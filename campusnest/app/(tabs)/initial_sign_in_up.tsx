@@ -6,6 +6,7 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
+import { Button } from '@react-navigation/elements';
 
 export default function HomeScreen() {
   return (
@@ -17,8 +18,16 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
+
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText>Campus Nest</ThemedText>
+      </ThemedView>
+
       <ThemedText type="title">Campus Nest</ThemedText>
       <ThemedText style={{ textAlign: 'center' }}>Let's get started!</ThemedText>
+      <Button href="/">Sign In</Button>
+      <ThemedText style={{ textAlign: 'center'}}>Don't have an account?</ThemedText>
+      <Button href="">Sign Up</Button>
     </ParallaxScrollView>
   );
 }
