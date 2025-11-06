@@ -1,3 +1,4 @@
+import { PageContainer } from '@/components/page-container';
 import { supabase } from '@/src/lib/supabaseClient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -46,7 +47,7 @@ export default function SignUpScreen() {
         Alert.alert(
           'Success',
           'Account created! Please check your email to verify your account.',
-          [{ text: 'OK', onPress: () => router.replace('./(tabs)') }]
+          [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
         );
       }
     } catch (error) {
@@ -57,8 +58,12 @@ export default function SignUpScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <StatusBar style="light" />
+    <PageContainer style={styles.outerContainer}>
+      <ScrollView 
+        style={styles.scrollContainer} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        <StatusBar style="light" />
       
       <View style={styles.content}>
         <Text style={styles.title}>Create Account</Text>
@@ -122,17 +127,21 @@ export default function SignUpScreen() {
             </Text>
           </Pressable>
 
-          <Pressable onPress={() => router.back()}>
-            <Text style={styles.backText}>Back to Landing</Text>
-          </Pressable>
+        <Pressable onPress={() => router.back()}>
+          <Text style={styles.backText}>Back to Landing</Text>
+        </Pressable>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </PageContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  outerContainer: {
+    backgroundColor: '#000',
+  },
+  scrollContainer: {
     flex: 1,
     backgroundColor: '#000',
   },

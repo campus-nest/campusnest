@@ -1,3 +1,4 @@
+import { PageContainer } from '@/components/page-container';
 import { supabase } from '@/src/lib/supabaseClient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -26,7 +27,7 @@ export default function LoginScreen() {
       if (error) {
         Alert.alert('Login Failed', error.message);
       } else {
-        router.replace('./(tabs)');
+        router.replace('/(tabs)');
       }
     } catch (error) {
       Alert.alert('Error', 'An unexpected error occurred');
@@ -36,7 +37,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <PageContainer style={styles.container}>
       <StatusBar style="light" />
       
       <View style={styles.content}>
@@ -83,7 +84,7 @@ export default function LoginScreen() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </PageContainer>
   );
 }
 

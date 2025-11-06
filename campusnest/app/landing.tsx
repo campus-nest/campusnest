@@ -1,27 +1,29 @@
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 
 export default function LandingScreen() {
+  const router = useRouter();
+
   return (
-    <View style={styles.container}>
+    <View style={styles.outerContainer}>
       <StatusBar style="light" />
-      
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Svg width={100} height={96} viewBox="0 0 100 96" fill="none">
-          <Rect width="100" height="96" fill="#010000" />
-          <Path
-            d="M37.5 88V48H62.5V88M12.5 36L50 8L87.5 36V80C87.5 82.1217 86.622 84.1566 85.0592 85.6569C83.4964 87.1571 81.3768 88 79.1667 88H20.8333C18.6232 88 16.5036 87.1571 14.9408 85.6569C13.378 84.1566 12.5 82.1217 12.5 80V36Z"
-            stroke="#F5F5F5"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </Svg>
-      </View>
+      <View style={styles.container}>
+        {/* Logo */}
+        <View style={styles.logoContainer}>
+          <Svg width={100} height={96} viewBox="0 0 100 96" fill="none">
+            <Rect width="100" height="96" fill="#010000" />
+            <Path
+              d="M37.5 88V48H62.5V88M12.5 36L50 8L87.5 36V80C87.5 82.1217 86.622 84.1566 85.0592 85.6569C83.4964 87.1571 81.3768 88 79.1667 88H20.8333C18.6232 88 16.5036 87.1571 14.9408 85.6569C13.378 84.1566 12.5 82.1217 12.5 80V36Z"
+              stroke="#F5F5F5"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </View>
 
       {/* Title */}
       <Text style={styles.title}>CampusNest</Text>
@@ -30,20 +32,16 @@ export default function LandingScreen() {
       <Text style={styles.subtitle}>Lets get Started!</Text>
 
       {/* Login Button */}
-      <Link href="/login" asChild>
-        <Pressable style={styles.loginBtn}>
-          <Text style={styles.btnText}>Login</Text>
-        </Pressable>
-      </Link>
+      <Pressable style={styles.loginBtn} onPress={() => router.push('/login')}>
+        <Text style={styles.btnText}>Login</Text>
+      </Pressable>
 
       {/* Sign Up Section */}
       <Text style={styles.signUpPrompt}>Don't have an account?</Text>
       
-      <Link href="/signup" asChild>
-        <Pressable style={styles.signUpBtn}>
-          <Text style={styles.btnText}>Sign Up</Text>
-        </Pressable>
-      </Link>
+      <Pressable style={styles.signUpBtn} onPress={() => router.push('/signup')}>
+        <Text style={styles.btnText}>Sign Up</Text>
+      </Pressable>
 
       {/* House Image */}
       <View style={styles.houseImageContainer}>
@@ -53,13 +51,22 @@ export default function LandingScreen() {
           contentFit="contain"
         />
       </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  outerContainer: {
     flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    width: '70%',
+    maxWidth: 500,
+    height: '100%',
     backgroundColor: '#000',
     alignItems: 'center',
     position: 'relative',
@@ -67,7 +74,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     position: 'absolute',
     top: 176,
-    left: 147,
+    alignSelf: 'center',
   },
   title: {
     position: 'absolute',
@@ -77,6 +84,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
     letterSpacing: 0.1,
+    alignSelf: 'center',
   },
   subtitle: {
     position: 'absolute',
@@ -87,6 +95,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     letterSpacing: 0.1,
+    alignSelf: 'center',
   },
   loginBtn: {
     position: 'absolute',
@@ -97,6 +106,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
   },
   signUpPrompt: {
     position: 'absolute',
@@ -107,6 +117,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     letterSpacing: 0.1,
+    alignSelf: 'center',
   },
   signUpBtn: {
     position: 'absolute',
@@ -117,6 +128,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
   },
   btnText: {
     color: '#000',
@@ -127,8 +139,10 @@ const styles = StyleSheet.create({
   houseImageContainer: {
     position: 'absolute',
     bottom: 25,
-    width: 363,
+    width: '92%',
+    maxWidth: 363,
     height: 173,
+    alignSelf: 'center',
   },
   houseImage: {
     width: '100%',
