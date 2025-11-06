@@ -1,34 +1,49 @@
 ## **Pull Request Template**
 
 **Title**: [Short Description of the Change]
-**Related Issue**: #issue_number (if applicable)
+*Resolves*: #[Issue Number]
 
-### **Description**
+### **Summary**
 
 * **What is this PR trying to accomplish?**
-  [Provide a brief summary of the changes made, bug fixed, or feature added.]
-
-* **What changes did you make?**
-  [List the major changes or additions in this PR.]
+  [Provide summary of changes done]
 
 ---
 
 ### **Checklist**
 
+- [ ] All relevant issues are referenced by this PR
 * [ ] I have run the app locally and verified that it works as expected.
-* [ ] I have ensured no errors or warnings are present in the app.
-* [ ] I have updated any documentation if necessary.
-* [ ] I have updated tests if necessary.
-* [ ] I have checked for any potential security issues.
-* [ ] I have tested on multiple screen sizes/emulators if applicable.
-* [ ] I have ensured that the code follows the team's coding style.
+* [ ] Have you updated new tests as needed?
+* [ ] Do all tests pass?
+- [ ] Does the feature work as expected?
+- [ ] Does this feature preserve the app’s existing stability?
+- [ ] Is the description of the changes correct/present?
+- [ ] Did you run `git pull origin main` at the end?
+  - [ ] Fixed merge conflicts(if any)
+  - [ ] N/A
 
 ---
 
 ### **Test Instructions**
 
 * **How can this be manually tested?**
-  [Provide step-by-step instructions for testing this change in the app. Include any necessary setup steps, e.g., installation of dependencies, running a particular command, etc.]
+- [Provide step-by-step instructions]
+
+- How should a reviewer test this feature, fix, or UI?
+     - 
+- Are there any specific commands, steps, or credentials needed?
+     - 
+
+---
+
+
+## Merge Instructions
+
+- Any considerations that other PR's may need to take into note? 
+     - 
+- Should the reviewer delete the branch on merge? 
+     - Yes/No
 
 ---
 
@@ -37,13 +52,3 @@
 * If applicable, attach any relevant screenshots or animated GIFs that demonstrate the change.
 
 ---
-
-### **Additional Information**
-
-* [Add any additional context or information that reviewers need to know.]
-
----
-
-### **Note to Reviewers**
-
-* [If you want specific feedback on a certain part of the code, mention it here.]
