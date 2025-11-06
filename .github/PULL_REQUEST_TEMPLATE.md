@@ -1,49 +1,56 @@
-## **Pull Request Template**
+## **Title**: [Short Description of the Change]
+*Resolves*: #[Issue Number]
 
-**Title**: [Short Description of the Change]
-**Related Issue**: #issue_number (if applicable)
+### **Summary**
 
-### **Description**
-
-* **What is this PR trying to accomplish?**
-  [Provide a brief summary of the changes made, bug fixed, or feature added.]
-
-* **What changes did you make?**
-  [List the major changes or additions in this PR.]
+**What is this PR trying to accomplish?**
+- [Provide summary of changes done]
 
 ---
 
 ### **Checklist**
 
-* [ ] I have run the app locally and verified that it works as expected.
-* [ ] I have ensured no errors or warnings are present in the app.
-* [ ] I have updated any documentation if necessary.
-* [ ] I have updated tests if necessary.
-* [ ] I have checked for any potential security issues.
-* [ ] I have tested on multiple screen sizes/emulators if applicable.
-* [ ] I have ensured that the code follows the team's coding style.
+- [ ] All relevant issues are referenced by this PR
+- [ ] I have run the app locally and verified that it works as expected.
+- [ ] I have verified that my code follows coding conventions.
+- [ ] Have you updated tests as needed?
+- [ ] Do all tests pass?
+- [ ] Does the feature work as expected?
+- [ ] Does this feature preserve the app’s existing stability?
+- [ ] Is the description of the changes correct/present?
+- [ ] Did you run `git pull origin main` at the end?
+  - [ ] Fixed merge conflicts (if any)
+  - [ ] N/A
 
 ---
 
 ### **Test Instructions**
 
-* **How can this be manually tested?**
-  [Provide step-by-step instructions for testing this change in the app. Include any necessary setup steps, e.g., installation of dependencies, running a particular command, etc.]
+### **Test Instructions**
+
+**How can this be manually tested?**  
+- [Provide step-by-step instructions for manual testing.]
+
+**How should a reviewer test this feature, fix, or UI?**  
+- [Describe the testing steps for the reviewer.]
+
+**Are there any specific commands, steps, or credentials needed?**  
+- [List any special instructions.]
 
 ---
 
-### **Screenshots / GIFs**
 
-* If applicable, attach any relevant screenshots or animated GIFs that demonstrate the change.
+### **Merge Instructions**
 
+- **Are there any considerations other PRs may need to take into account?**  
+  - [Mention any considerations.]
+  
+- **Should the reviewer delete the branch on merge?**  
+  - Yes / No
 ---
 
-### **Additional Information**
+### **Screenshots / GIFs**  
 
-* [Add any additional context or information that reviewers need to know.]
+If applicable, attach any relevant screenshots or animated GIFs that demonstrate the change.
 
 ---
-
-### **Note to Reviewers**
-
-* [If you want specific feedback on a certain part of the code, mention it here.]
