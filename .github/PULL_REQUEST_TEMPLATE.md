@@ -1,5 +1,5 @@
 ## **Title**: [Short Description of the Change]
-*Related Issue*: #[Issue Number]
+*Resolves*: #[Issue Number]
 
 ### **Summary**
 
