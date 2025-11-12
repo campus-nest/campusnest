@@ -29,7 +29,8 @@ export default function LandingScreen() {
       <Text style={styles.title}>CampusNest</Text>
 
       {/* Subtitle */}
-      <Text style={styles.subtitle}>Lets get Started!</Text>
+      <Text style={styles.subtitle}>Let's get Started!</Text>
+
 
       {/* Login Button */}
       <Pressable style={styles.loginBtn} onPress={() => router.push('/login')}>
@@ -46,7 +47,7 @@ export default function LandingScreen() {
       {/* House Image */}
       <View style={styles.houseImageContainer}>
         <Image
-          source={{ uri: 'https://api.builder.io/api/v1/image/assets/TEMP/4f4d024a6d7009f6821d880a299706efdc5ff2c3?width=727' }}
+          source={require('../assets/images/landing_page_logo.png')}
           style={styles.houseImage}
           contentFit="contain"
         />
