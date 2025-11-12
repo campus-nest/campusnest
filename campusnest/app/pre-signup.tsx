@@ -27,7 +27,7 @@ export default function PreSignUpScreen() {
   const getRoleDisplayText = () => {
     if (selectedRole === 'student') return 'Student';
     if (selectedRole === 'landlord') return 'Landlord';
-    return 'Student/Landlord';
+    return 'Choose role';
   };
 
   return (
@@ -56,7 +56,6 @@ export default function PreSignUpScreen() {
             style={styles.roleInput}
             onPress={() => setShowDropdown(!showDropdown)}>
             <Text style={styles.roleInputText}>{getRoleDisplayText()}</Text>
-            <Text style={styles.clearButton}>✕</Text>
           </Pressable>
 
           {/* Dropdown */}
@@ -170,10 +169,6 @@ const styles = StyleSheet.create({
   },
   roleInputText: {
     color: '#fff',
-    fontSize: 16,
-  },
-  clearButton: {
-    color: '#666',
     fontSize: 16,
   },
   dropdown: {
