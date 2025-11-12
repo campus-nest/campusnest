@@ -1,0 +1,165 @@
+import { PageContainer } from '@/components/page-container';
+import { supabase } from '@/src/lib/supabaseClient';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+
+export default function LoginScreen() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+   if (!email.trim() || !password) {
+     Alert.alert('Error', 'Please fill in all fields');
+     return;
+   }
+   
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+   if (!emailRegex.test(email.trim())) {
+     Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        Alert.alert('Login Failed', error.message);
+      } else {
+        router.replace('/(tabs)');
+      }
+    } catch (error) {
+     console.error('Login error:', error);
+     Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <PageContainer style={styles.container}>
+      <StatusBar style="light" />
+      
+      <View style={styles.content}>
+        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.subtitle}>Login to CampusNest</Text>
+
+        <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email"
+              placeholderTextColor="#666"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              placeholderTextColor="#666"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+
+          <Pressable
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}>
+            <Text style={styles.buttonText}>
+              {loading ? 'Logging in...' : 'Login'}
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.backText}>Back to Landing</Text>
+          </Pressable>
+        </View>
+      </View>
+    </PageContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 30,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '400',
+    marginBottom: 40,
+    textAlign: 'center',
+    opacity: 0.8,
+  },
+  form: {
+    gap: 20,
+  },
+  inputContainer: {
+    gap: 8,
+  },
+  label: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  input: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    padding: 16,
+    color: '#fff',
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  button: {
+    backgroundColor: '#fff',
+    borderRadius: 100,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  backText: {
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 10,
+    opacity: 0.7,
+  },
+});
