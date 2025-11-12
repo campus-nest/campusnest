@@ -12,6 +12,7 @@ describe('Landing Page Navigation', () => {
   const mockPush = jest.fn();
 
   beforeEach(() => {
+    mockPush.mockClear();
     (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
   });
 
