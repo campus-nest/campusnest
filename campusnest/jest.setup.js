@@ -46,7 +46,6 @@ jest.mock(
   }),
 );
 
-// 👇 NEW: feature-flags mock
 jest.mock(
   'react-native/src/private/featureflags/specs/NativeReactNativeFeatureFlags',
   () => ({
