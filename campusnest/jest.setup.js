@@ -1,35 +1,59 @@
-require('dotenv/config');
-require('@testing-library/jest-native/extend-expect');
+global.__DEV__ = true;
 
+jest.mock('react-native/Libraries/BatchedBridge/NativeModules', () => ({
+  PlatformConstants: { reactNativeVersion: { major: 0, minor: 81, patch: 0 } },
+}));
+
+jest.mock('react-native/Libraries/TurboModule/TurboModuleRegistry', () => ({
+  getEnforcing: (name) => {
+    if (name === 'NativeDeviceInfo') {
+      return {
+        getConstants: () => ({
+          Dimensions: {
+            window: { width: 1080, height: 1920, scale: 2, fontScale: 2 },
+            screen: { width: 1080, height: 1920, scale: 2, fontScale: 2 },
+          },
+        }),
+      };
+    }
+    return {};
+  },
+  get: () => ({}),
+}));
+
+jest.mock(
+  'react-native/src/private/specs_DEPRECATED/modules/NativeDeviceInfo',
+  () => ({
+    getConstants: () => ({
+      Dimensions: {
+        window: { width: 1080, height: 1920, scale: 2, fontScale: 2 },
+        screen: { width: 1080, height: 1920, scale: 2, fontScale: 2 },
+      },
+    }),
+  }),
+);
+
+// 👇 NEW: feature-flags mock
+jest.mock(
+  'react-native/src/private/featureflags/specs/NativeReactNativeFeatureFlags',
+  () => ({
+    getConstants: () => ({}),
+    get: () => ({}),
+  }),
+);
+
+jest.mock('react-native/Libraries/Utilities/Platform', () => ({
+  OS: 'ios',
+  select: (objs) => objs.ios,
+}));
+
+jest.mock('react-native/Libraries/ReactNative/UIManager', () => ({
+  RCTView: () => {},
+  ViewManagerNames: [],
+  getViewManagerConfig: () => ({}),
+  hasViewManagerConfig: () => true,
+}));
+
+import 'dotenv/config';
+import '@testing-library/jest-native/extend-expect';
 jest.mock('expo', () => ({}));
-
-// Mock Expo winter runtime
-global.__ExpoImportMetaRegistry = {
-  register: jest.fn(),
-  get: jest.fn(),
-};
-
-// Mock expo-router
-jest.mock('expo-router', () => ({
-  useRouter: jest.fn(() => ({ 
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
-  })),
-  usePathname: jest.fn(),
-  useSegments: jest.fn(),
-}));
-
-// Mock expo-image
-jest.mock('expo-image', () => {
-  const React = require('react');
-  const { View } = require('react-native');
-  return {
-    Image: (props) => React.createElement(View, props),
-  };
-});
-
-// Mock expo-status-bar
-jest.mock('expo-status-bar', () => ({
-  StatusBar: () => null,
-}));

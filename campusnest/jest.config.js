@@ -1,42 +1,17 @@
 module.exports = {
-  preset: 'jest-expo',
   testEnvironment: 'jsdom',
-
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-
   transform: {
     '^.+\\.[tj]sx?$': 'babel-jest',
   },
-
   transformIgnorePatterns: [
-    'node_modules/(?!(?:.pnpm/)?(' +
-      'react-native|' +
-      'react-native/.*|' +
-      '@react-native|' +
-      '@react-native/.*|' +
-      '@react-native-community|' +
-      '@react-navigation|' +
-      'expo|' +
-      'expo-.*|' +
-      '@expo|' +
-      '@expo/.*|' +
-      '@unimodules|' +
-      'unimodules|' +
-      'sentry-expo|' +
-      'native-base|' +
-      'react-native-svg' +
-    '))',
+    'node_modules/(?!(react-native|expo-.*|@expo/.*|@react-native|@react-navigation)/)',
   ],
-
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],
-
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
-    '^@/src/lib/supabaseClient$': '<rootDir>/__mocks__/src/lib/supabaseClient.ts',
   },
-
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   globals: {
-    'process.env.EXPO_OS': 'ios',
+  __DEV__: true,
   },
 };
