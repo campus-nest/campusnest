@@ -20,11 +20,8 @@
 - [ ] Is the description of the changes correct/present?
 - [ ] Did you run `git pull origin main` at the end?
   - [ ] Fixed merge conflicts (if any)
-  - [ ] N/A
 
 ---
-
-### **Test Instructions**
 
 ### **Test Instructions**
 
