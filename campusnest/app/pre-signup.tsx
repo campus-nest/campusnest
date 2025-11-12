@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { Platform } from "react-native";
 import LandingTopHome from "../assets/images/landing_page_top_home.svg";
 import PreSignUpBottomHouse from "../assets/images/pre_sign_up_bottom_house.svg";
 
@@ -34,10 +34,12 @@ export default function PreSignUpScreen() {
     <PageContainer style={styles.outerContainer}>
       <StatusBar style="light" />
       <View style={styles.container}>
-        {/* Back Button */}
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backArrow}>←</Text>
-        </Pressable>
+        {/* Back Button, only show on android */}
+        {Platform.OS == "android" && (
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backArrow}>←</Text>
+          </Pressable>
+        )}
 
         {/* Logo */}
         <View style={styles.logoContainer}>
