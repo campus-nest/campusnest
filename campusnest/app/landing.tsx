@@ -40,7 +40,7 @@ export default function LandingScreen() {
       {/* Sign Up Section */}
       <Text style={styles.signUpPrompt}>Don't have an account?</Text>
       
-      <Pressable style={styles.signUpBtn} onPress={() => router.push('/signup')}>
+      <Pressable style={styles.signUpBtn} onPress={() => router.push('/pre-signup')}>
         <Text style={styles.btnText}>Sign Up</Text>
       </Pressable>
 
