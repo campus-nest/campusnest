@@ -29,7 +29,7 @@ export default function LandingScreen() {
       <Text style={styles.title}>CampusNest</Text>
 
       {/* Subtitle */}
-      <Text style={styles.subtitle}>Let's get Started!</Text>
+      <Text style={styles.subtitle}>Let&apos;s get Started!</Text>
 
 
       {/* Login Button */}
@@ -38,7 +38,7 @@ export default function LandingScreen() {
       </Pressable>
 
       {/* Sign Up Section */}
-      <Text style={styles.signUpPrompt}>Don't have an account?</Text>
+      <Text style={styles.signUpPrompt}>Don&apos;t have an account?</Text>
       
       <Pressable style={styles.signUpBtn} onPress={() => router.push('/signup')}>
         <Text style={styles.btnText}>Sign Up</Text>

@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint",
+    "lint": "expo lint --max-warnings=0",
+    "lint:fix": "expo lint --fix && npx prettier --write .",
     "test": "jest"
   },
   "dependencies": {

@@ -30,6 +30,7 @@ export default function VerifyEmailScreen() {
       }
     } catch (err) {
       Alert.alert('Error', 'Failed to resend verification email');
+      console.error('Verification error:', err);
     } finally {
       setLoading(false);
     }
@@ -48,13 +49,13 @@ export default function VerifyEmailScreen() {
 
           {/* Description */}
           <Text style={styles.description}>
-            We've sent a verification link to your email address. Please check your inbox and
+            We&apos;ve sent a verification link to your email address. Please check your inbox and
             click the link to verify your account.
           </Text>
 
           {/* Resend Section */}
           <View style={styles.resendSection}>
-            <Text style={styles.resendText}>Didn't receive the email?</Text>
+            <Text style={styles.resendText}>Didn&apos;t receive the email?</Text>
             <Pressable
               onPress={handleResendEmail}
               disabled={loading}
