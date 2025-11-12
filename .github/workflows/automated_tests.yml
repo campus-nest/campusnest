@@ -123,5 +123,5 @@ jobs:
           path: campusnest/node_modules
           key: ${{ runner.os }}-modules-${{ hashFiles('campusnest/package-lock.json') }}
 
-      - name: Build web bundle (Expo)
-        run: npx expo export:web
+      - name: Build app (Expo export)
+        run: npx expo export --platform web
