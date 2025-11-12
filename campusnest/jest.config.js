@@ -1,10 +1,22 @@
 module.exports = {
   preset: 'jest-expo',
-  setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
-  transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': 'ts-jest',
-  },
-  testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-};
+  testEnvironment: 'jsdom',
 
+  setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
+
+  transform: {
+    '^.+\\.[tj]sx?$': 'babel-jest',
+  },
+
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-native|expo(nent)?|@expo(nent)?/.*|@react-native|@react-navigation|@react-native-community)/)',
+  ],
+
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],
+
+  moduleNameMapper: {
+    // so imports like @/app/login work
+    '^@/(.*)$': '<rootDir>/$1',
+  },
+};
