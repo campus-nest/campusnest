@@ -1,6 +1,6 @@
 module.exports = {
   preset: 'jest-expo',
-  testEnvironment: 'jsdom',
+  testEnvironment: 'node',
 
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 

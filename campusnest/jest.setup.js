@@ -1,6 +1,12 @@
 require('dotenv/config');
 require('@testing-library/jest-native/extend-expect');
 
+// Mock Expo winter runtime
+global.__ExpoImportMetaRegistry = {
+  register: jest.fn(),
+  get: jest.fn(),
+};
+
 // Mock expo-router
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({ 
