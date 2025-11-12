@@ -1,5 +1,18 @@
 global.__DEV__ = true;
 
+// Suppress react-test-renderer deprecation warnings in Jest
+const originalError = console.error;
+console.error = (...args) => {
+  if (
+    typeof args[0] === 'string' &&
+    args[0].includes('react-test-renderer is deprecated')
+  ) {
+    return;
+  }
+  originalError(...args);
+};
+
+
 jest.mock('react-native/Libraries/BatchedBridge/NativeModules', () => ({
   PlatformConstants: { reactNativeVersion: { major: 0, minor: 81, patch: 0 } },
 }));
