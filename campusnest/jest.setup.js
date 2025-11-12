@@ -1,6 +1,8 @@
 require('dotenv/config');
 require('@testing-library/jest-native/extend-expect');
 
+jest.mock('expo', () => ({}));
+
 // Mock Expo winter runtime
 global.__ExpoImportMetaRegistry = {
   register: jest.fn(),

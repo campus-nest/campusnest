@@ -1,10 +1,10 @@
+/*
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import Landing from '@/app/landing';
 import { useRouter } from 'expo-router';
 import { Text } from 'react-native';
 
-/*
 describe('Landing Page Navigation', () => {
   const mockPush = jest.fn();
 
@@ -31,9 +31,12 @@ describe('Landing Page Navigation', () => {
 });
 */
 
-describe('Smoke test', () => {
-  it('renders text correctly', () => {
-    const { getByText } = render(<Text>Hello, CampusNest!</Text>);
-    expect(getByText('Hello, CampusNest!')).toBeTruthy();
-  });
+
+
+import { render } from '@testing-library/react-native';
+import { Text } from 'react-native';
+
+test('renders', () => {
+  const { getByText } = render(<Text>Hello, CampusNest!</Text>);
+  expect(getByText('Hello, CampusNest!')).toBeTruthy();
 });
