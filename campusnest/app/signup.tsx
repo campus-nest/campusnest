@@ -47,11 +47,12 @@ export default function SignUpScreen() {
         Alert.alert(
           'Success',
           'Account created! Please check your email to verify your account.',
-          [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
+          [{ text: 'OK', onPress: () => router.replace('/verify-email') }]
         );
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+     console.error('Signup error:', error);
+     Alert.alert('Error', error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

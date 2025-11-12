@@ -12,8 +12,14 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+   if (!email.trim() || !password) {
+     Alert.alert('Error', 'Please fill in all fields');
+     return;
+   }
+   
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+   if (!emailRegex.test(email.trim())) {
+     Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
@@ -30,7 +36,8 @@ export default function LoginScreen() {
         router.replace('/(tabs)');
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+     console.error('Login error:', error);
+     Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
