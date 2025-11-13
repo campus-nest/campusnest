@@ -47,3 +47,5 @@ app-example
 myenv/
 .venv/
 venv/
+
+tests/__snapshots__
