@@ -9,8 +9,15 @@ jest.mock("expo-router", () => ({
 }));
 
 // Mock SVG imports
-<LandingTopHome width={96} height={96} fill="none" />
-<LandingPageLogo width="100%" height="100%" />
+// Mock SVG imports
+jest.mock("../assets/images/landing_page_top_home.svg", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+jest.mock("../assets/images/landing_page_bottom_logo.svg", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
 describe("LandingScreen", () => {
   const mockPush = jest.fn();
