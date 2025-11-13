@@ -68,3 +68,6 @@ jest.mock("react-native/Libraries/ReactNative/UIManager", () => ({
 import "dotenv/config";
 import "@testing-library/jest-native/extend-expect";
 jest.mock("expo", () => ({}));
+
+jest.mock('expo-router', () => ({ useRouter: jest.fn(), Redirect: jest.fn() }));
+jest.mock('expo-status-bar', () => ({ StatusBar: jest.fn() }));
