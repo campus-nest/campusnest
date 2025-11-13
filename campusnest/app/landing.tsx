@@ -1,4 +1,3 @@
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -23,9 +22,11 @@ export default function LandingScreen() {
         {/* Subtitle */}
         <Text style={styles.subtitle}>Let&apos;s get Started!</Text>
 
-
         {/* Login Button */}
-        <Pressable style={styles.loginBtn} onPress={() => router.push("/login")}>
+        <Pressable
+          style={styles.loginBtn}
+          onPress={() => router.push("/login")}
+        >
           <Text style={styles.btnText}>Login</Text>
         </Pressable>
 
@@ -43,7 +44,6 @@ export default function LandingScreen() {
         <View style={styles.houseImageContainer}>
           <LandingPageLogo width="100%" height="100%" />
         </View>
-
       </View>
     </View>
   );

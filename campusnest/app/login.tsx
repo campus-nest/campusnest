@@ -1,25 +1,32 @@
-import { PageContainer } from '@/components/page-container';
-import { supabase } from '@/src/lib/supabaseClient';
-import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { PageContainer } from "@/components/page-container";
+import { supabase } from "@/src/lib/supabaseClient";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-   if (!email.trim() || !password) {
-     Alert.alert('Error', 'Please fill in all fields');
-     return;
-   }
-   
-   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-   if (!emailRegex.test(email.trim())) {
-     Alert.alert('Error', 'Please enter a valid email address');
+    if (!email.trim() || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
 
@@ -31,13 +38,13 @@ export default function LoginScreen() {
       });
 
       if (error) {
-        Alert.alert('Login Failed', error.message);
+        Alert.alert("Login Failed", error.message);
       } else {
-        router.replace('/(tabs)');
+        router.replace("/(tabs)");
       }
     } catch (error) {
-     console.error('Login error:', error);
-     Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      console.error("Login error:", error);
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -46,7 +53,7 @@ export default function LoginScreen() {
   return (
     <PageContainer style={styles.container}>
       <StatusBar style="light" />
-      
+
       <View style={styles.content}>
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Login to CampusNest</Text>
@@ -80,9 +87,10 @@ export default function LoginScreen() {
           <Pressable
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleLogin}
-            disabled={loading}>
+            disabled={loading}
+          >
             <Text style={styles.buttonText}>
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </Text>
           </Pressable>
 
@@ -98,26 +106,26 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 30,
   },
   title: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 32,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: "400",
     marginBottom: 40,
-    textAlign: 'center',
+    textAlign: "center",
     opacity: 0.8,
   },
   form: {
@@ -127,38 +135,38 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   input: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 16,
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
   },
   button: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 100,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#000',
+    color: "#000",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   backText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 10,
     opacity: 0.7,
   },

@@ -4,22 +4,21 @@ global.__DEV__ = true;
 const originalError = console.error;
 console.error = (...args) => {
   if (
-    typeof args[0] === 'string' &&
-    args[0].includes('react-test-renderer is deprecated')
+    typeof args[0] === "string" &&
+    args[0].includes("react-test-renderer is deprecated")
   ) {
     return;
   }
   originalError(...args);
 };
 
-
-jest.mock('react-native/Libraries/BatchedBridge/NativeModules', () => ({
+jest.mock("react-native/Libraries/BatchedBridge/NativeModules", () => ({
   PlatformConstants: { reactNativeVersion: { major: 0, minor: 81, patch: 0 } },
 }));
 
-jest.mock('react-native/Libraries/TurboModule/TurboModuleRegistry', () => ({
+jest.mock("react-native/Libraries/TurboModule/TurboModuleRegistry", () => ({
   getEnforcing: (name) => {
-    if (name === 'NativeDeviceInfo') {
+    if (name === "NativeDeviceInfo") {
       return {
         getConstants: () => ({
           Dimensions: {
@@ -35,7 +34,7 @@ jest.mock('react-native/Libraries/TurboModule/TurboModuleRegistry', () => ({
 }));
 
 jest.mock(
-  'react-native/src/private/specs_DEPRECATED/modules/NativeDeviceInfo',
+  "react-native/src/private/specs_DEPRECATED/modules/NativeDeviceInfo",
   () => ({
     getConstants: () => ({
       Dimensions: {
@@ -47,25 +46,25 @@ jest.mock(
 );
 
 jest.mock(
-  'react-native/src/private/featureflags/specs/NativeReactNativeFeatureFlags',
+  "react-native/src/private/featureflags/specs/NativeReactNativeFeatureFlags",
   () => ({
     getConstants: () => ({}),
     get: () => ({}),
   }),
 );
 
-jest.mock('react-native/Libraries/Utilities/Platform', () => ({
-  OS: 'ios',
+jest.mock("react-native/Libraries/Utilities/Platform", () => ({
+  OS: "ios",
   select: (objs) => objs.ios,
 }));
 
-jest.mock('react-native/Libraries/ReactNative/UIManager', () => ({
+jest.mock("react-native/Libraries/ReactNative/UIManager", () => ({
   RCTView: () => {},
   ViewManagerNames: [],
   getViewManagerConfig: () => ({}),
   hasViewManagerConfig: () => true,
 }));
 
-import 'dotenv/config';
-import '@testing-library/jest-native/extend-expect';
-jest.mock('expo', () => ({}));
+import "dotenv/config";
+import "@testing-library/jest-native/extend-expect";
+jest.mock("expo", () => ({}));
