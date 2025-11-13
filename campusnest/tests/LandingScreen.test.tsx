@@ -9,8 +9,8 @@ jest.mock("expo-router", () => ({
 }));
 
 // Mock SVG imports
-jest.mock("../assets/images/landing_page_top_home.svg", () => "SvgMock");
-jest.mock("../assets/images/landing_page_bottom_logo.svg", () => "SvgMock");
+<LandingTopHome width={96} height={96} fill="none" />
+<LandingPageLogo width="100%" height="100%" />
 
 describe("LandingScreen", () => {
   const mockPush = jest.fn();
