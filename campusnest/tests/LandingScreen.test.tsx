@@ -9,7 +9,6 @@ jest.mock("expo-router", () => ({
 }));
 
 // Mock SVG imports
-// Mock SVG imports
 jest.mock("../assets/images/landing_page_top_home.svg", () => ({
   __esModule: true,
   default: () => null,
