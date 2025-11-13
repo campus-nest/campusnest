@@ -1,17 +1,17 @@
 module.exports = {
-  testEnvironment: "jsdom",
+  preset: "jest-expo",
+
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+
   transform: {
     "^.+\\.[tj]sx?$": "babel-jest",
   },
+
   transformIgnorePatterns: [
-    "node_modules/(?!(react-native|expo-.*|@expo/.*|@react-native|@react-navigation)/)",
+    "node_modules/(?!(expo|expo-router|expo-modules-core|expo-status-bar|react-native|react-native-svg|react-native-reanimated|@react-native)/)"
   ],
+
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1",
-  },
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
-  globals: {
-    __DEV__: true,
+    "\\.(svg)$": "<rootDir>/tests/__mocks__/svgMock.js",
   },
 };
