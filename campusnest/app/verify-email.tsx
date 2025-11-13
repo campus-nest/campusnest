@@ -1,36 +1,46 @@
-import { PageContainer } from '@/components/page-container';
-import { supabase } from '@/src/lib/supabaseClient';
-import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { PageContainer } from "@/components/page-container";
+import { supabase } from "@/src/lib/supabaseClient";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
 
   const handleResendEmail = async () => {
     if (!email) {
-      Alert.alert('Error', 'Please enter your email address');
+      Alert.alert("Error", "Please enter your email address");
       return;
     }
 
     setLoading(true);
     try {
       const { error } = await supabase.auth.resend({
-        type: 'signup',
+        type: "signup",
         email: email.trim(),
       });
 
       if (error) {
-        Alert.alert('Error', error.message);
+        Alert.alert("Error", error.message);
       } else {
-        Alert.alert('Success', 'Verification email sent! Please check your inbox.');
+        Alert.alert(
+          "Success",
+          "Verification email sent! Please check your inbox.",
+        );
       }
     } catch (err) {
-      Alert.alert('Error', 'Failed to resend verification email');
-      console.error('Verification error:', err);
+      Alert.alert("Error", "Failed to resend verification email");
+      console.error("Verification error:", err);
     } finally {
       setLoading(false);
     }
@@ -49,13 +59,15 @@ export default function VerifyEmailScreen() {
 
           {/* Description */}
           <Text style={styles.description}>
-            We&apos;ve sent a verification link to your email address. Please check your inbox and
-            click the link to verify your account.
+            We&apos;ve sent a verification link to your email address. Please
+            check your inbox and click the link to verify your account.
           </Text>
 
           {/* Resend Section */}
           <View style={styles.resendSection}>
-            <Text style={styles.resendText}>Didn&apos;t receive the email?</Text>
+            <Text style={styles.resendText}>
+              Didn&apos;t receive the email?
+            </Text>
             <Pressable
               onPress={handleResendEmail}
               disabled={loading}
@@ -66,7 +78,7 @@ export default function VerifyEmailScreen() {
               ]}
             >
               <Text style={styles.resendButtonText}>
-                {loading ? 'Sending...' : 'Resend Email'}
+                {loading ? "Sending..." : "Resend Email"}
               </Text>
             </Pressable>
           </View>
@@ -88,7 +100,7 @@ export default function VerifyEmailScreen() {
 
           {/* Back to Login */}
           <Pressable
-            onPress={() => router.replace('/login')}
+            onPress={() => router.replace("/login")}
             style={({ pressed }) => [
               styles.backButton,
               pressed && styles.backButtonPressed,
@@ -105,15 +117,15 @@ export default function VerifyEmailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   content: {
-    width: '100%',
+    width: "100%",
     maxWidth: 400,
-    alignItems: 'center',
+    alignItems: "center",
   },
   icon: {
     fontSize: 80,
@@ -121,25 +133,25 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   description: {
     fontSize: 16,
-    color: '#ccc',
-    textAlign: 'center',
+    color: "#ccc",
+    textAlign: "center",
     marginBottom: 32,
     lineHeight: 24,
   },
   resendSection: {
     marginBottom: 32,
-    alignItems: 'center',
+    alignItems: "center",
   },
   resendText: {
     fontSize: 14,
-    color: '#999',
+    color: "#999",
     marginBottom: 12,
   },
   resendButton: {
@@ -147,39 +159,39 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#fff',
+    borderColor: "#fff",
   },
   resendButtonPressed: {
     opacity: 0.7,
-    backgroundColor: '#333',
+    backgroundColor: "#333",
   },
   resendButtonDisabled: {
     opacity: 0.5,
   },
   resendButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   inputContainer: {
-    width: '100%',
+    width: "100%",
     marginBottom: 24,
   },
   inputLabel: {
     fontSize: 14,
-    color: '#ccc',
+    color: "#ccc",
     marginBottom: 8,
   },
   input: {
-    width: '100%',
+    width: "100%",
     height: 50,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: "#1a1a1a",
     borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: '#fff',
+    color: "#fff",
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
   },
   backButton: {
     paddingVertical: 12,
@@ -188,8 +200,8 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   backButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    textDecoration: 'underline',
+    textDecoration: "underline",
   },
 });

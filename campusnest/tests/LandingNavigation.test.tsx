@@ -1,7 +1,7 @@
-import { render } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { render } from "@testing-library/react-native";
+import { Text } from "react-native";
 
-test('renders', () => {
+test("renders", () => {
   const { getByText } = render(<Text>Hello, CampusNest!</Text>);
-  expect(getByText('Hello, CampusNest!')).toBeTruthy();
+  expect(getByText("Hello, CampusNest!")).toBeTruthy();
 });
