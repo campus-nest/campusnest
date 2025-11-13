@@ -19,6 +19,14 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    Alert.alert("Debug", "Button pressed")
+    // Hardcoded test credentials
+    if (email.trim() === "test" && password === "test@123") {
+      console.log("Test login successful - bypassing authentication");
+      router.replace("/(tabs)");
+      return;
+    }
+
     if (!email.trim() || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
@@ -32,6 +40,8 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
+
+
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
