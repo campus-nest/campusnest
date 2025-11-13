@@ -1,15 +1,14 @@
+import { renderRoute, mockRouter } from "./test-utils";
 import { fireEvent } from "@testing-library/react-native";
-import { renderRoute } from "./test-utils";
 
-describe("LandingScreen → PreSignup flow", () => {
-  it("navigates to PreSignup when Sign Up is pressed", () => {
-    const screen = renderRoute("/landing");
+it("navigates to PreSignup when Sign Up is pressed", () => {
+  const screen = renderRoute("/landing");
 
-    fireEvent.press(screen.getByText("Sign Up"));
+  fireEvent.press(screen.getByText("Sign Up"));
 
-    // Re-render the screen after navigation
-    screen.rerenderRoute();
+  // Ensure next route selection
+  screen.rerenderRoute();
 
-    expect(screen.getByText("Select a Role!")).toBeTruthy();
-  });
+  expect(mockRouter.push).toHaveBeenCalledWith("/pre-signup");
+  expect(screen.getByText("Select a Role!")).toBeTruthy();
 });

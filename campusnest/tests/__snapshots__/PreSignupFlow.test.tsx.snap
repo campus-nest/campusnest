@@ -1,0 +1,213 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PreSignup → Signup flow Student → navigates to signup-student 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#000",
+      "flex": 1,
+      "justifyContent": "center",
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#000",
+        "height": "100%",
+        "maxWidth": 500,
+        "position": "relative",
+        "width": "70%",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignSelf": "center",
+          "position": "absolute",
+          "top": 176,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "alignSelf": "center",
+          "color": "#fff",
+          "fontSize": 32,
+          "fontWeight": "500",
+          "letterSpacing": 0.1,
+          "position": "absolute",
+          "textAlign": "center",
+          "top": 295,
+        }
+      }
+    >
+      CampusNest
+    </Text>
+    <Text
+      style={
+        {
+          "alignSelf": "center",
+          "color": "#fff",
+          "fontSize": 14,
+          "fontStyle": "italic",
+          "fontWeight": "500",
+          "letterSpacing": 0.1,
+          "position": "absolute",
+          "textAlign": "center",
+          "top": 367,
+        }
+      }
+    >
+      Let's get Started!
+    </Text>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "alignSelf": "center",
+          "backgroundColor": "#fff",
+          "borderRadius": 100,
+          "height": 48,
+          "justifyContent": "center",
+          "position": "absolute",
+          "top": 408,
+          "width": 152,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#000",
+            "fontSize": 14,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
+          }
+        }
+      >
+        Login
+      </Text>
+    </View>
+    <Text
+      style={
+        {
+          "alignSelf": "center",
+          "color": "#fff",
+          "fontSize": 14,
+          "fontStyle": "italic",
+          "fontWeight": "500",
+          "letterSpacing": 0.1,
+          "position": "absolute",
+          "textAlign": "center",
+          "top": 477,
+        }
+      }
+    >
+      Don't have an account?
+    </Text>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "alignSelf": "center",
+          "backgroundColor": "#fff",
+          "borderRadius": 100,
+          "height": 51,
+          "justifyContent": "center",
+          "position": "absolute",
+          "top": 513,
+          "width": 152,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#000",
+            "fontSize": 14,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
+          }
+        }
+      >
+        Sign Up
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "alignSelf": "center",
+          "bottom": 25,
+          "height": 173,
+          "maxWidth": 363,
+          "position": "absolute",
+          "width": "92%",
+        }
+      }
+    />
+  </View>
+</View>
+`;

@@ -1,5 +1,5 @@
+import { renderRoute, mockRouter } from "./test-utils";
 import { fireEvent } from "@testing-library/react-native";
-import { renderRoute } from "./test-utils";
 
 describe("PreSignup → Signup flow", () => {
   it("Student → navigates to signup-student", () => {
@@ -7,12 +7,8 @@ describe("PreSignup → Signup flow", () => {
 
     fireEvent.press(screen.getByText("Choose role"));
     fireEvent.press(screen.getByText("Student"));
-
     fireEvent.press(screen.getByText("Create Account"));
 
-    // Automatically rerender after push
-    screen.rerenderRoute();
-
-    expect(screen).toMatchSnapshot(); // or check text in next page
+    expect(mockRouter.push).toHaveBeenCalledWith("/signup-student");
   });
 });

@@ -1,56 +1,46 @@
 import React from "react";
 import { render } from "@testing-library/react-native";
-import { useRouter } from "expo-router";
 
-// Global mock state for navigation
 let currentRoute = "/";
-let listeners: Function[] = [];
-
-// Mock the router
-jest.mock("expo-router", () => ({
-  useRouter: jest.fn(),
-}));
+const listeners: Function[] = [];
 
 export const mockRouter = {
-  push: (route: string) => {
-    currentRoute = route;
+  push: jest.fn((path: string) => {
+    currentRoute = path;
     listeners.forEach((fn) => fn());
-  },
-  back: () => {
+  }),
+  back: jest.fn(() => {
     currentRoute = "/";
     listeners.forEach((fn) => fn());
-  },
-  getCurrentRoute: () => currentRoute,
-  subscribe: (fn: Function) => listeners.push(fn)
+  }),
 };
 
-beforeEach(() => {
-  currentRoute = "/";
-  listeners = [];
-  (useRouter as jest.Mock).mockReturnValue(mockRouter);
-});
+jest.mock("expo-router", () => ({
+  useRouter: () => mockRouter,
+}));
 
-// Map routes to screens
 import LandingScreen from "../app/landing";
 import PreSignUpScreen from "../app/pre-signup";
 
+const FakeScreen = () => null;
+
 const routeMap: Record<string, React.FC> = {
+  "/": LandingScreen,
   "/landing": LandingScreen,
   "/pre-signup": PreSignUpScreen,
-  "/": LandingScreen,
+  "/signup-student": FakeScreen,
+  "/signup-landlord": FakeScreen,
 };
 
 export function renderRoute(route: string) {
   currentRoute = route;
 
-  const screen = render(React.createElement(routeMap[route] || LandingScreen));
+  const screen = render(React.createElement(routeMap[currentRoute]));
 
   return {
     ...screen,
     rerenderRoute() {
-      screen.rerender(
-        React.createElement(routeMap[mockRouter.getCurrentRoute()] || LandingScreen)
-      );
-    }
+      screen.rerender(React.createElement(routeMap[currentRoute]));
+    },
   };
 }
