@@ -1,20 +1,48 @@
 import { usePathname, useRouter } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SvgXml } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
-// Import your SVG files
-const HomeIcon = require('@/assets/images/nav_bar/Home.svg');
-const SearchIcon = require('@/assets/images/nav_bar/search.svg');
-const PlusIcon = require('@/assets/images/nav_bar/Plus circle.svg');
-const UsersIcon = require('@/assets/images/nav_bar/Users.svg');
-const UserIcon = require('@/assets/images/nav_bar/User.svg');
+// Simple icon components using react-native-svg
+const HomeIcon = ({ color = "#000", size = 24 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <Path d="M9 22V12h6v10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
+const SearchIcon = ({ color = "#000", size = 24 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
+const PlusIcon = ({ color = "#000", size = 24 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <Path d="M12 8v8M8 12h8" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
+const UsersIcon = ({ color = "#000", size = 24 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <Path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
+const UserIcon = ({ color = "#000", size = 24 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <Path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
 
 export function NavigationBar() {
   const router = useRouter();
   const pathname = usePathname();
 
   // Check if user is authenticated (in tabs routes)
-  const isAuthenticated = pathname.startsWith('/(tabs)');
+  const isAuthenticated = !['/landing', '/login', '/signup', '/pre-signup', '/verify-email'].includes(pathname);
 
   if (Platform.OS === 'web') {
     // Web - Top navigation bar
@@ -73,11 +101,9 @@ export function NavigationBar() {
         style={styles.navItem} 
         onPress={() => router.push('/(tabs)')}
       >
-        <SvgXml 
-          xml={HomeIcon} 
-          width={24} 
-          height={24}
-          color={pathname === '/(tabs)' ? '#fff' : '#666'}
+        <HomeIcon 
+          color={pathname === '/' || pathname === '/(tabs)' ? '#888' : '#000'} 
+          size={24} 
         />
       </Pressable>
 
@@ -85,11 +111,9 @@ export function NavigationBar() {
         style={styles.navItem} 
         onPress={() => router.push('/(tabs)/explore')}
       >
-        <SvgXml 
-          xml={SearchIcon} 
-          width={24} 
-          height={24}
-          color={pathname === '/(tabs)/explore' ? '#fff' : '#666'}
+        <SearchIcon 
+          color={pathname === '/explore' || pathname === '/(tabs)/explore' ? '#888' : '#000'} 
+          size={24} 
         />
       </Pressable>
 
@@ -97,11 +121,9 @@ export function NavigationBar() {
         style={styles.navItem} 
         onPress={() => console.log('New Post')}
       >
-        <SvgXml 
-          xml={PlusIcon} 
-          width={24} 
-          height={24}
-          color="#666"
+        <PlusIcon 
+          color="#000" 
+          size={24} 
         />
       </Pressable>
 
@@ -109,11 +131,9 @@ export function NavigationBar() {
         style={styles.navItem} 
         onPress={() => console.log('Users')}
       >
-        <SvgXml 
-          xml={UsersIcon} 
-          width={24} 
-          height={24}
-          color="#666"
+        <UsersIcon 
+          color="#000" 
+          size={24} 
         />
       </Pressable>
 
@@ -121,11 +141,9 @@ export function NavigationBar() {
         style={styles.navItem} 
         onPress={() => console.log('Profile')}
       >
-        <SvgXml 
-          xml={UserIcon} 
-          width={24} 
-          height={24}
-          color="#666"
+        <UserIcon 
+          color="#000" 
+          size={24} 
         />
       </Pressable>
     </View>
@@ -162,17 +180,23 @@ const styles = StyleSheet.create({
   // Mobile styles
   mobileContainer: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 20,
+    left: 20,
+    right: 20,
     height: 70,
-    backgroundColor: '#000',
+    backgroundColor: '#fff',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#333',
-    paddingBottom: 10,
+    borderRadius: 35,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   navItem: {
     alignItems: 'center',
