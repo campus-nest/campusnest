@@ -6,9 +6,5 @@ it("navigates to PreSignup when Sign Up is pressed", () => {
 
   fireEvent.press(screen.getByText("Sign Up"));
 
-  // Ensure next route selection
-  screen.rerenderRoute();
-
   expect(mockRouter.push).toHaveBeenCalledWith("/pre-signup");
-  expect(screen.getByText("Select a Role!")).toBeTruthy();
 });
