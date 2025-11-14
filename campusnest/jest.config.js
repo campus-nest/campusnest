@@ -1,6 +1,5 @@
 module.exports = {
   preset: "jest-expo",
-  // testEnvironment: "jsdom",
 
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 
@@ -14,6 +13,5 @@ module.exports = {
 
   moduleNameMapper: {
     "\\.(svg)$": "<rootDir>/tests/__mocks__/svgMock.js",
-    "^@/(.*)$": "<rootDir>/$1"
   },
 };
