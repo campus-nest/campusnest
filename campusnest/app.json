@@ -4,7 +4,7 @@
     "slug": "campusnest",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/landing_page_bottom_logo.png",
+    "icon": "./assets/images/landing_page_bottom_house.png",
     "scheme": "campusnest",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -12,12 +12,33 @@
       "supportsTablet": true
     },
     "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/no_image.png",
+        "backgroundImage": "./assets/images/no_image.png",
+        "monochromeImage": "./assets/images/no_image.png"
+      },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/no_image.png"
+    },
     "plugins": [
       "expo-router",
-      "expo-splash-screen"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/no_image.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
