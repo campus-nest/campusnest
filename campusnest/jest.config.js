@@ -1,14 +1,6 @@
-const ignoreReactNativePreset = true;
-
 module.exports = {
   preset: "jest-expo",
   testEnvironment: "jsdom",
-
-  // Stop React Native from loading react-native/jest/setup.js
-  haste: {
-    defaultPlatform: "ios",
-    platforms: ["ios", "android"],
-  },
 
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 
@@ -22,6 +14,6 @@ module.exports = {
 
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
-    "\\.(svg)$": "<rootDir>/tests/__mocks__/svgMock.js",
-  },
+    "\\.(svg)$": "<rootDir>/tests/__mocks__/svgMock.js"
+  }
 };
