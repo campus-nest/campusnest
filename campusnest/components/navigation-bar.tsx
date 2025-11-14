@@ -5,6 +5,7 @@ import UserIcon from '@/assets/images/nav_bar/User.svg';
 import UsersIcon from '@/assets/images/nav_bar/Users.svg';
 import { usePathname, useRouter } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+
 export function NavigationBar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -32,6 +33,8 @@ export function NavigationBar() {
           {isAuthenticated ? (
             <>
               <Pressable 
+                accessibilityRole='link'
+                accessibilityLabel='Home'
                 onPress={() => router.push('/(tabs)')}
                 style={[styles.webNavItem, isActive('/(tabs)') && styles.webNavItemActive]}
               >
@@ -40,6 +43,8 @@ export function NavigationBar() {
                 </Text>
               </Pressable>
               <Pressable 
+                accessibilityRole='link'
+                accessibilityLabel='Search'
                 onPress={() => router.push('/(tabs)/explore')}
                 style={[styles.webNavItem, isActive('/explore') && styles.webNavItemActive]}
               >
@@ -48,6 +53,8 @@ export function NavigationBar() {
                 </Text>
               </Pressable>
               <Pressable 
+                accessibilityRole='link'
+                accessibilityLabel='New Post'
                 onPress={() => router.push('/(tabs)/new_post')}
                 style={[styles.webNavItem, isActive('/new_post') && styles.webNavItemActive]}
               >
@@ -56,6 +63,8 @@ export function NavigationBar() {
                 </Text>
               </Pressable>
               <Pressable 
+                accessibilityRole='link'
+                accessibilityLabel='Users'
                 onPress={() => router.push('/(tabs)/users')}
                 style={[styles.webNavItem, isActive('/users') && styles.webNavItemActive]}
               >
@@ -64,6 +73,8 @@ export function NavigationBar() {
                 </Text>
               </Pressable>
               <Pressable 
+                accessibilityRole='link'
+                accessibilityLabel='Profile'
                 onPress={() => router.push('/(tabs)/profile')}
                 style={[styles.webNavItem, isActive('/profile') && styles.webNavItemActive]}
               >
@@ -105,6 +116,8 @@ export function NavigationBar() {
   return (
     <View style={styles.mobileContainer}>
       <Pressable 
+        accessibilityRole='link'
+        accessibilityLabel='Home'
         style={styles.navItem} 
         onPress={() => router.push('/(tabs)')}
       >
@@ -116,6 +129,8 @@ export function NavigationBar() {
       </Pressable>
 
       <Pressable 
+        accessibilityRole='link'
+        accessibilityLabel='Search'
         style={styles.navItem} 
         onPress={() => router.push('/(tabs)/explore')}
       >
@@ -127,6 +142,8 @@ export function NavigationBar() {
       </Pressable>
 
       <Pressable 
+        accessibilityRole='link'
+        accessibilityLabel='New Post'
         style={styles.navItem} 
         onPress={() => router.push('/(tabs)/new_post')}
       >
@@ -138,6 +155,8 @@ export function NavigationBar() {
       </Pressable>
 
       <Pressable 
+        accessibilityRole='link'
+        accessibilityLabel='Users'
         style={styles.navItem} 
         onPress={() => router.push('/(tabs)/users')}
       >
@@ -149,6 +168,8 @@ export function NavigationBar() {
       </Pressable>
 
       <Pressable 
+        accessibilityRole='link'
+        accessibilityLabel='Profile'
         style={styles.navItem} 
         onPress={() => router.push('/(tabs)/profile')}
       >
