@@ -19,8 +19,8 @@ jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
 
-import LandingScreen from "../app/landing";
-import PreSignUpScreen from "../app/pre-signup";
+import LandingScreen from "@/app/landing";
+import PreSignUpScreen from "@/app/pre-signup";
 
 const FakeScreen = () => null;
 
