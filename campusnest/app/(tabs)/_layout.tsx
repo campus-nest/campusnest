@@ -5,7 +5,7 @@ import { NavigationBar } from "../../components/navigation-bar";
 export default function TabLayout() {
   return (
     <View style={styles.container}>
-      {Platform.OS == 'web' && <NavigationBar />}
+      {Platform.OS === 'web' && <NavigationBar />}
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#000",
