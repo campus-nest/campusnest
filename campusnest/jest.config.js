@@ -1,9 +1,14 @@
+const ignoreReactNativePreset = true;
+
 module.exports = {
   preset: "jest-expo",
   testEnvironment: "jsdom",
 
-  // ⬇️ THIS IS THE FIX
-  globalSetup: "<rootDir>/jest.disable-rn-setup.js",
+  // Stop React Native from loading react-native/jest/setup.js
+  haste: {
+    defaultPlatform: "ios",
+    platforms: ["ios", "android"],
+  },
 
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 
