@@ -50,6 +50,7 @@ export default function SignUpScreen() {
         email: email.trim(),
         password,
         options: {
+          emailRedirectTo: "http://localhost:8081",
           data: {
             full_name: fullName,
             role: role, 
@@ -59,22 +60,7 @@ export default function SignUpScreen() {
 
       if (signUpError) {
         Alert.alert("Sign Up Failed", signUpError.message);
-        setLoading(false);
         return;
-      }
-
-      if (data?.user) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert({
-            id: data.user.id,
-            full_name: fullName,
-            role: role,
-          });
-
-        if (profileError) {
-          console.error("Profile Insert error:", profileError);
-        }
       }
 
       Alert.alert(
@@ -251,3 +237,4 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
+

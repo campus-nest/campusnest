@@ -53,6 +53,22 @@ export default function LoginScreen() {
         Alert.alert("Error", "No user session found.");
         return;
       }
+      
+      const userId = session.user.id;
+
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (!existingProfile) {
+        await supabase.from("profiles").insert({
+          id: userId,
+          full_name: session.user.user_metadata.full_name,
+          role: session.user.user_metadata.role,
+        });
+      }
 
       const {data: profile, error: profileError} = await supabase
         .from("profiles")
@@ -202,3 +218,5 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
+console.log("ENV URL:", process.env.EXPO_PUBLIC_SUPABASE_URL);
+console.log("ENV KEY:", process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.slice(0, 10) + "...");
