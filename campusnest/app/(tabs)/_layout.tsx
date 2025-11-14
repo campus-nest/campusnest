@@ -8,7 +8,6 @@ export default function TabLayout() {
       {Platform.OS === 'web' && <NavigationBar />}
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: "#000",
           headerShown: false,
           tabBarStyle: { display: "none" },
         }}>

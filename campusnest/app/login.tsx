@@ -20,8 +20,8 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     // Alert.alert("Debug", "Button pressed")
-    // Hardcoded test credentials
-    if (email.trim() === "test" && password === "test@123") {
+    // Hardcoded test credentials behind __DEV__ flag
+    if (__DEV__ && email.trim() === "test" && password === "test@123") {
       console.log("Test login successful - bypassing authentication");
       router.replace("/(tabs)");
       return;

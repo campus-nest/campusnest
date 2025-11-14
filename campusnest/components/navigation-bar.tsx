@@ -1,41 +1,10 @@
+import HomeIcon from '@/assets/icons/Home.svg';
+import PlusIcon from '@/assets/icons/PlusIcon.svg';
+import SearchIcon from '@/assets/icons/Search.svg';
+import UserIcon from '@/assets/icons/User.svg';
+import UsersIcon from '@/assets/icons/Users.svg';
 import { usePathname, useRouter } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-
-// Simple icon components using react-native-svg
-const HomeIcon = ({ color = "#000", size = 24 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <Path d="M9 22V12h6v10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </Svg>
-);
-
-const SearchIcon = ({ color = "#000", size = 24 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </Svg>
-);
-
-const PlusIcon = ({ color = "#000", size = 24 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <Path d="M12 8v8M8 12h8" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </Svg>
-);
-
-const UsersIcon = ({ color = "#000", size = 24 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <Path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </Svg>
-);
-
-const UserIcon = ({ color = "#000", size = 24 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <Path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </Svg>
-);
 
 export function NavigationBar() {
   const router = useRouter();
@@ -43,6 +12,14 @@ export function NavigationBar() {
 
   // Check if user is authenticated (in tabs routes)
   const isAuthenticated = !['/landing', '/login', '/signup', '/pre-signup', '/verify-email'].includes(pathname);
+
+  // Helper function to check if route is active
+  const isActive = (route: string) => {
+    if (route === '/(tabs)') {
+      return pathname === '/' || pathname === '/(tabs)';
+    }
+    return pathname === route || pathname === `/(tabs)${route}`;
+  };
 
   if (Platform.OS === 'web') {
     // Web - Top navigation bar
@@ -55,30 +32,61 @@ export function NavigationBar() {
         <View style={styles.webNav}>
           {isAuthenticated ? (
             <>
-              <Pressable onPress={() => router.push('/(tabs)')}>
-                <Text style={styles.webNavLink}>Home</Text>
+              <Pressable 
+                onPress={() => router.push('/(tabs)')}
+                style={[styles.webNavItem, isActive('/(tabs)') && styles.webNavItemActive]}
+              >
+                <Text style={[styles.webNavLink, isActive('/(tabs)') && styles.webNavLinkActive]}>
+                  Home
+                </Text>
               </Pressable>
-              <Pressable onPress={() => router.push('/(tabs)/explore')}>
-                <Text style={styles.webNavLink}>Search</Text>
+              <Pressable 
+                onPress={() => router.push('/(tabs)/explore')}
+                style={[styles.webNavItem, isActive('/explore') && styles.webNavItemActive]}
+              >
+                <Text style={[styles.webNavLink, isActive('/explore') && styles.webNavLinkActive]}>
+                  Search
+                </Text>
               </Pressable>
-              <Pressable onPress={() => router.push('/(tabs)/new_post')}>
-                <Text style={styles.webNavLink}>New Post</Text>
+              <Pressable 
+                onPress={() => router.push('/(tabs)/new_post')}
+                style={[styles.webNavItem, isActive('/new_post') && styles.webNavItemActive]}
+              >
+                <Text style={[styles.webNavLink, isActive('/new_post') && styles.webNavLinkActive]}>
+                  New Post
+                </Text>
               </Pressable>
-              <Pressable onPress={() => router.push('/(tabs)/users')}>
-                <Text style={styles.webNavLink}>Users</Text>
+              <Pressable 
+                onPress={() => router.push('/(tabs)/users')}
+                style={[styles.webNavItem, isActive('/users') && styles.webNavItemActive]}
+              >
+                <Text style={[styles.webNavLink, isActive('/users') && styles.webNavLinkActive]}>
+                  Users
+                </Text>
               </Pressable>
-              <Pressable onPress={() => router.push('/(tabs)/profile')}>
-                <Text style={styles.webNavLink}>Profile</Text>
+              <Pressable 
+                onPress={() => router.push('/(tabs)/profile')}
+                style={[styles.webNavItem, isActive('/profile') && styles.webNavItemActive]}
+              >
+                <Text style={[styles.webNavLink, isActive('/profile') && styles.webNavLinkActive]}>
+                  Profile
+                </Text>
               </Pressable>
             </>
           ) : (
             <>
               {pathname !== '/login' && pathname !== '/signup' && (
                 <>
-                  <Pressable onPress={() => router.push('/login')}>
+                  <Pressable 
+                    onPress={() => router.push('/login')}
+                    style={styles.webNavItem}
+                  >
                     <Text style={styles.webNavLink}>Login</Text>
                   </Pressable>
-                  <Pressable onPress={() => router.push('/signup')}>
+                  <Pressable 
+                    onPress={() => router.push('/signup')}
+                    style={styles.webNavItem}
+                  >
                     <Text style={styles.webNavLink}>Sign Up</Text>
                   </Pressable>
                 </>
@@ -102,8 +110,11 @@ export function NavigationBar() {
         onPress={() => router.push('/(tabs)')}
       >
         <HomeIcon 
-          color={pathname === '/' || pathname === '/(tabs)' ? '#888' : '#000'} 
-          size={24} 
+          width={24}
+          height={24}
+          fill="none"
+          stroke={isActive('/(tabs)') ? '#000' : '#888'}
+          strokeWidth={2}
         />
       </Pressable>
 
@@ -112,8 +123,11 @@ export function NavigationBar() {
         onPress={() => router.push('/(tabs)/explore')}
       >
         <SearchIcon 
-          color={pathname === '/explore' || pathname === '/(tabs)/explore' ? '#888' : '#000'} 
-          size={24} 
+          width={24}
+          height={24}
+          fill="none"
+          stroke={isActive('/explore') ? '#000' : '#888'}
+          strokeWidth={2}
         />
       </Pressable>
 
@@ -122,8 +136,11 @@ export function NavigationBar() {
         onPress={() => router.push('/(tabs)/new_post')}
       >
         <PlusIcon 
-          color={pathname === '/new_post' || pathname === '/(tabs)/new_post' ? '#888' : '#000'}
-          size={24} 
+          width={24}
+          height={24}
+          fill="none"
+          stroke={isActive('/new_post') ? '#000' : '#888'}
+          strokeWidth={2}
         />
       </Pressable>
 
@@ -132,8 +149,11 @@ export function NavigationBar() {
         onPress={() => router.push('/(tabs)/users')}
       >
         <UsersIcon 
-          color={pathname === '/users' || pathname === '/(tabs)/users' ? '#888' : '#000'} 
-          size={24} 
+          width={24}
+          height={24}
+          fill="none"
+          stroke={isActive('/users') ? '#000' : '#888'}
+          strokeWidth={2}
         />
       </Pressable>
 
@@ -142,8 +162,11 @@ export function NavigationBar() {
         onPress={() => router.push('/(tabs)/profile')}
       >
         <UserIcon 
-          color={pathname === '/profile' || pathname === '/(tabs)/profile' ? '#888' : '#000'} 
-          size={24} 
+          width={24}
+          height={24}
+          fill="none"
+          stroke={isActive('/profile') ? '#000' : '#888'}
+          strokeWidth={2}
         />
       </Pressable>
     </View>
@@ -171,10 +194,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 20,
   },
+  webNavItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  webNavItemActive: {
+    backgroundColor: '#333',
+  },
   webNavLink: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '500',
+  },
+  webNavLinkActive: {
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
   
   // Mobile styles
@@ -201,6 +236,6 @@ const styles = StyleSheet.create({
   navItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 10
+    padding: 10,
   },
 });
