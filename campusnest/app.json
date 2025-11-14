@@ -4,7 +4,7 @@
     "slug": "campusnest",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/landing_page_logo.png",
+    "icon": "./assets/images/landing_page_bottom_house.png",
     "scheme": "campusnest",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
