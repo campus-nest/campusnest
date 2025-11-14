@@ -61,13 +61,13 @@ export function NavigationBar() {
               <Pressable onPress={() => router.push('/(tabs)/explore')}>
                 <Text style={styles.webNavLink}>Search</Text>
               </Pressable>
-              <Pressable onPress={() => console.log('New Post')}>
+              <Pressable onPress={() => router.push('/(tabs)/new_post')}>
                 <Text style={styles.webNavLink}>New Post</Text>
               </Pressable>
-              <Pressable onPress={() => console.log('Users')}>
+              <Pressable onPress={() => router.push('/(tabs)/users')}>
                 <Text style={styles.webNavLink}>Users</Text>
               </Pressable>
-              <Pressable onPress={() => console.log('Profile')}>
+              <Pressable onPress={() => router.push('/(tabs)/profile')}>
                 <Text style={styles.webNavLink}>Profile</Text>
               </Pressable>
             </>
@@ -119,30 +119,30 @@ export function NavigationBar() {
 
       <Pressable 
         style={styles.navItem} 
-        onPress={() => console.log('New Post')}
+        onPress={() => router.push('/(tabs)/new_post')}
       >
         <PlusIcon 
-          color="#000" 
+          color={pathname === '/new_post' || pathname === '/(tabs)/new_post' ? '#888' : '#000'}
           size={24} 
         />
       </Pressable>
 
       <Pressable 
         style={styles.navItem} 
-        onPress={() => console.log('Users')}
+        onPress={() => router.push('/(tabs)/users')}
       >
         <UsersIcon 
-          color="#000" 
+          color={pathname === '/users' || pathname === '/(tabs)/users' ? '#888' : '#000'} 
           size={24} 
         />
       </Pressable>
 
       <Pressable 
         style={styles.navItem} 
-        onPress={() => console.log('Profile')}
+        onPress={() => router.push('/(tabs)/profile')}
       >
         <UserIcon 
-          color="#000" 
+          color={pathname === '/profile' || pathname === '/(tabs)/profile' ? '#888' : '#000'} 
           size={24} 
         />
       </Pressable>
@@ -201,6 +201,6 @@ const styles = StyleSheet.create({
   navItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 10,
+    padding: 10
   },
 });
