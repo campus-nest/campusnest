@@ -5,7 +5,6 @@ import UserIcon from '@/assets/images/nav_bar/User.svg';
 import UsersIcon from '@/assets/images/nav_bar/Users.svg';
 import { usePathname, useRouter } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-
 export function NavigationBar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -112,9 +111,7 @@ export function NavigationBar() {
         <HomeIcon 
           width={24}
           height={24}
-          fill="none"
-          stroke={isActive('/(tabs)') ? '#000' : '#888'}
-          strokeWidth={2}
+          color={isActive('/(tabs)') ? '#888' : '#000'}
         />
       </Pressable>
 
@@ -125,9 +122,7 @@ export function NavigationBar() {
         <SearchIcon 
           width={24}
           height={24}
-          fill="none"
-          stroke={isActive('/explore') ? '#000' : '#888'}
-          strokeWidth={2}
+          color={isActive('/explore') ? '#888' : '#000'}
         />
       </Pressable>
 
@@ -138,9 +133,7 @@ export function NavigationBar() {
         <PlusIcon 
           width={24}
           height={24}
-          fill="none"
-          stroke={isActive('/new_post') ? '#000' : '#888'}
-          strokeWidth={2}
+          color={isActive('/new_post') ? '#888' : '#000'}
         />
       </Pressable>
 
@@ -151,9 +144,7 @@ export function NavigationBar() {
         <UsersIcon 
           width={24}
           height={24}
-          fill="none"
-          stroke={isActive('/users') ? '#000' : '#888'}
-          strokeWidth={2}
+          color={isActive('/users') ? '#888' : '#000'}
         />
       </Pressable>
 
@@ -164,9 +155,7 @@ export function NavigationBar() {
         <UserIcon 
           width={24}
           height={24}
-          fill="none"
-          stroke={isActive('/profile') ? '#000' : '#888'}
-          strokeWidth={2}
+          color={isActive('/profile') ? '#888' : '#000'}
         />
       </Pressable>
     </View>
