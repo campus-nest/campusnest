@@ -1,8 +1,8 @@
-import HomeIcon from '@/assets/icons/Home.svg';
-import PlusIcon from '@/assets/icons/PlusIcon.svg';
-import SearchIcon from '@/assets/icons/Search.svg';
-import UserIcon from '@/assets/icons/User.svg';
-import UsersIcon from '@/assets/icons/Users.svg';
+import HomeIcon from '@/assets/images/nav_bar/Home.svg';
+import PlusIcon from '@/assets/images/nav_bar/PlusCircle.svg';
+import SearchIcon from '@/assets/images/nav_bar/Search.svg';
+import UserIcon from '@/assets/images/nav_bar/User.svg';
+import UsersIcon from '@/assets/images/nav_bar/Users.svg';
 import { usePathname, useRouter } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
