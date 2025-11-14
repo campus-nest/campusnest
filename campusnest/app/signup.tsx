@@ -1,6 +1,6 @@
 import { PageContainer } from "@/components/page-container";
 import { supabase } from "@/src/lib/supabaseClient";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
@@ -15,6 +15,7 @@ import {
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { role } = useLocalSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -37,32 +38,56 @@ export default function SignUpScreen() {
       return;
     }
 
+    if (!role) {
+      Alert.alert("Error", "Missing role. Please go back and select a role.");
+      return;
+    }
+
     setLoading(true);
+
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
           data: {
             full_name: fullName,
+            role: role, 
           },
         },
       });
 
-      if (error) {
-        Alert.alert("Sign Up Failed", error.message);
-      } else {
-        Alert.alert(
-          "Success",
-          "Account created! Please check your email to verify your account.",
-          [{ text: "OK", onPress: () => router.replace("/verify-email") }],
-        );
+      if (signUpError) {
+        Alert.alert("Sign Up Failed", signUpError.message);
+        setLoading(false);
+        return;
       }
+
+      if (data?.user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert({
+            id: data.user.id,
+            full_name: fullName,
+            role: role,
+          });
+
+        if (profileError) {
+          console.error("Profile Insert error:", profileError);
+        }
+      }
+
+      Alert.alert(
+        "Success",
+        "Account created! Please check your email to verify your account.",
+        [{ text: "OK", onPress: () => router.replace("/verify-email") }]
+      );
+
     } catch (error) {
       console.error("Signup error:", error);
       Alert.alert(
         "Error",
-        error instanceof Error ? error.message : "An unexpected error occurred",
+        error instanceof Error ? error.message : "An unexpected error occurred"
       );
     } finally {
       setLoading(false);
