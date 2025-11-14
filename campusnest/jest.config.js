@@ -1,5 +1,9 @@
 module.exports = {
   preset: "jest-expo",
+  testEnvironment: "jsdom",
+
+  // ⬇️ THIS IS THE FIX
+  globalSetup: "<rootDir>/jest.disable-rn-setup.js",
 
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 
