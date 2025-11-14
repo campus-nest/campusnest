@@ -1,8 +1,8 @@
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import LandingTopHome from "@/assets/images/landing_page_top_home.svg";
-import LandingPageLogo from "@/assets/images/landing_page_bottom_logo.svg";
+import LandingTopHome from "../assets/images/landing_page_top_home.svg";
+import LandingPageLogo from "../assets/images/landing_page_bottom_logo.svg";
 
 export default function LandingScreen() {
   const router = useRouter();
