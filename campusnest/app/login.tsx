@@ -24,13 +24,13 @@ export default function LoginScreen() {
       return;
     }
 
-    setLoading(true);
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       Alert.alert("Error", "Please enter a valid email address");
       return;
     }
+
+    setLoading(true);
 
     try {
 
@@ -51,6 +51,7 @@ export default function LoginScreen() {
 
       if (!session?.user) {
         Alert.alert("Error", "No user session found.");
+        setLoading(false);
         return;
       }
       
@@ -62,13 +63,18 @@ export default function LoginScreen() {
         .eq("id", userId)
         .maybeSingle();
 
-      if (!existingProfile) {
-        await supabase.from("profiles").insert({
+       if (!existingProfile) {
+        const { error: insertError } = await supabase.from("profiles").insert({
           id: userId,
-          full_name: session.user.user_metadata.full_name,
-          role: session.user.user_metadata.role,
-        });
-      }
+          full_name: session.user.user_metadata?.full_name || null,
+          role: session.user.user_metadata?.role || "student",
+         });
+
+        if (insertError) {
+          Alert.alert("Error", "Failed to create user profile.");
+          return;
+        }
+       }
 
       const {data: profile, error: profileError} = await supabase
         .from("profiles")
@@ -82,11 +88,12 @@ export default function LoginScreen() {
       }
 
       if (profile.role === "student") {
-        router.replace("/(tabs)");
+        router.replace("/(student-tabs)");
       } else if (profile.role === "landlord") {
-        router.replace("/(tabs)");
+        router.replace("/(landlord-tabs)");
       } else {
         Alert.alert("Error", "Unknown user role.");
+        setLoading(false);
       }
 
     } catch (error) {
