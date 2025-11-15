@@ -25,60 +25,88 @@ export default function LoginScreen() {
       return;
     }
 
-    setLoading(true);
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       Alert.alert("Error", "Please enter a valid email address");
       return;
     }
 
-    try {
+    setLoading(true);
 
-      const { error } = await supabase.auth.signInWithPassword({
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
-      if (error) {
-        Alert.alert("Login Failed", error.message);
+      if (loginError) {
+        Alert.alert("Login Failed", loginError.message);
         setLoading(false);
         return;
       }
 
-      const{
+      const {
         data: { session },
       } = await supabase.auth.getSession();
 
       if (!session?.user) {
         Alert.alert("Error", "No user session found.");
+        setLoading(false);
         return;
       }
-      
+
       const userId = session.user.id;
 
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", userId)
-        .maybeSingle();
+      const { data: existingProfile, error: profileCheckError } =
+        await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", userId)
+          .maybeSingle();
 
-      if (!existingProfile) {
-        await supabase.from("profiles").insert({
-          id: userId,
-          full_name: session.user.user_metadata.full_name,
-          role: session.user.user_metadata.role,
-        });
+      if (profileCheckError) {
+        Alert.alert("Error", "Failed to check user profile.");
+        setLoading(false);
+        return;
       }
 
-      const {data: profile, error: profileError} = await supabase
+      if (!existingProfile) {
+        const fullName = session.user.user_metadata?.full_name;
+        const role = session.user.user_metadata?.role;
+
+        if (!fullName || !role) {
+          Alert.alert(
+            "Error",
+            "Missing required profile information. Please complete signup again."
+          );
+          setLoading(false);
+          return;
+        }
+
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            full_name: fullName,
+            role: role,
+          });
+
+        if (insertError) {
+          Alert.alert("Error", "Failed to create user profile.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
-        .eq("id", session.user.id)
+        .eq("id", userId)
         .single();
 
-      if (profileError) {
+      if (profileError || !profile) {
         Alert.alert("Error", "Failed to fetch user profile.");
+        setLoading(false);
         return;
       }
 
