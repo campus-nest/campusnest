@@ -51,7 +51,7 @@ export default function SignUpScreen() {
         email: email.trim(),
         password,
         options: {
-          emailRedirectTo: "http://localhost:8081",
+          emailRedirectTo: "https://campusnest.uofacs.ca/",
           data: {
             full_name: fullName,
             role: role, 
