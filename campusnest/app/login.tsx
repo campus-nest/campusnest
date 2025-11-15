@@ -82,12 +82,12 @@ export default function LoginScreen() {
         return;
       }
 
-      if (profile.role === "student") {
-        router.replace("/(tabs)");
-      } else if (profile.role === "landlord") {
+      if (profile.role === "student" || profile.role === "landlord") {
         router.replace("/(tabs)");
       } else {
         Alert.alert("Error", "Unknown user role.");
+        setLoading(false);
+        return;
       }
 
     } catch (error) {
