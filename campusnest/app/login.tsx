@@ -10,6 +10,7 @@ import {
   Text,
   TextInput,
   View,
+  Platform,
 } from "react-native";
 
 export default function LoginScreen() {
@@ -148,9 +149,11 @@ export default function LoginScreen() {
             </Text>
           </Pressable>
 
-          <Pressable onPress={() => router.back()}>
-            <Text style={styles.backText}>Back to Landing</Text>
-          </Pressable>
+          {Platform.OS === "android" && (
+            <Pressable onPress={() => router.back()}>
+              <Text style={styles.backText}>Back to Landing</Text>
+            </Pressable>
+          )}
         </View>
       </View>
     </PageContainer>
