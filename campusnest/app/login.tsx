@@ -218,5 +218,3 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
-console.log("ENV URL:", process.env.EXPO_PUBLIC_SUPABASE_URL);
-console.log("ENV KEY:", process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.slice(0, 10) + "...");
