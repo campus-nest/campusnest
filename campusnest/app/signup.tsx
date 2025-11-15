@@ -11,6 +11,7 @@ import {
   Text,
   TextInput,
   View,
+  Platform,
 } from "react-native";
 
 export default function SignUpScreen() {
@@ -141,9 +142,11 @@ export default function SignUpScreen() {
               </Text>
             </Pressable>
 
+          {Platform.OS === "android" && (
             <Pressable onPress={() => router.back()}>
               <Text style={styles.backText}>Back to Landing</Text>
             </Pressable>
+          )}
           </View>
         </View>
       </ScrollView>
