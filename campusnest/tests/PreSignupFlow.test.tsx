@@ -9,6 +9,9 @@ describe("PreSignup → Signup flow", () => {
     fireEvent.press(screen.getByText("Student"));
     fireEvent.press(screen.getByText("Create Account"));
 
-    expect(mockRouter.push).toHaveBeenCalledWith("/signup-student");
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: "/signup",
+      params: { role: "student" },
+    });
   });
 });
