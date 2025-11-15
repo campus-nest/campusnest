@@ -18,11 +18,10 @@ export default function PreSignUpScreen() {
       return;
     }
 
-    if (selectedRole === "student") {
-      router.push("/signup-student");
-    } else {
-      router.push("/signup-landlord");
-    }
+    router.push({
+      pathname: "/signup",
+      params: { role: selectedRole },
+    })
   };
 
   const getRoleDisplayText = () => {

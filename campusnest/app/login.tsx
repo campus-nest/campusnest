@@ -20,14 +20,6 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    // Alert.alert("Debug", "Button pressed")
-    // Hardcoded test credentials behind __DEV__ flag
-    if (__DEV__ && email.trim() === "test" && password === "test@123") {
-      console.log("Test login successful - bypassing authentication");
-      router.replace("/(tabs)");
-      return;
-    }
-
     if (!email.trim() || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
@@ -40,19 +32,92 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
+
     try {
-
-
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error: loginError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
-      if (error) {
-        Alert.alert("Login Failed", error.message);
-      } else {
-        router.replace("/(tabs)");
+      if (loginError) {
+        Alert.alert("Login Failed", loginError.message);
+        setLoading(false);
+        return;
       }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user) {
+        Alert.alert("Error", "No user session found.");
+        setLoading(false);
+        return;
+      }
+
+      const userId = session.user.id;
+
+      const { data: existingProfile, error: profileCheckError } =
+        await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", userId)
+          .maybeSingle();
+
+      if (profileCheckError) {
+        Alert.alert("Error", "Failed to check user profile.");
+        setLoading(false);
+        return;
+      }
+
+      if (!existingProfile) {
+        const fullName = session.user.user_metadata?.full_name;
+        const role = session.user.user_metadata?.role;
+
+        if (!fullName || !role) {
+          Alert.alert(
+            "Error",
+            "Missing required profile information. Please complete signup again."
+          );
+          setLoading(false);
+          return;
+        }
+
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            full_name: fullName,
+            role: role,
+          });
+
+        if (insertError) {
+          Alert.alert("Error", "Failed to create user profile.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+      if (profileError || !profile) {
+        Alert.alert("Error", "Failed to fetch user profile.");
+        setLoading(false);
+        return;
+      }
+
+      if (profile.role === "student" || profile.role === "landlord") {
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Error", "Unknown user role.");
+        setLoading(false);
+        return;
+      }
+
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
