@@ -69,9 +69,9 @@ export default function HomeScreen() {
         if (userRole === "student" || userRole === "landlord") {
           setRole(userRole);
 
-          // reset filter default based on role
+          // default filter per role
           setActiveFilter(
-            userRole === "student" ? ("new" as FilterKey) : ("yourListings" as FilterKey)
+            userRole === "student" ? "new" : "yourListings"
           );
         } else {
           setRole(null);
@@ -145,19 +145,20 @@ export default function HomeScreen() {
   };
 
   const renderListingCard = ({ item }: { item: Listing }) => (
-    <Pressable style={styles.card} onPress={() => { /* TODO: navigate to detail */ }}>
+    <Pressable style={styles.card}>
       <View style={styles.cardImagePlaceholder}>
         <Text style={styles.cardImageEmoji}>🏠</Text>
       </View>
+
       <View style={styles.cardContent}>
-        <Text style={styles.cardTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
+        <Text style={styles.cardTitle}>{item.title}</Text>
         <Text style={styles.cardSubtitle}>Lease Term: {item.leaseTerm}</Text>
         <Text style={styles.cardSubtitle}>Rent: ${item.rent} per month</Text>
+
         <Text style={styles.cardAddress} numberOfLines={2}>
           {item.address}
         </Text>
+
         <View style={styles.cardMetaRow}>
           <Text style={styles.cardMetaText}>
             Dist. to Uni: {item.distanceMinutes} min
@@ -188,36 +189,45 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.screen}>
-      {renderHeader()}
-      {renderFilters()}
-
-      <FlatList
-        data={MOCK_LISTINGS}
-        keyExtractor={(item) => item.id}
-        renderItem={renderListingCard}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={styles.contentWrapper}>
+        {renderHeader()}
+        {renderFilters()}
+  
+        <FlatList
+          data={MOCK_LISTINGS}
+          keyExtractor={(item) => item.id}
+          renderItem={renderListingCard}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
     </View>
   );
+  
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#000", // outer shell to match rest of app
+    backgroundColor: "#000",
     alignItems: "center",
+    paddingTop: 10,
   },
-  header: {
+
+  contentWrapper: {
     width: "100%",
     maxWidth: 480,
+    alignSelf: "center",
+    paddingHorizontal: 16,
+  },
+
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 12,
     gap: 8,
+    paddingTop: 12,
   },
+
   searchInput: {
     flex: 1,
     backgroundColor: "#f2f2f2",
@@ -226,6 +236,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 14,
   },
+
   iconButton: {
     width: 40,
     height: 40,
@@ -234,43 +245,50 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   iconText: {
     fontSize: 18,
   },
+
   filtersRow: {
-    width: "100%",
-    maxWidth: 480,
     flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingBottom: 8,
     gap: 8,
+    paddingTop: 10,
+    paddingBottom: 16,
   },
+
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#aaa",
     backgroundColor: "#fff",
   },
+
   filterChipActive: {
     backgroundColor: "#000",
     borderColor: "#000",
   },
+
   filterChipText: {
     fontSize: 13,
     color: "#333",
     fontWeight: "500",
   },
+
   filterChipTextActive: {
     color: "#fff",
   },
+
   listContent: {
     width: "100%",
     maxWidth: 480,
+    alignSelf: "center",
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 50,
   },
+
   card: {
     flexDirection: "row",
     backgroundColor: "#1a1a1a",
@@ -278,6 +296,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
+
   cardImagePlaceholder: {
     width: 70,
     height: 70,
@@ -287,35 +306,43 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 12,
   },
+
   cardImageEmoji: {
     fontSize: 28,
   },
+
   cardContent: {
     flex: 1,
   },
+
   cardTitle: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "700",
     marginBottom: 4,
   },
+
   cardSubtitle: {
     color: "#ddd",
     fontSize: 12,
   },
+
   cardAddress: {
     color: "#aaa",
     fontSize: 11,
     marginTop: 4,
   },
+
   cardMetaRow: {
     flexDirection: "row",
     marginTop: 6,
   },
+
   cardMetaText: {
     color: "#fff",
     fontSize: 11,
   },
+
   centered: {
     flex: 1,
     backgroundColor: "#000",
@@ -323,6 +350,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 24,
   },
+
   centeredText: {
     color: "#fff",
     textAlign: "center",
