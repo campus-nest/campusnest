@@ -46,7 +46,7 @@ export default function SignUpScreen() {
     setLoading(true);
 
     try {
-      const { data: _data, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
