@@ -1,28 +1,23 @@
-import { StyleSheet, Text, View } from "react-native";
+import React, {useEffect, useState} from "react";
+import { ActivityIndicator, Alert, Pressable, Role, ScrollView, StyleSheet, Text, TextInput, View,} from "react-native";
+import {supabase} from "@/src/lib/supabaseClient";
+import {useRouter} from "expo-router";
 
 export default function NewPostScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>New post Screen</Text>
-      <Text style={styles.subtext}>Create your new post here</Text>
-    </View>
-  );
-}
+  const router = useRouter();
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  subtext: {
-    fontSize: 16,
-    color: "#666",
-  },
-});
+  const [role, setRole] = useState<Role | null >(null);
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // landlord form state
+  const [listingTitle, setListingTitle] = useState("");
+  const [listingAddress, setListingAddress] = useState("");
+  const [listingRent, setListingRent] = useState("");
+  const [listingLeaseTerm, setListingLeaseTerm] = useState("");
+
+  //student post state
+  const [postTitle, setPostTitle] = useState("");
+  const [postBody, setPostBody] = useState("");
+
+}
