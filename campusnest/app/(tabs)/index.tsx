@@ -18,44 +18,23 @@ type FilterKey = StudentFilter | LandlordFilter;
 
 type Listing = {
   id: string;
+  landlord_id: string;
   title: string;
   address: string;
   rent: number;
-  leaseTerm: string;
-  distanceMinutes: number;
+  lease_term: string;
+  distanceMinutes?: number;
 };
-
-const MOCK_LISTINGS: Listing[] = [
-  {
-    id: "1",
-    title: "Lease Term: 8 Months (Extend)",
-    address: "2190 111-B North Avenue NW Edmonton, AB TH6-2H7",
-    rent: 780,
-    leaseTerm: "8 Months",
-    distanceMinutes: 5,
-  },
-  {
-    id: "2",
-    title: "Lease Term: 12 Months",
-    address: "1020 Campus Road NW Edmonton, AB TH4-1Z2",
-    rent: 820,
-    leaseTerm: "12 Months",
-    distanceMinutes: 10,
-  },
-  {
-    id: "3",
-    title: "Lease Term: 4 Months",
-    address: "55 University Drive NW Edmonton, AB TH1-9Q1",
-    rent: 700,
-    leaseTerm: "4 Months",
-    distanceMinutes: 7,
-  },
-];
 
 export default function HomeScreen() {
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
+
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
+
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -66,19 +45,10 @@ export default function HomeScreen() {
 
         const userRole = session?.user?.user_metadata?.role as Role | undefined;
 
-        if (userRole === "student" || userRole === "landlord") {
+        if (userRole) {
           setRole(userRole);
-
-          // default filter per role
-          setActiveFilter(
-            userRole === "student" ? "new" : "yourListings"
-          );
-        } else {
-          setRole(null);
+          setActiveFilter(userRole === "student" ? "new" : "yourListings");
         }
-      } catch (error) {
-        console.error("Error fetching role:", error);
-        setRole(null);
       } finally {
         setRoleLoading(false);
       }
@@ -86,6 +56,44 @@ export default function HomeScreen() {
 
     fetchRole();
   }, []);
+
+
+  useEffect(() => {
+    if (!role) return;
+
+    const fetchListings = async () => {
+      setListingsLoading(true);
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      let query = supabase.from("listings").select("*");
+
+      if (role === "student") {
+        query = query
+          .eq("status", "active")
+          .eq("visibility", "public");
+      } else {
+        query = query.eq("landlord_id", session?.user?.id);
+      }
+
+      const { data, error } = await query.order("created_at", {
+        ascending: false,
+      });
+
+      if (error) {
+        console.error("Listing fetch error:", error);
+      } else {
+        setListings(data as Listing[]);
+      }
+
+      setListingsLoading(false);
+    };
+
+    fetchListings();
+  }, [role, activeFilter]);
+
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -152,8 +160,8 @@ export default function HomeScreen() {
 
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{item.title}</Text>
-        <Text style={styles.cardSubtitle}>Lease Term: {item.leaseTerm}</Text>
-        <Text style={styles.cardSubtitle}>Rent: ${item.rent} per month</Text>
+        <Text style={styles.cardSubtitle}>Lease Term: {item.lease_term}</Text>
+        <Text style={styles.cardSubtitle}>Rent: ${item.rent}</Text>
 
         <Text style={styles.cardAddress} numberOfLines={2}>
           {item.address}
@@ -161,18 +169,21 @@ export default function HomeScreen() {
 
         <View style={styles.cardMetaRow}>
           <Text style={styles.cardMetaText}>
-            Dist. to Uni: {item.distanceMinutes} min
+            Dist. to Uni: {item.distanceMinutes ?? "—"} min
           </Text>
         </View>
       </View>
     </Pressable>
   );
 
+  // -----------------------------
+  // Loading States
+  // -----------------------------
   if (roleLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator />
-        <Text style={styles.centeredText}>Loading your dashboard...</Text>
+        <ActivityIndicator color="#fff" />
+        <Text style={styles.centeredText}>Checking your role...</Text>
       </View>
     );
   }
@@ -181,8 +192,17 @@ export default function HomeScreen() {
     return (
       <View style={styles.centered}>
         <Text style={styles.centeredText}>
-          Couldn&apos;t determine your role. Please log out and log in again.
+          No role found — please re-login.
         </Text>
+      </View>
+    );
+  }
+
+  if (listingsLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#fff" />
+        <Text style={styles.centeredText}>Loading listings...</Text>
       </View>
     );
   }
@@ -192,9 +212,9 @@ export default function HomeScreen() {
       <View style={styles.contentWrapper}>
         {renderHeader()}
         {renderFilters()}
-  
+
         <FlatList
-          data={MOCK_LISTINGS}
+          data={listings}
           keyExtractor={(item) => item.id}
           renderItem={renderListingCard}
           contentContainerStyle={styles.listContent}
@@ -203,7 +223,6 @@ export default function HomeScreen() {
       </View>
     </View>
   );
-  
 }
 
 const styles = StyleSheet.create({
@@ -307,12 +326,12 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
 
-  cardImageEmoji: {
-    fontSize: 28,
-  },
-
   cardContent: {
     flex: 1,
+  },
+
+  cardImageEmoji: {
+    fontSize: 28,
   },
 
   cardTitle: {
@@ -345,15 +364,13 @@ const styles = StyleSheet.create({
 
   centered: {
     flex: 1,
-    backgroundColor: "#000",
     justifyContent: "center",
     alignItems: "center",
-    padding: 24,
+    backgroundColor: "#000",
   },
 
   centeredText: {
     color: "#fff",
-    textAlign: "center",
-    marginTop: 12,
+    marginTop: 10,
   },
 });
