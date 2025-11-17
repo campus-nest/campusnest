@@ -154,7 +154,7 @@ export default function HomeScreen() {
   };
 
   const renderListingCard = ({ item }: { item: Listing }) => (
-    <Pressable style={styles.card} onPress = {()=> router.push('/listing/${item.id}')}>
+    <Pressable style={styles.card} onPress = {()=> router.push(`/listing/${item.id}`)}>
       <View style={styles.cardImagePlaceholder}>
         <Text style={styles.cardImageEmoji}>🏠</Text>
       </View>

@@ -44,6 +44,7 @@ export default function ListingDetailScreen() {
 
   useEffect(() => {
     if (!id) return;
+    console.log("ID from router:", id);
 
     const fetchData = async () => {
       setLoading(true);
