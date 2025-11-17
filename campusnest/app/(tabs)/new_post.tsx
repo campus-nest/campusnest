@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 
@@ -289,15 +290,14 @@ export default function NewPostScreen() {
   }
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <ScrollView
-        style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
