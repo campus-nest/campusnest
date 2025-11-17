@@ -83,4 +83,20 @@ export default function ListingDetailScreen() {
         fetchData();
     }, [id]);
 
+    const handleContact = () => {
+        Alert.alert("Contact Landlord", "Feature to contact landlord is not implemented yet.");
+    };
+
+    const handleEdit = () => {
+        Alert.alert("Edit Listing", "Feature to edit listing is not implemented yet.");
+    };
+
+    if (loading) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator color="#fff" />
+                <Text style={styles.centeredText}>Loading listing...</Text>
+            </View>
+        );
+    }
 }
