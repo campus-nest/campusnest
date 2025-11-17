@@ -107,7 +107,7 @@ export default function NewPostScreen() {
       setListingLeaseTerm("");
 
       Alert.alert("Success", "Listing created.");
-      router.push("/(tabs)/"); // back to home feed
+      router.push("/(tabs)"); // back to home feed
     } finally {
       setSubmitting(false);
     }
@@ -148,7 +148,7 @@ export default function NewPostScreen() {
       setPostBody("");
 
       Alert.alert("Success", "Post created.");
-      router.push("/(tabs)/"); // back to home
+      router.push("/(tabs)"); // back to home
     } finally {
       setSubmitting(false);
     }
