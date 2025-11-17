@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { supabase } from "@/src/lib/supabaseClient";
+import { useRouter } from "expo-router";
 
 type Role = "student" | "landlord";
 
@@ -34,7 +35,7 @@ export default function HomeScreen() {
   const [listingsLoading, setListingsLoading] = useState(true);
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
-
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -153,7 +154,7 @@ export default function HomeScreen() {
   };
 
   const renderListingCard = ({ item }: { item: Listing }) => (
-    <Pressable style={styles.card}>
+    <Pressable style={styles.card} onPress = {()=> router.push('/listing/${item.id}')}>
       <View style={styles.cardImagePlaceholder}>
         <Text style={styles.cardImageEmoji}>🏠</Text>
       </View>
@@ -176,9 +177,7 @@ export default function HomeScreen() {
     </Pressable>
   );
 
-  // -----------------------------
   // Loading States
-  // -----------------------------
   if (roleLoading) {
     return (
       <View style={styles.centered}>
