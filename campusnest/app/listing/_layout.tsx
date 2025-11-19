@@ -1,11 +1,9 @@
 import { Stack } from "expo-router";
 
-export default function ListingLayout() {
+export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false, // hide the native header for all /listing/* screens
-      }}
-    />
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* your screens */}
+    </Stack>
   );
 }
