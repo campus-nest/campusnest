@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "@/src/lib/supabaseClient";
+import { PageContainer } from "@/components/page-container";
 
 type Role = "student" | "landlord";
 
@@ -115,7 +116,7 @@ export default function ListingDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <PageContainer>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -219,14 +220,13 @@ export default function ListingDetailScreen() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </PageContainer>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#000",
   },
   scroll: {
     flex: 1,
@@ -235,8 +235,6 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 40,
     paddingHorizontal: 16,
-    maxWidth: 480,
-    alignSelf: "center",
   },
   centered: {
     flex: 1,

@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { PageContainer } from "@/components/page-container";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 
@@ -207,20 +208,22 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.contentWrapper}>
-        {renderHeader()}
-        {renderFilters()}
+    <PageContainer>
+      <View style={styles.screen}>
+        <View style={styles.contentWrapper}>
+          {renderHeader()}
+          {renderFilters()}
 
-        <FlatList
-          data={listings}
-          keyExtractor={(item) => item.id}
-          renderItem={renderListingCard}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+          <FlatList
+            data={listings}
+            keyExtractor={(item) => item.id}
+            renderItem={renderListingCard}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
       </View>
-    </View>
+    </PageContainer>
   );
 }
 
@@ -228,14 +231,11 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",
-    alignItems: "center",
     paddingTop: 10,
   },
 
   contentWrapper: {
     width: "100%",
-    maxWidth: 480,
-    alignSelf: "center",
     paddingHorizontal: 16,
   },
 
@@ -301,9 +301,6 @@ const styles = StyleSheet.create({
 
   listContent: {
     width: "100%",
-    maxWidth: 480,
-    alignSelf: "center",
-    paddingHorizontal: 16,
     paddingBottom: 50,
   },
 
