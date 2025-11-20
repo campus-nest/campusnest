@@ -101,7 +101,7 @@ jobs:
   #         path: campusnest/coverage/
 
   build:
-    name: Verify Expo Build (Web)
+    name: Verify Expo Builds (iOS, Android, Web)
     runs-on: ubuntu-latest
     # needs: [lint, test]
     needs: [lint]
@@ -124,5 +124,11 @@ jobs:
           path: campusnest/node_modules
           key: ${{ runner.os }}-modules-${{ hashFiles('campusnest/package-lock.json') }}
 
-      - name: Build app (Expo export)
+      - name: Verify iOS build
+        run: npx expo export --platform ios
+
+      - name: Verify Android build
+        run: npx expo export --platform android
+
+      - name: Verify Web build
         run: npx expo export --platform web
