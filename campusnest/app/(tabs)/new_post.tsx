@@ -111,6 +111,36 @@ export default function NewPostScreen() {
         .map(([key]) => key)
         .join (", ");
 
+      //upload photos to supabase
+      const uploadedUrls: string[] = [];
+
+      for (const uri of photoUris) {
+        const fileExt = uri.split(".").pop(); 
+        const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
+        const filePath = `listings/${session.user.id}/${fileName}`;
+
+        const response = await fetch(uri); 
+        const blob = await response.blob(); 
+
+        const { error: uploadError } = await supabase.storage
+          .from("listing_photos")
+          .upload(filePath, blob);
+
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          Alert.alert("Error", "Could not upload photos.");
+          return;
+        }
+        const { data: publicUrlData } = supabase.storage
+          .from("listing_photos")
+          .getPublicUrl(filePath);
+        
+        if (publicUrlData?.publicUrl) {
+          uploadedUrls.push(publicUrlData.publicUrl);
+        }
+
+      }
+
       const { error } = await supabase.from("listings").insert({
         landlord_id: session.user.id,
         title: listingTitle,
