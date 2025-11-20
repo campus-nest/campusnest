@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
 
 type Role = "student" | "landlord";
@@ -199,6 +200,25 @@ export default function NewPostScreen() {
       setSubmitting(false);
     }
   };
+
+  const pickImages = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        const newUris = result.assets.map((a) => a.uri);
+        setPhotoUris((prev) => [...prev, ...newUris]);
+      }
+    }
+    catch (e){
+      console.error("Image pick error:", e);
+      Alert.alert("Error", "Could not pick images.");
+    }
+  }
 
   // Render pieces
   const renderLandlordForm = () => (
