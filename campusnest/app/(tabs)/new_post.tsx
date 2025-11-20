@@ -39,6 +39,8 @@ export default function NewPostScreen() {
     water: false,
     internet: false,
     heating: false,
+    wifi: false,
+    heat: false,
   });
 
   const [nearbyUniversity, setNearbyUniversity] = useState("");
@@ -103,14 +105,28 @@ export default function NewPostScreen() {
         return;
       }
 
+      const utilitesSelected = Object.entries(utilities) 
+        .filter(([, on])=> on)
+        .map(([key]) => key)
+        .join (", ");
+
       const { error } = await supabase.from("listings").insert({
         landlord_id: session.user.id,
         title: listingTitle,
         address: listingAddress,
         rent: rentNumber,
-        lease_term: listingLeaseTerm,
+        lease_term: leaseTermOption || listingLeaseTerm,
         status: "active",
         visibility: "public",
+
+        utilities : utilitesSelected || null,
+        nearby_university: nearbyUniversity || null,
+        description: description || null,
+        tenant_preferences: tenantPreferences || null,
+        is_furnished: isFurnished,
+        move_in_date: moveInDate ? moveInDate.toISOString(): null,
+        location_area: locationArea || null,
+        photo_urls: photoUris.length > 0 ? photoUris : null,
       });
 
       if (error) {
@@ -124,6 +140,17 @@ export default function NewPostScreen() {
       setListingAddress("");
       setListingRent("");
       setListingLeaseTerm("");
+
+      setUtilities({ electricity: false, water: false, internet: false, heating: false, wifi: false, heat: false });
+      setNearbyUniversity("");
+      setDescription("");
+      setTenantPreferences("");
+      setLeaseTermOption(null);
+      setIsFurnished(null);
+      setMoveInDate(null);
+      setLocationArea("");
+      setPhotoUris([]);
+      setActiveTab("rent");
 
       Alert.alert("Success", "Listing created.");
       router.push("/(tabs)"); // back to home feed
