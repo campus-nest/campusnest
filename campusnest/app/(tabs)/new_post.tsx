@@ -205,69 +205,270 @@ export default function NewPostScreen() {
     <>
       <Text style={styles.title}>Create Listing</Text>
       <Text style={styles.subtitle}>Share a place students can rent</Text>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Title</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Lease Term: 8 Months (Extendable)"
-          placeholderTextColor="#999"
-          value={listingTitle}
-          onChangeText={setListingTitle}
-        />
-      </View>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Address</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="2190 111-B North Avenue NW Edmonton, AB"
-          placeholderTextColor="#999"
-          value={listingAddress}
-          onChangeText={setListingAddress}
-        />
-      </View>
-
-      <View style={styles.inlineRow}>
-        <View style={[styles.field, styles.inlineField]}>
-          <Text style={styles.label}>Rent / month</Text>
+  
+      {/* Card container (light grey background) */}
+      <View style={styles.formCard}>
+  
+        {/* Rent / Price Tabs */}
+        <View style={styles.tabRow}>
+          <Pressable
+            onPress={() => setActiveTab("rent")}
+            style={[styles.tab, activeTab === "rent" && styles.tabActive]}
+          >
+            <Text style={[styles.tabText, activeTab === "rent" && styles.tabTextActive]}>
+              Rent
+            </Text>
+          </Pressable>
+  
+          <Pressable
+            onPress={() => setActiveTab("price")}
+            style={[styles.tab, activeTab === "price" && styles.tabActive]}
+          >
+            <Text style={[styles.tabText, activeTab === "price" && styles.tabTextActive]}>
+              Price
+            </Text>
+          </Pressable>
+        </View>
+  
+        <View style={styles.cardDivider} />
+  
+        {/* UTILITIES */}
+        <Text style={styles.sectionTitle}>Utilities</Text>
+        <View style={styles.utilitiesGrid}>
+          {["electricity", "water", "wifi", "heat"].map((key) => {
+            const typedKey = key as keyof typeof utilities;
+            const label =
+              key === "wifi" ? "Wifi" : key.charAt(0).toUpperCase() + key.slice(1);
+  
+            const selected = utilities[typedKey];
+  
+            return (
+              <Pressable
+                key={key}
+                onPress={() =>
+                  setUtilities((prev) => ({
+                    ...prev,
+                    [typedKey]: !prev[typedKey],
+                  }))
+                }
+                style={[
+                  styles.utilityChip,
+                  selected && styles.utilityChipSelected,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.utilityChipText,
+                    selected && styles.utilityChipTextSelected,
+                  ]}
+                >
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+  
+        {/* NEARBY UNIVERSITY */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Nearby University</Text>
           <TextInput
-            style={styles.input}
-            placeholder="780"
-            placeholderTextColor="#999"
-            keyboardType="numeric"
-            value={listingRent}
-            onChangeText={setListingRent}
+            style={styles.inputLight}
+            placeholder="Select college"
+            placeholderTextColor="#777"
+            value={nearbyUniversity}
+            onChangeText={setNearbyUniversity}
+          />
+  
+          {/* simple suggestion list */}
+          {nearbyUniversity.length === 0 && (
+            <Pressable
+              style={styles.universitySuggestionBox}
+              onPress={() => setNearbyUniversity("University of Alberta")}
+            >
+              <Text style={styles.universitySuggestionText}>
+                University of Alberta
+              </Text>
+            </Pressable>
+          )}
+        </View>
+  
+        {/* DESCRIPTION */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            style={[styles.inputLight, styles.multilineInput]}
+            placeholder="Tell people about your place"
+            placeholderTextColor="#777"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            textAlignVertical="top"
           />
         </View>
-
-        <View style={[styles.field, styles.inlineField]}>
-          <Text style={styles.label}>Lease term</Text>
+  
+        {/* TENANT PREFERENCES */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Tenant Preferences</Text>
           <TextInput
-            style={styles.input}
-            placeholder="8 months"
-            placeholderTextColor="#999"
-            value={listingLeaseTerm}
-            onChangeText={setListingLeaseTerm}
+            style={[styles.inputLight, styles.multilineInput]}
+            placeholder="What do you look for?"
+            placeholderTextColor="#777"
+            value={tenantPreferences}
+            onChangeText={setTenantPreferences}
+            multiline
+            textAlignVertical="top"
           />
         </View>
+  
+        {/* LEASE TERM OPTION (dropdown) */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Lease Term</Text>
+          <Pressable
+            style={styles.dropdown}
+            onPress={() => {
+              const options = ["4 months", "8 months", "12 months"];
+              const idx = options.indexOf(leaseTermOption || "");
+              const next = options[(idx + 1) % options.length];
+              setLeaseTermOption(next);
+              setListingLeaseTerm(next);
+            }}
+          >
+            <Text style={styles.dropdownText}>
+              {leaseTermOption || "Select lease term"}
+            </Text>
+            <Text style={styles.dropdownChevron}>⌄</Text>
+          </Pressable>
+        </View>
+  
+        {/* FURNISHED / UNFURNISHED */}
+        <View style={styles.toggleRow}>
+          <Pressable
+            style={[
+              styles.toggleChip,
+              isFurnished === true && styles.toggleChipActive,
+            ]}
+            onPress={() => setIsFurnished(true)}
+          >
+            <Text
+              style={[
+                styles.toggleChipText,
+                isFurnished === true && styles.toggleChipTextActive,
+              ]}
+            >
+              Furnished
+            </Text>
+          </Pressable>
+  
+          <Pressable
+            style={[
+              styles.toggleChip,
+              isFurnished === false && styles.toggleChipActive,
+            ]}
+            onPress={() => setIsFurnished(false)}
+          >
+            <Text
+              style={[
+                styles.toggleChipText,
+                isFurnished === false && styles.toggleChipTextActive,
+              ]}
+            >
+              Unfurnished
+            </Text>
+          </Pressable>
+        </View>
+  
+        {/* MOVE IN DATE */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Move In Date</Text>
+          <Pressable
+            style={styles.dropdown}
+            onPress={async () => {
+              const { DateTimePickerAndroid } = await import(
+                "@react-native-community/datetimepicker"
+              );
+              DateTimePickerAndroid.open({
+                value: moveInDate || new Date(),
+                mode: "date",
+                onChange: (_event: any, selectedDate?: Date) => {
+                  if (selectedDate) setMoveInDate(selectedDate);
+                },
+              });
+            }}
+          >
+            <Text style={styles.dropdownText}>
+              {moveInDate
+                ? moveInDate.toLocaleDateString()
+                : "Select move in date"}
+            </Text>
+            <Text style={styles.dropdownChevron}>📅</Text>
+          </Pressable>
+        </View>
+  
+        {/* EXISTING FIELDS (Rent + Lease term text) */}
+        <View style={styles.inlineRow}>
+          <View style={[styles.field, styles.inlineField]}>
+            <Text style={styles.label}>Rent / month</Text>
+            <TextInput
+              style={styles.inputLight}
+              placeholder="780"
+              placeholderTextColor="#777"
+              keyboardType="numeric"
+              value={listingRent}
+              onChangeText={setListingRent}
+            />
+          </View>
+  
+          <View style={[styles.field, styles.inlineField]}>
+            <Text style={styles.label}>Lease term text (display)</Text>
+            <TextInput
+              style={styles.inputLight}
+              placeholder="8 months"
+              placeholderTextColor="#777"
+              value={listingLeaseTerm}
+              onChangeText={setListingLeaseTerm}
+            />
+          </View>
+        </View>
+  
+        {/* LOCATION */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Location</Text>
+          <TextInput
+            style={styles.inputLight}
+            placeholder="Neighborhood / Area"
+            placeholderTextColor="#777"
+            value={locationArea}
+            onChangeText={setLocationArea}
+          />
+        </View>
+  
+        {/* UPLOAD PHOTOS (stub only) */}
+        <Pressable
+          style={styles.uploadButton}
+          onPress={() => {
+            Alert.alert("Upload photos", "We'll wire this in the next step.");
+          }}
+        >
+          <Text style={styles.uploadButtonText}>Upload photos</Text>
+        </Pressable>
       </View>
-
-      {/* Future: utilities, description, move-in date, map, photos */}
-
+  
+      {/* Publish button */}
       <Pressable
         style={[styles.primaryButton, submitting && styles.primaryButtonDisabled]}
         onPress={handleCreateListing}
         disabled={submitting}
       >
         {submitting ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color="#000" />
         ) : (
           <Text style={styles.primaryButtonText}>Publish listing</Text>
         )}
       </Pressable>
     </>
   );
+  
 
   const renderStudentForm = () => (
     <>
@@ -424,4 +625,166 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
   },
+  formCard: {
+    backgroundColor: "#f2f2f2",
+    borderRadius: 24,
+    padding: 16,
+    marginTop: 8,
+  },
+
+  tabRow: {
+    flexDirection: "row",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 999,
+    padding: 4,
+    marginBottom: 12,
+  },
+  tab: {
+    flex: 1,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+  },
+  tabActive: {
+    backgroundColor: "#fff",
+  },
+  tabText: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "500",
+  },
+  tabTextActive: {
+    color: "#000",
+  },
+
+  cardDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#d0d0d0",
+    marginBottom: 12,
+  },
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+    color: "#111",
+  },
+
+  utilitiesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 16,
+  },
+
+  utilityChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#bbb",
+    backgroundColor: "#fff",
+  },
+  utilityChipSelected: {
+    backgroundColor: "#000",
+    borderColor: "#000",
+  },
+  utilityChipText: {
+    fontSize: 12,
+    color: "#333",
+  },
+  utilityChipTextSelected: {
+    color: "#fff",
+  },
+
+  inputLight: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: "#000",
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  universitySuggestionBox: {
+    marginTop: 6,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  universitySuggestionText: {
+    fontSize: 13,
+    color: "#333",
+  },
+
+  dropdown: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 4,
+  },
+  dropdownText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  dropdownChevron: {
+    fontSize: 14,
+    color: "#555",
+  },
+
+  toggleRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 10,
+    marginBottom: 16,
+  },
+  toggleChip: {
+    flex: 1,
+    borderRadius: 999,
+    paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#e0e0e0",
+  },
+  toggleChipActive: {
+    backgroundColor: "#000",
+  },
+  toggleChipText: {
+    fontSize: 13,
+    color: "#333",
+    fontWeight: "500",
+  },
+  toggleChipTextActive: {
+    color: "#fff",
+  },
+
+  uploadButton: {
+    marginTop: 12,
+    borderRadius: 999,
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#000",
+    backgroundColor: "#000",
+  },
+  uploadButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+  },
+
 });
