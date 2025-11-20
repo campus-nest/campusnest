@@ -54,7 +54,7 @@ export default function SignUpScreen() {
           emailRedirectTo: "https://campusnest.uofacs.ca/",
           data: {
             full_name: fullName,
-            role: role, 
+            role: role,
           },
         },
       });
@@ -67,14 +67,13 @@ export default function SignUpScreen() {
       Alert.alert(
         "Success",
         "Account created! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.replace("/verify-email") }]
+        [{ text: "OK", onPress: () => router.replace("/verify-email") }],
       );
-
     } catch (error) {
       console.error("Signup error:", error);
       Alert.alert(
         "Error",
-        error instanceof Error ? error.message : "An unexpected error occurred"
+        error instanceof Error ? error.message : "An unexpected error occurred",
       );
     } finally {
       setLoading(false);
@@ -153,11 +152,11 @@ export default function SignUpScreen() {
               </Text>
             </Pressable>
 
-          {Platform.OS === "android" && (
-            <Pressable onPress={() => router.back()}>
-              <Text style={styles.backText}>Back to Landing</Text>
-            </Pressable>
-          )}
+            {Platform.OS === "android" && (
+              <Pressable onPress={() => router.back()}>
+                <Text style={styles.backText}>Back to Landing</Text>
+              </Pressable>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -240,4 +239,3 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
-

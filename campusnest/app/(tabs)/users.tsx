@@ -3,8 +3,8 @@ import { StyleSheet, Text, View } from "react-native";
 export default function UsersScreen() {
   return (
     <View style={styles.container}>
-        <Text style={styles.text}>Users Screen</Text>
-        <Text style={styles.subtext}>Browse and connect with users here</Text>
+      <Text style={styles.text}>Users Screen</Text>
+      <Text style={styles.subtext}>Browse and connect with users here</Text>
     </View>
   );
 }

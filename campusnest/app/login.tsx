@@ -57,12 +57,11 @@ export default function LoginScreen() {
 
       const userId = session.user.id;
 
-      const { data: existingProfile, error: profileCheckError } =
-        await supabase
-          .from("profiles")
-          .select("id")
-          .eq("id", userId)
-          .maybeSingle();
+      const { data: existingProfile, error: profileCheckError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle();
 
       if (profileCheckError) {
         Alert.alert("Error", "Failed to check user profile.");
@@ -77,19 +76,17 @@ export default function LoginScreen() {
         if (!fullName || !role) {
           Alert.alert(
             "Error",
-            "Missing required profile information. Please complete signup again."
+            "Missing required profile information. Please complete signup again.",
           );
           setLoading(false);
           return;
         }
 
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert({
-            id: userId,
-            full_name: fullName,
-            role: role,
-          });
+        const { error: insertError } = await supabase.from("profiles").insert({
+          id: userId,
+          full_name: fullName,
+          role: role,
+        });
 
         if (insertError) {
           Alert.alert("Error", "Failed to create user profile.");
@@ -117,7 +114,6 @@ export default function LoginScreen() {
         setLoading(false);
         return;
       }
-
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
