@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { StyleSheet, View, ViewProps } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface PageContainerProps extends ViewProps {
   children: ReactNode;
@@ -11,23 +12,23 @@ export function PageContainer({
   ...props
 }: PageContainerProps) {
   return (
-    <View style={styles.outerContainer}>
-      <View style={[styles.innerContainer, style]} {...props}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={[styles.container, style]} {...props}>
         {children}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  outerContainer: {
+  safeArea: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "#000",
   },
-  innerContainer: {
-    width: "70%",
-    maxWidth: 1000,
+  container: {
     flex: 1,
+    width: "100%",           // full width
+    paddingHorizontal: 20,   // consistent mobile padding
+    paddingTop: 10,
   },
 });
