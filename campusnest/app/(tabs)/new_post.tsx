@@ -492,6 +492,60 @@ export default function NewPostScreen() {
             onChangeText={setLocationArea}
           />
         </View>
+
+        {/* PHOTO UPLOAD test gpt */}    
+        <Pressable
+          style={[styles.uploadButton, { backgroundColor: "#444", marginBottom: 12 }]}
+          onPress={async () => {
+            try {
+              const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsMultipleSelection: false,
+                quality: 0.8,
+              });
+
+              if (result.canceled) {
+                Alert.alert("Cancelled", "Image picking cancelled.");
+                return;
+              }
+
+              const asset = result.assets[0];
+              const uri = asset.uri;
+
+              // Convert to blob
+              const response = await fetch(uri);
+              const blob = await response.blob();
+
+              const fileExt = uri.split(".").pop() || "jpg";
+              const fileName = `${Date.now()}.${fileExt}`;
+              const filePath = `test_uploads/${fileName}`;
+
+              const { data, error } = await supabase.storage
+                .from("listing_photos")
+                .upload(filePath, blob);
+
+              if (error) {
+                console.error(error);
+                Alert.alert("Upload failed", error.message);
+                return;
+              }
+
+              const { data: urlData } = supabase.storage
+                .from("listing_photos")
+                .getPublicUrl(filePath);
+
+              Alert.alert("Success!", `Uploaded:\n${urlData.publicUrl}`);
+
+              console.log("PUBLIC URL:", urlData.publicUrl);
+            } catch (err) {
+              console.error(err);
+              Alert.alert("Error", "Something went wrong.");
+            }
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "600" }}>🧪 Test Upload</Text>
+        </Pressable>
+
   
         {/* UPLOAD PHOTOS (stub only) */}
         <Pressable
