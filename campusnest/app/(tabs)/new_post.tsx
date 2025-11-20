@@ -34,10 +34,27 @@ export default function NewPostScreen() {
   const [listingRent, setListingRent] = useState("");
   const [listingLeaseTerm, setListingLeaseTerm] = useState("");
 
+  const [utilities, setUtilities] = useState({
+    electricity: false,
+    water: false,
+    internet: false,
+    heating: false,
+  });
+
+  const [nearbyUniversity, setNearbyUniversity] = useState("");
+  const [description, setDescription] = useState("");
+  const [tenantPreferences, setTenantPreferences] = useState("");
+  const [leaseTermOption, setLeaseTermOption] = useState<string | null>(null);
+  const [isFurnished, setIsFurnished] = useState<boolean | null>(null);
+  const [moveInDate, setMoveInDate] = useState<Date | null>(null);
+  const [locationArea, setLocationArea] = useState("");
+  const [photoUris, setPhotoUris] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<"rent" | "price" > ("rent");
+
   // student post form state (simplified)
   const [postTitle, setPostTitle] = useState("");
   const [postBody, setPostBody] = useState("");
-
+  
   // Fetch role
   useEffect(() => {
     const loadRole = async () => {
