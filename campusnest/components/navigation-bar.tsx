@@ -4,7 +4,9 @@ import SearchIcon from "@/assets/images/nav_bar/Search.svg";
 import UserIcon from "@/assets/images/nav_bar/User.svg";
 import UsersIcon from "@/assets/images/nav_bar/Users.svg";
 import { usePathname, useRouter } from "expo-router";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
 
 export function NavigationBar() {
   const router = useRouter();
@@ -30,121 +32,71 @@ export function NavigationBar() {
   if (Platform.OS === "web") {
     // Web - Top navigation bar
     return (
-      <View style={styles.webContainer}>
+      <View className="h-[60px] bg-black flex-row justify-between items-center px-5 border-b border-[#333]">
         <Pressable onPress={() => router.push("/landing")}>
-          <Text style={styles.logo}>🏠 CampusNest</Text>
+          <Text className="text-white text-xl font-bold">🏠 CampusNest</Text>
         </Pressable>
 
-        <View style={styles.webNav}>
+        <View className="flex-row gap-5">
           {isAuthenticated ? (
             <>
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="Home"
+              <Button
+                variant={isActive("/(tabs)") ? "secondary" : "ghost"}
                 onPress={() => router.push("/(tabs)")}
-                style={[
-                  styles.webNavItem,
-                  isActive("/(tabs)") && styles.webNavItemActive,
-                ]}
               >
-                <Text
-                  style={[
-                    styles.webNavLink,
-                    isActive("/(tabs)") && styles.webNavLinkActive,
-                  ]}
-                >
+                <Text className={isActive("/(tabs)") ? "font-bold" : ""}>
                   Home
                 </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="Search"
+              </Button>
+              <Button
+                variant={isActive("/explore") ? "secondary" : "ghost"}
                 onPress={() => router.push("/(tabs)/explore")}
-                style={[
-                  styles.webNavItem,
-                  isActive("/explore") && styles.webNavItemActive,
-                ]}
               >
-                <Text
-                  style={[
-                    styles.webNavLink,
-                    isActive("/explore") && styles.webNavLinkActive,
-                  ]}
-                >
+                <Text className={isActive("/explore") ? "font-bold" : ""}>
                   Search
                 </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="New Post"
+              </Button>
+              <Button
+                variant={isActive("/new_post") ? "secondary" : "ghost"}
                 onPress={() => router.push("/(tabs)/new_post")}
-                style={[
-                  styles.webNavItem,
-                  isActive("/new_post") && styles.webNavItemActive,
-                ]}
               >
-                <Text
-                  style={[
-                    styles.webNavLink,
-                    isActive("/new_post") && styles.webNavLinkActive,
-                  ]}
-                >
+                <Text className={isActive("/new_post") ? "font-bold" : ""}>
                   New Post
                 </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="Users"
+              </Button>
+              <Button
+                variant={isActive("/users") ? "secondary" : "ghost"}
                 onPress={() => router.push("/(tabs)/users")}
-                style={[
-                  styles.webNavItem,
-                  isActive("/users") && styles.webNavItemActive,
-                ]}
               >
-                <Text
-                  style={[
-                    styles.webNavLink,
-                    isActive("/users") && styles.webNavLinkActive,
-                  ]}
-                >
+                <Text className={isActive("/users") ? "font-bold" : ""}>
                   Users
                 </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="Profile"
+              </Button>
+              <Button
+                variant={isActive("/profile") ? "secondary" : "ghost"}
                 onPress={() => router.push("/(tabs)/profile")}
-                style={[
-                  styles.webNavItem,
-                  isActive("/profile") && styles.webNavItemActive,
-                ]}
               >
-                <Text
-                  style={[
-                    styles.webNavLink,
-                    isActive("/profile") && styles.webNavLinkActive,
-                  ]}
-                >
+                <Text className={isActive("/profile") ? "font-bold" : ""}>
                   Profile
                 </Text>
-              </Pressable>
+              </Button>
             </>
           ) : (
             <>
               {pathname !== "/login" && pathname !== "/signup" && (
                 <>
-                  <Pressable
+                  <Button
+                    variant="ghost"
                     onPress={() => router.push("/login")}
-                    style={styles.webNavItem}
                   >
-                    <Text style={styles.webNavLink}>Login</Text>
-                  </Pressable>
-                  <Pressable
+                    <Text>Login</Text>
+                  </Button>
+                  <Button
+                    variant="ghost"
                     onPress={() => router.push("/signup")}
-                    style={styles.webNavItem}
                   >
-                    <Text style={styles.webNavLink}>Sign Up</Text>
-                  </Pressable>
+                    <Text>Sign Up</Text>
+                  </Button>
                 </>
               )}
             </>
@@ -160,11 +112,11 @@ export function NavigationBar() {
   }
 
   return (
-    <View style={styles.mobileContainer}>
+    <View className="absolute bottom-5 left-5 right-5 h-[70px] bg-white flex-row justify-around items-center rounded-[35px] shadow-lg">
       <Pressable
         accessibilityRole="link"
         accessibilityLabel="Home"
-        style={styles.navItem}
+        className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)")}
       >
         <HomeIcon
@@ -177,7 +129,7 @@ export function NavigationBar() {
       <Pressable
         accessibilityRole="link"
         accessibilityLabel="Search"
-        style={styles.navItem}
+        className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)/explore")}
       >
         <SearchIcon
@@ -190,7 +142,7 @@ export function NavigationBar() {
       <Pressable
         accessibilityRole="link"
         accessibilityLabel="New Post"
-        style={styles.navItem}
+        className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)/new_post")}
       >
         <PlusIcon
@@ -203,7 +155,7 @@ export function NavigationBar() {
       <Pressable
         accessibilityRole="link"
         accessibilityLabel="Users"
-        style={styles.navItem}
+        className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)/users")}
       >
         <UsersIcon
@@ -216,7 +168,7 @@ export function NavigationBar() {
       <Pressable
         accessibilityRole="link"
         accessibilityLabel="Profile"
-        style={styles.navItem}
+        className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)/profile")}
       >
         <UserIcon
@@ -228,70 +180,3 @@ export function NavigationBar() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  // Web styles
-  webContainer: {
-    height: 60,
-    backgroundColor: "#000",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  logo: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  webNav: {
-    flexDirection: "row",
-    gap: 20,
-  },
-  webNavItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-  },
-  webNavItemActive: {
-    backgroundColor: "#333",
-  },
-  webNavLink: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  webNavLinkActive: {
-    fontWeight: "700",
-    textDecorationLine: "underline",
-  },
-
-  // Mobile styles
-  mobileContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-    height: 70,
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderRadius: 35,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  navItem: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 10,
-  },
-});

@@ -3,16 +3,11 @@ import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  Platform,
-} from "react-native";
+import { Alert, ScrollView, View, Platform } from "react-native";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -81,81 +76,91 @@ export default function SignUpScreen() {
   };
 
   return (
-    <PageContainer style={styles.outerContainer}>
+    <PageContainer className="bg-black">
       <ScrollView
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1 bg-black"
+        contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
         <StatusBar style="light" />
 
-        <View style={styles.content}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join CampusNest today</Text>
+        <View className="flex-1 justify-center px-8 py-[60px]">
+          <Text className="text-white text-[32px] font-semibold mb-2 text-center">
+            Create Account
+          </Text>
+          <Text className="text-white text-base font-normal mb-10 text-center opacity-80">
+            Join CampusNest today
+          </Text>
 
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
+          <View className="gap-5">
+            <View className="gap-2">
+              <Label nativeID="fullName" className="text-white text-sm font-medium">
+                Full Name
+              </Label>
+              <Input
                 placeholder="Enter your full name"
-                placeholderTextColor="#666"
                 value={fullName}
                 onChangeText={setFullName}
+                aria-labelledby="fullName"
+                className="bg-[#1a1a1a] border-[#333]"
               />
             </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
+            <View className="gap-2">
+              <Label nativeID="email" className="text-white text-sm font-medium">
+                Email
+              </Label>
+              <Input
                 placeholder="Enter your email"
-                placeholderTextColor="#666"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
+                aria-labelledby="email"
+                className="bg-[#1a1a1a] border-[#333]"
               />
             </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
+            <View className="gap-2">
+              <Label nativeID="password" className="text-white text-sm font-medium">
+                Password
+              </Label>
+              <Input
                 placeholder="Create a password"
-                placeholderTextColor="#666"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                aria-labelledby="password"
+                className="bg-[#1a1a1a] border-[#333]"
               />
             </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirm Password</Text>
-              <TextInput
-                style={styles.input}
+            <View className="gap-2">
+              <Label nativeID="confirmPassword" className="text-white text-sm font-medium">
+                Confirm Password
+              </Label>
+              <Input
                 placeholder="Confirm your password"
-                placeholderTextColor="#666"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
+                aria-labelledby="confirmPassword"
+                className="bg-[#1a1a1a] border-[#333]"
               />
             </View>
 
-            <Pressable
-              style={[styles.button, loading && styles.buttonDisabled]}
+            <Button
               onPress={handleSignUp}
               disabled={loading}
+              className="rounded-full p-4 mt-2"
             >
-              <Text style={styles.buttonText}>
-                {loading ? "Creating Account..." : "Sign Up"}
-              </Text>
-            </Pressable>
+              <Text>{loading ? "Creating Account..." : "Sign Up"}</Text>
+            </Button>
 
             {Platform.OS === "android" && (
-              <Pressable onPress={() => router.back()}>
-                <Text style={styles.backText}>Back to Landing</Text>
-              </Pressable>
+              <Button variant="ghost" onPress={() => router.back()}>
+                <Text className="text-white">Back to Landing</Text>
+              </Button>
             )}
           </View>
         </View>
@@ -163,79 +168,3 @@ export default function SignUpScreen() {
     </PageContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  outerContainer: {
-    backgroundColor: "#000",
-  },
-  scrollContainer: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 30,
-    paddingVertical: 60,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "400",
-    marginBottom: 40,
-    textAlign: "center",
-    opacity: 0.8,
-  },
-  form: {
-    gap: 20,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    color: "#fff",
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  button: {
-    backgroundColor: "#fff",
-    borderRadius: 100,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  backText: {
-    color: "#fff",
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 10,
-    opacity: 0.7,
-  },
-});

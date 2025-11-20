@@ -1,28 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "@/components/ui/text";
 
 export default function ExploreScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Explore Screen</Text>
-      <Text style={styles.subtext}>Find your perfect home</Text>
+    <View className="flex-1 justify-center items-center bg-white">
+      <Text className="text-2xl font-bold mb-2">Explore Screen</Text>
+      <Text className="text-base text-[#666]">Find your perfect home</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  subtext: {
-    fontSize: 16,
-    color: "#666",
-  },
-});

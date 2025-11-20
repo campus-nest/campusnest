@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
-import { StyleSheet, View, ViewProps } from "react-native";
+import { View, ViewProps } from "react-native";
+import { cn } from "@/lib/utils";
 
 interface PageContainerProps extends ViewProps {
   children: ReactNode;
@@ -7,27 +8,17 @@ interface PageContainerProps extends ViewProps {
 
 export function PageContainer({
   children,
-  style,
+  className,
   ...props
 }: PageContainerProps) {
   return (
-    <View style={styles.outerContainer}>
-      <View style={[styles.innerContainer, style]} {...props}>
+    <View className="flex-1 justify-center items-center">
+      <View 
+        className={cn("w-[70%] max-w-[1000px] flex-1", className)} 
+        {...props}
+      >
         {children}
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  innerContainer: {
-    width: "70%",
-    maxWidth: 1000,
-    flex: 1,
-  },
-});

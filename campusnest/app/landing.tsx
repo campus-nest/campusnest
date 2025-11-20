@@ -1,144 +1,59 @@
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 import LandingTopHome from "../assets/images/landing_page_top_home.svg";
 import LandingPageLogo from "../assets/images/landing_page_bottom_logo.svg";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 
 export default function LandingScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.outerContainer}>
+    <View className="flex-1 bg-black justify-center items-center">
       <StatusBar style="light" />
-      <View style={styles.container}>
+      <View className="w-[70%] max-w-[500px] h-full bg-black items-center relative">
         {/* Logo */}
-        <View style={styles.logoContainer}>
+        <View className="absolute top-44 self-center">
           <LandingTopHome width={96} height={96} fill="none" />
         </View>
 
         {/* Title */}
-        <Text style={styles.title}>CampusNest</Text>
+        <Text className="absolute top-[295px] text-white text-[32px] font-medium text-center self-center">
+          CampusNest
+        </Text>
 
         {/* Subtitle */}
-        <Text style={styles.subtitle}>Let&apos;s get Started!</Text>
+        <Text className="absolute top-[367px] text-white text-sm font-medium italic text-center self-center">
+          Let's get Started!
+        </Text>
 
         {/* Login Button */}
-        <Pressable
-          style={styles.loginBtn}
+        <Button
           onPress={() => router.push("/login")}
+          className="absolute top-[408px] w-[152px] h-12 rounded-full self-center"
         >
-          <Text style={styles.btnText}>Login</Text>
-        </Pressable>
+          <Text>Login</Text>
+        </Button>
 
         {/* Sign Up Section */}
-        <Text style={styles.signUpPrompt}>Don&apos;t have an account?</Text>
+        <Text className="absolute top-[477px] text-white text-sm font-medium italic text-center self-center">
+          Don't have an account?
+        </Text>
 
-        <Pressable
-          style={styles.signUpBtn}
+        {/* Sign Up Button */}
+        <Button
           onPress={() => router.push("/pre-signup")}
+          className="absolute top-[513px] w-[152px] h-[51px] rounded-full self-center"
         >
-          <Text style={styles.btnText}>Sign Up</Text>
-        </Pressable>
+          <Text>Sign Up</Text>
+        </Button>
 
         {/* House Image (SVG) */}
-        <View style={styles.houseImageContainer}>
+        <View className="absolute bottom-6 w-[92%] max-w-[363px] h-[173px] self-center">
           <LandingPageLogo width="100%" height="100%" />
         </View>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-    backgroundColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  container: {
-    width: "70%",
-    maxWidth: 500,
-    height: "100%",
-    backgroundColor: "#000",
-    alignItems: "center",
-    position: "relative",
-  },
-  logoContainer: {
-    position: "absolute",
-    top: 176,
-    alignSelf: "center",
-  },
-  title: {
-    position: "absolute",
-    top: 295,
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "500",
-    textAlign: "center",
-    letterSpacing: 0.1,
-    alignSelf: "center",
-  },
-  subtitle: {
-    position: "absolute",
-    top: 367,
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-    fontStyle: "italic",
-    textAlign: "center",
-    letterSpacing: 0.1,
-    alignSelf: "center",
-  },
-  loginBtn: {
-    position: "absolute",
-    top: 408,
-    width: 152,
-    height: 48,
-    backgroundColor: "#fff",
-    borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-  },
-  signUpPrompt: {
-    position: "absolute",
-    top: 477,
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-    fontStyle: "italic",
-    textAlign: "center",
-    letterSpacing: 0.1,
-    alignSelf: "center",
-  },
-  signUpBtn: {
-    position: "absolute",
-    top: 513,
-    width: 152,
-    height: 51,
-    backgroundColor: "#fff",
-    borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-  },
-  btnText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "500",
-    letterSpacing: 0.1,
-  },
-  houseImageContainer: {
-    position: "absolute",
-    bottom: 25,
-    width: "92%",
-    maxWidth: 363,
-    height: 173,
-    alignSelf: "center",
-  },
-  houseImage: {
-    width: "100%",
-    height: "100%",
-  },
-});
