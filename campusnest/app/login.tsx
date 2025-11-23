@@ -158,6 +158,12 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry
             />
+            <Pressable
+              onPress={() => router.push("/forgot-password")}
+              style={styles.forgotPasswordButton}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </Pressable>
           </View>
 
           <Pressable
@@ -247,5 +253,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 10,
     opacity: 0.7,
+  },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+  },
+  forgotPasswordText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+    opacity: 0.8,
   },
 });
