@@ -52,12 +52,12 @@ export default function NewPostScreen() {
   const [moveInDate, setMoveInDate] = useState<Date | null>(null);
   const [locationArea, setLocationArea] = useState("");
   const [photoUris, setPhotoUris] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<"rent" | "price" > ("rent");
+  const [activeTab, setActiveTab] = useState<"rent" | "price">("rent");
 
   // student post form state (simplified)
   const [postTitle, setPostTitle] = useState("");
   const [postBody, setPostBody] = useState("");
-  
+
   // Fetch role
   useEffect(() => {
     const loadRole = async () => {
@@ -106,21 +106,21 @@ export default function NewPostScreen() {
         return;
       }
 
-      const utilitesSelected = Object.entries(utilities) 
-        .filter(([, on])=> on)
+      const utilitesSelected = Object.entries(utilities)
+        .filter(([, on]) => on)
         .map(([key]) => key)
-        .join (", ");
+        .join(", ");
 
       //upload photos to supabase
       const uploadedUrls: string[] = [];
 
       for (const uri of photoUris) {
-        const fileExt = uri.split(".").pop(); 
+        const fileExt = uri.split(".").pop();
         const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
         const filePath = `listings/${session.user.id}/${fileName}`;
 
-        const response = await fetch(uri); 
-        const blob = await response.blob(); 
+        const response = await fetch(uri);
+        const blob = await response.blob();
 
         const { error: uploadError } = await supabase.storage
           .from("listing_photos")
@@ -134,7 +134,7 @@ export default function NewPostScreen() {
         const { data: publicUrlData } = supabase.storage
           .from("listing_photos")
           .getPublicUrl(filePath);
-        
+
         if (publicUrlData?.publicUrl) {
           uploadedUrls.push(publicUrlData.publicUrl);
         }
@@ -150,12 +150,12 @@ export default function NewPostScreen() {
         status: "active",
         visibility: "public",
 
-        utilities : utilitesSelected || null,
+        utilities: utilitesSelected || null,
         nearby_university: nearbyUniversity || null,
         description: description || null,
         tenant_preferences: tenantPreferences || null,
         is_furnished: isFurnished,
-        move_in_date: moveInDate ? moveInDate.toISOString(): null,
+        move_in_date: moveInDate ? moveInDate.toISOString() : null,
         location_area: locationArea || null,
         photo_urls: photoUris.length > 0 ? photoUris : null,
       });
@@ -244,7 +244,7 @@ export default function NewPostScreen() {
         setPhotoUris((prev) => [...prev, ...newUris]);
       }
     }
-    catch (e){
+    catch (e) {
       console.error("Image pick error:", e);
       Alert.alert("Error", "Could not pick images.");
     }
@@ -255,10 +255,10 @@ export default function NewPostScreen() {
     <>
       <Text style={styles.title}>Create Listing</Text>
       <Text style={styles.subtitle}>Share a place students can rent</Text>
-  
+
       {/* Card container (light grey background) */}
       <View style={styles.formCard}>
-  
+
         {/* Rent / Price Tabs */}
         <View style={styles.tabRow}>
           <Pressable
@@ -269,7 +269,7 @@ export default function NewPostScreen() {
               Rent
             </Text>
           </Pressable>
-  
+
           <Pressable
             onPress={() => setActiveTab("price")}
             style={[styles.tab, activeTab === "price" && styles.tabActive]}
@@ -279,9 +279,9 @@ export default function NewPostScreen() {
             </Text>
           </Pressable>
         </View>
-  
+
         <View style={styles.cardDivider} />
-  
+
         {/* UTILITIES */}
         <Text style={styles.sectionTitle}>Utilities</Text>
         <View style={styles.utilitiesGrid}>
@@ -289,9 +289,9 @@ export default function NewPostScreen() {
             const typedKey = key as keyof typeof utilities;
             const label =
               key === "wifi" ? "Wifi" : key.charAt(0).toUpperCase() + key.slice(1);
-  
+
             const selected = utilities[typedKey];
-  
+
             return (
               <Pressable
                 key={key}
@@ -318,7 +318,7 @@ export default function NewPostScreen() {
             );
           })}
         </View>
-  
+
         {/* NEARBY UNIVERSITY */}
         <View style={styles.field}>
           <Text style={styles.label}>Nearby University</Text>
@@ -329,7 +329,7 @@ export default function NewPostScreen() {
             value={nearbyUniversity}
             onChangeText={setNearbyUniversity}
           />
-  
+
           {/* simple suggestion list */}
           {nearbyUniversity.length === 0 && (
             <Pressable
@@ -342,7 +342,7 @@ export default function NewPostScreen() {
             </Pressable>
           )}
         </View>
-  
+
         {/* DESCRIPTION */}
         <View style={styles.field}>
           <Text style={styles.label}>Description</Text>
@@ -356,7 +356,7 @@ export default function NewPostScreen() {
             textAlignVertical="top"
           />
         </View>
-  
+
         {/* TENANT PREFERENCES */}
         <View style={styles.field}>
           <Text style={styles.label}>Tenant Preferences</Text>
@@ -370,7 +370,7 @@ export default function NewPostScreen() {
             textAlignVertical="top"
           />
         </View>
-  
+
         {/* LEASE TERM OPTION (dropdown) */}
         <View style={styles.field}>
           <Text style={styles.label}>Lease Term</Text>
@@ -390,7 +390,7 @@ export default function NewPostScreen() {
             <Text style={styles.dropdownChevron}>⌄</Text>
           </Pressable>
         </View>
-  
+
         {/* FURNISHED / UNFURNISHED */}
         <View style={styles.toggleRow}>
           <Pressable
@@ -409,7 +409,7 @@ export default function NewPostScreen() {
               Furnished
             </Text>
           </Pressable>
-  
+
           <Pressable
             style={[
               styles.toggleChip,
@@ -427,7 +427,7 @@ export default function NewPostScreen() {
             </Text>
           </Pressable>
         </View>
-  
+
         {/* MOVE IN DATE */}
         <View style={styles.field}>
           <Text style={styles.label}>Move In Date</Text>
@@ -454,7 +454,7 @@ export default function NewPostScreen() {
             <Text style={styles.dropdownChevron}>📅</Text>
           </Pressable>
         </View>
-  
+
         {/* EXISTING FIELDS (Rent + Lease term text) */}
         <View style={styles.inlineRow}>
           <View style={[styles.field, styles.inlineField]}>
@@ -468,7 +468,7 @@ export default function NewPostScreen() {
               onChangeText={setListingRent}
             />
           </View>
-  
+
           <View style={[styles.field, styles.inlineField]}>
             <Text style={styles.label}>Lease term text (display)</Text>
             <TextInput
@@ -480,7 +480,7 @@ export default function NewPostScreen() {
             />
           </View>
         </View>
-  
+
         {/* LOCATION */}
         <View style={styles.field}>
           <Text style={styles.label}>Location</Text>
@@ -493,7 +493,7 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* PHOTO UPLOAD test gpt */}    
+        {/* PHOTO UPLOAD test gpt */}
         <Pressable
           style={[styles.uploadButton, { backgroundColor: "#444", marginBottom: 12 }]}
           onPress={async () => {
@@ -546,7 +546,7 @@ export default function NewPostScreen() {
           <Text style={{ color: "white", fontWeight: "600" }}>🧪 Test Upload</Text>
         </Pressable>
 
-  
+
         {/* UPLOAD PHOTOS (stub only) */}
         <Pressable
           style={styles.uploadButton}
@@ -557,7 +557,7 @@ export default function NewPostScreen() {
           <Text style={styles.uploadButtonText}>Upload photos</Text>
         </Pressable>
       </View>
-  
+
       {/* Publish button */}
       <Pressable
         style={[styles.primaryButton, submitting && styles.primaryButtonDisabled]}
@@ -572,7 +572,7 @@ export default function NewPostScreen() {
       </Pressable>
     </>
   );
-  
+
 
   const renderStudentForm = () => (
     <>
@@ -647,7 +647,7 @@ export default function NewPostScreen() {
       >
         {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
       </ScrollView>
-      </PageContainer>
+    </PageContainer>
   );
 }
 
