@@ -9,8 +9,7 @@ import {
     StyleSheet,
     Text,
     TextInput,
-    View,
-    Platform,
+    View
 } from "react-native";
 
 export default function ForgotPasswordScreen() {
