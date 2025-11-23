@@ -82,7 +82,7 @@ export default function EditProfileScreen() {
     async function pickImage() {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ImagePicker.MediaType,
                 allowsEditing: true,
                 aspect: [1, 1],
                 quality: 0.5,
@@ -100,15 +100,18 @@ export default function EditProfileScreen() {
     async function uploadAvatar(userId: string, uri: string): Promise<string | null> {
         try {
             const response = await fetch(uri);
-            const blob = await response.blob();
+            const arrayBuffer = await response.arrayBuffer();
             const fileExt = uri.split(".").pop();
             const fileName = `${userId}.${fileExt}`; // Overwrite existing file for simplicity or use timestamp
-            const filePath = `${fileName}`;
-
+            const filePath = `${userId}/${fileName}`;
+            const uint8Array = new Uint8Array(arrayBuffer);
             // Upsert to replace if exists
             const { error: uploadError } = await supabase.storage
                 .from("profile_photos")
-                .upload(filePath, blob, { upsert: true });
+                .upload(filePath, uint8Array, {
+                    contentType: "image/jpeg",
+                    upsert: true,
+                });
 
             if (uploadError) {
                 throw uploadError;

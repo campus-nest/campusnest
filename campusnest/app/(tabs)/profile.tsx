@@ -122,30 +122,20 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
           </View>
-
           <View style={styles.detailRow}>
             <Text style={styles.detailText}>University: {profile?.university || "NULL"}</Text>
-            <Text style={styles.detailText}>City: {profile?.city || "NULL"}</Text>
-          </View>
-          <View style={styles.detailRow}>
             <Text style={styles.detailText}>Year: {profile?.year || "NULL"}</Text>
-            <Text style={styles.detailText}>Province: {profile?.province || "NULL"}</Text>
           </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailText}>
-              Current Address: {profile?.current_address || "NULL"}
-            </Text>
-            <Text style={styles.detailText}>
-              Email: {profile?.email || "NULL"}
-            </Text>
-          </View>
+          <Text style={styles.detailText}>Email: {profile?.email || "NULL"}</Text>
+          <Text style={styles.detailText}>Current Address: {profile?.current_address || "NULL"}</Text>
+          <Text style={styles.detailText}>City: {profile?.city || "NULL"}</Text>
+          <Text style={styles.detailText}>Province: {profile?.province || "NULL"}</Text>
         </View>
 
         {/* Saved Posts Section */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
-            <View style={styles.sectionIndicator} />
-            <View style={styles.bookmarkIconPlaceholder} />
+            {<View style={styles.sectionIndicator} />}
             <Text style={styles.sectionTitle}>Saved Posts</Text>
           </View>
           { /* TODO: Add saved posts from supabase */}
