@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { supabase } from "@/src/lib/supabaseClient";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Profile } from "@/src/types/profile";
 import { Bell, ChevronLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,13 +19,17 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [])
+  );
 
   async function fetchProfile() {
     try {
-      setLoading(true);
+      // Only set loading true on first load or if profile is null to avoid flicker
+      if (!profile) setLoading(true);
+
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -104,7 +108,10 @@ export default function ProfileScreen() {
               </View>
             </View>
             <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => router.push("/edit-profile")}
+              >
                 <Text style={styles.actionButtonText}>Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity
