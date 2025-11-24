@@ -9,7 +9,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -231,24 +230,24 @@ export default function NewPostScreen() {
     }
   };
 
-  const pickImages = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
-        quality: 0.8,
-      });
+  // const pickImages = async () => {
+  //   try {
+  //     const result = await ImagePicker.launchImageLibraryAsync({
+  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //       allowsMultipleSelection: true,
+  //       quality: 0.8,
+  //     });
 
-      if (!result.canceled) {
-        const newUris = result.assets.map((a) => a.uri);
-        setPhotoUris((prev) => [...prev, ...newUris]);
-      }
-    }
-    catch (e) {
-      console.error("Image pick error:", e);
-      Alert.alert("Error", "Could not pick images.");
-    }
-  }
+  //     if (!result.canceled) {
+  //       const newUris = result.assets.map((a) => a.uri);
+  //       setPhotoUris((prev) => [...prev, ...newUris]);
+  //     }
+  //   }
+  //   catch (e) {
+  //     console.error("Image pick error:", e);
+  //     Alert.alert("Error", "Could not pick images.");
+  //   }
+  // }
 
   // Render pieces
   const renderLandlordForm = () => (
@@ -519,8 +518,10 @@ export default function NewPostScreen() {
               const fileExt = uri.split(".").pop() || "jpg";
               const fileName = `${Date.now()}.${fileExt}`;
               const filePath = `test_uploads/${fileName}`;
-
-              const { data, error } = await supabase.storage
+              // This was :
+              // const { data, error } = await supabase.storage
+              // FUCK YOU ESLINT
+              const { error } = await supabase.storage
                 .from("listing_photos")
                 .upload(filePath, blob);
 

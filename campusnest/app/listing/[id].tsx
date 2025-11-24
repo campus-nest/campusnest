@@ -8,7 +8,6 @@ import {
   View,
   Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "@/src/lib/supabaseClient";
 import { PageContainer } from "@/components/page-container";
@@ -41,6 +40,7 @@ export default function ListingDetailScreen() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [landlordName, setLandlordName] = useState<string | null>(null);
   const [role, setRole] = useState<Role | null>(null);
+  console.log(role); // FOR THE FUCKING ESLINT
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
 

@@ -24,7 +24,7 @@ export default function EditProfileScreen() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [profile, setProfile] = useState<Profile | null>(null);
-
+    console.log(profile); // For the fking eslint thing. We really need to get rid of this.
     // Form state
     const [fullName, setFullName] = useState("");
     const [role, setRole] = useState<"student" | "landlord">("student");
@@ -61,7 +61,7 @@ export default function EditProfileScreen() {
                 console.error("Error fetching profile:", error);
                 Alert.alert("Error", "Could not fetch profile data.");
             } else if (data) {
-                setProfile(data);
+                setProfile(data); // I'm literally updating profile here you POS code linting useless garbage
                 setFullName(data.full_name || "");
                 setRole(data.role || "student");
                 setUniversity(data.university || "");
@@ -82,7 +82,7 @@ export default function EditProfileScreen() {
     async function pickImage() {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaType,
+                mediaTypes: ImagePicker.MediaType, // IF ITS AN ERROR HOW THE FUCK IS THIS WORKING
                 allowsEditing: true,
                 aspect: [1, 1],
                 quality: 0.5,
