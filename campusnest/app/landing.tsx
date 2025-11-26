@@ -30,6 +30,13 @@ export default function LandingScreen() {
           <Text style={styles.btnText}>Login</Text>
         </Pressable>
 
+        <Pressable
+          style={styles.test}
+          onPress={() => router.push("./database_test")}
+        >
+          <Text style={styles.btnText}>TEST</Text>
+        </Pressable>
+
         {/* Sign Up Section */}
         <Text style={styles.signUpPrompt}>Don&apos;t have an account?</Text>
 
@@ -93,6 +100,17 @@ const styles = StyleSheet.create({
   loginBtn: {
     position: "absolute",
     top: 408,
+    width: 152,
+    height: 48,
+    backgroundColor: "#fff",
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+  },
+  test: {
+    position: "absolute",
+    top: 600,
     width: 152,
     height: 48,
     backgroundColor: "#fff",
