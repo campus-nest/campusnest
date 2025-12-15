@@ -14,6 +14,7 @@ import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
+import * as FileSystem from "expo-file-system/legacy";
 
 type Role = "student" | "landlord";
 
@@ -493,7 +494,6 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* PHOTO UPLOAD test gpt */}    
         <Pressable
           style={[styles.uploadButton, { backgroundColor: "#444", marginBottom: 12 }]}
           onPress={async () => {
@@ -509,20 +509,21 @@ export default function NewPostScreen() {
                 return;
               }
 
-              const asset = result.assets[0];
-              const uri = asset.uri;
+              const uri = result.assets[0].uri;
 
-              // Convert to blob
-              const response = await fetch(uri);
-              const blob = await response.blob();
+              const base64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: "base64",
+              });
 
               const fileExt = uri.split(".").pop() || "jpg";
               const fileName = `${Date.now()}.${fileExt}`;
-              const filePath = `test_uploads/${fileName}`;
 
-              const { data, error } = await supabase.storage
+              const { error } = await supabase.storage
                 .from("listing_photos")
-                .upload(filePath, blob);
+                .upload(`test_uploads/${fileName}`, base64, {
+                  contentType: `image/${fileExt}`,
+                  upsert: true,
+                });
 
               if (error) {
                 console.error(error);
@@ -530,16 +531,15 @@ export default function NewPostScreen() {
                 return;
               }
 
-              const { data: urlData } = supabase.storage
+              const { data } = supabase.storage
                 .from("listing_photos")
-                .getPublicUrl(filePath);
+                .getPublicUrl(`test_uploads/${fileName}`);
 
-              Alert.alert("Success!", `Uploaded:\n${urlData.publicUrl}`);
-
-              console.log("PUBLIC URL:", urlData.publicUrl);
+              Alert.alert("Success!", data.publicUrl);
+              console.log("PUBLIC URL:", data.publicUrl);
             } catch (err) {
               console.error(err);
-              Alert.alert("Error", "Something went wrong.");
+              Alert.alert("Error", "Upload failed.");
             }
           }}
         >
