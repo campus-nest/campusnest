@@ -501,9 +501,7 @@ export default function NewPostScreen() {
         {/* UPLOAD PHOTOS (stub only) */}
         <Pressable
           style={styles.uploadButton}
-          onPress={() => {
-            Alert.alert("Upload photos", "We'll wire this in the next step.");
-          }}
+          onPress={pickImages}
         >
           <Text style={styles.uploadButtonText}>Upload photos</Text>
         </Pressable>
