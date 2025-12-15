@@ -116,30 +116,34 @@ export default function NewPostScreen() {
       const uploadedUrls: string[] = [];
 
       for (const uri of photoUris) {
-        const fileExt = uri.split(".").pop(); 
+        const base64 = await FileSystem.readAsStringAsync(uri, {
+          encoding: "base64",
+        });
+
+        const fileExt = uri.split(".").pop() || "jpg";
         const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
         const filePath = `listings/${session.user.id}/${fileName}`;
 
-        const response = await fetch(uri); 
-        const blob = await response.blob(); 
-
         const { error: uploadError } = await supabase.storage
           .from("listing_photos")
-          .upload(filePath, blob);
+          .upload(filePath, base64, {
+            contentType: `image/${fileExt}`,
+            upsert: true,
+          });
 
         if (uploadError) {
           console.error("Upload error:", uploadError);
           Alert.alert("Error", "Could not upload photos.");
           return;
         }
-        const { data: publicUrlData } = supabase.storage
+
+        const { data } = supabase.storage
           .from("listing_photos")
           .getPublicUrl(filePath);
-        
-        if (publicUrlData?.publicUrl) {
-          uploadedUrls.push(publicUrlData.publicUrl);
-        }
 
+        if (data?.publicUrl) {
+          uploadedUrls.push(data.publicUrl);
+        }
       }
 
       const { error } = await supabase.from("listings").insert({
@@ -158,7 +162,7 @@ export default function NewPostScreen() {
         is_furnished: isFurnished,
         move_in_date: moveInDate ? moveInDate.toISOString(): null,
         location_area: locationArea || null,
-        photo_urls: photoUris.length > 0 ? photoUris : null,
+        photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
       });
 
       if (error) {
@@ -493,59 +497,6 @@ export default function NewPostScreen() {
             onChangeText={setLocationArea}
           />
         </View>
-
-        <Pressable
-          style={[styles.uploadButton, { backgroundColor: "#444", marginBottom: 12 }]}
-          onPress={async () => {
-            try {
-              const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsMultipleSelection: false,
-                quality: 0.8,
-              });
-
-              if (result.canceled) {
-                Alert.alert("Cancelled", "Image picking cancelled.");
-                return;
-              }
-
-              const uri = result.assets[0].uri;
-
-              const base64 = await FileSystem.readAsStringAsync(uri, {
-                encoding: "base64",
-              });
-
-              const fileExt = uri.split(".").pop() || "jpg";
-              const fileName = `${Date.now()}.${fileExt}`;
-
-              const { error } = await supabase.storage
-                .from("listing_photos")
-                .upload(`test_uploads/${fileName}`, base64, {
-                  contentType: `image/${fileExt}`,
-                  upsert: true,
-                });
-
-              if (error) {
-                console.error(error);
-                Alert.alert("Upload failed", error.message);
-                return;
-              }
-
-              const { data } = supabase.storage
-                .from("listing_photos")
-                .getPublicUrl(`test_uploads/${fileName}`);
-
-              Alert.alert("Success!", data.publicUrl);
-              console.log("PUBLIC URL:", data.publicUrl);
-            } catch (err) {
-              console.error(err);
-              Alert.alert("Error", "Upload failed.");
-            }
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "600" }}>🧪 Test Upload</Text>
-        </Pressable>
-
   
         {/* UPLOAD PHOTOS (stub only) */}
         <Pressable
