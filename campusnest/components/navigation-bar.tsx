@@ -1,12 +1,10 @@
-import HomeIcon from "@/assets/images/nav_bar/Home.svg";
-import PlusIcon from "@/assets/images/nav_bar/PlusCircle.svg";
-import SearchIcon from "@/assets/images/nav_bar/Search.svg";
-import UserIcon from "@/assets/images/nav_bar/User.svg";
-import UsersIcon from "@/assets/images/nav_bar/Users.svg";
-import { usePathname, useRouter } from "expo-router";
-import { Platform, Pressable, View } from "react-native";
-import { Text } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
+import Home from '@/assets/images/nav_bar/home_icon.svg';
+import CreateListing from '@/assets/images/nav_bar/create_listing.svg';
+import SearchListing from '@/assets/images/nav_bar/search_listing.svg';
+import Profile from '@/assets/images/nav_bar/profile.svg';
+import Users from '@/assets/images/nav_bar/users_icon.svg';
+import { usePathname, useRouter } from 'expo-router';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export function NavigationBar() {
   const router = useRouter();
@@ -119,7 +117,7 @@ export function NavigationBar() {
         className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)")}
       >
-        <HomeIcon
+        <Home 
           width={24}
           height={24}
           color={isActive("/(tabs)") ? "#888" : "#000"}
@@ -132,7 +130,7 @@ export function NavigationBar() {
         className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)/explore")}
       >
-        <SearchIcon
+        <SearchListing 
           width={24}
           height={24}
           color={isActive("/explore") ? "#888" : "#000"}
@@ -145,7 +143,7 @@ export function NavigationBar() {
         className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)/new_post")}
       >
-        <PlusIcon
+        <CreateListing 
           width={24}
           height={24}
           color={isActive("/new_post") ? "#888" : "#000"}
@@ -158,7 +156,7 @@ export function NavigationBar() {
         className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)/users")}
       >
-        <UsersIcon
+        <Users
           width={24}
           height={24}
           color={isActive("/users") ? "#888" : "#000"}
@@ -171,7 +169,7 @@ export function NavigationBar() {
         className="items-center justify-center p-2"
         onPress={() => router.push("/(tabs)/profile")}
       >
-        <UserIcon
+        <Profile 
           width={24}
           height={24}
           color={isActive("/profile") ? "#888" : "#000"}
