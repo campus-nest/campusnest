@@ -231,6 +231,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#333",
+    letterSpacing: 0,
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
   },
   button: {
     backgroundColor: "#fff",

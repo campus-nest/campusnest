@@ -2,13 +2,18 @@ import { PageContainer } from "@/components/page-container";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Alert,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
+    TouchableWithoutFeedback,
     View,
 } from "react-native";
 
@@ -17,6 +22,12 @@ export default function EnterCodeScreen() {
     const { email } = useLocalSearchParams<{ email: string }>();
     const [code, setCode] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (code.length === 6) {
+            Keyboard.dismiss();
+        }
+    }, [code]);
 
     const handleVerifyCode = async () => {
         if (!code.trim()) {
@@ -56,41 +67,61 @@ export default function EnterCodeScreen() {
         <PageContainer style={styles.container}>
             <StatusBar style="light" />
 
-            <View style={styles.content}>
-                <Pressable onPress={() => router.back()} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>← Back</Text>
-                </Pressable>
-
-                <Text style={styles.title}>Enter Code</Text>
-                <Text style={styles.subtitle}>
-                    Enter the 6-digit code sent to {email}
-                </Text>
-
-                <View style={styles.form}>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Verification Code</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="123456"
-                            placeholderTextColor="#666"
-                            value={code}
-                            onChangeText={setCode}
-                            keyboardType="number-pad"
-                            maxLength={6}
-                        />
-                    </View>
-
-                    <Pressable
-                        style={[styles.button, loading && styles.buttonDisabled]}
-                        onPress={handleVerifyCode}
-                        disabled={loading}
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <ScrollView
+                        contentContainerStyle={styles.content}
+                        keyboardShouldPersistTaps="handled"
                     >
-                        <Text style={styles.buttonText}>
-                            {loading ? "Verifying..." : "Verify Code"}
+                        {Platform.OS === "android" && (
+                            <Pressable
+                                onPress={() => router.back()}
+                                style={styles.backButton}
+                            >
+                                <Text style={styles.backButtonText}>← Back</Text>
+                            </Pressable>
+                        )}
+
+                        <Text style={styles.title}>Enter Code</Text>
+                        <Text style={styles.subtitle}>
+                            Enter the 6-digit code sent to {email}
                         </Text>
-                    </Pressable>
-                </View>
-            </View>
+
+                        <View style={styles.form}>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>
+                                    Verification Code
+                                </Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="123456"
+                                    placeholderTextColor="#666"
+                                    value={code}
+                                    onChangeText={setCode}
+                                    keyboardType="number-pad"
+                                    maxLength={6}
+                                />
+                            </View>
+
+                            <Pressable
+                                style={[
+                                    styles.button,
+                                    loading && styles.buttonDisabled,
+                                ]}
+                                onPress={handleVerifyCode}
+                                disabled={loading}
+                            >
+                                <Text style={styles.buttonText}>
+                                    {loading ? "Verifying..." : "Verify Code"}
+                                </Text>
+                            </Pressable>
+                        </View>
+                    </ScrollView>
+                </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
         </PageContainer>
     );
 }

@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
     Alert,
+    Platform,
     Pressable,
     StyleSheet,
     Text,
@@ -151,6 +152,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         borderWidth: 1,
         borderColor: "#333",
+        letterSpacing: 0,
+        fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
     },
     button: {
         backgroundColor: "#fff",

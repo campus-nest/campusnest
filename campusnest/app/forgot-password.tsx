@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
     Alert,
+    Platform,
     Pressable,
     StyleSheet,
     Text,
@@ -66,9 +67,11 @@ export default function ForgotPasswordScreen() {
             <StatusBar style="light" />
 
             <View style={styles.content}>
-                <Pressable onPress={() => router.back()} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>← Back</Text>
-                </Pressable>
+                {Platform.OS === "android" && (
+                    <Pressable onPress={() => router.back()} style={styles.backButton}>
+                        <Text style={styles.backButtonText}>← Back</Text>
+                    </Pressable>
+                )}
 
                 <Text style={styles.title}>Forgot Password</Text>
                 <Text style={styles.subtitle}>
