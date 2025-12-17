@@ -35,6 +35,11 @@ export default function EnterCodeScreen() {
       return;
     }
 
+    if (code.trim().length !== 6) {
+      Alert.alert("Error", "Verification code must be 6 digits");
+      return;
+    }
+
     if (!email) {
       Alert.alert("Error", "Email address missing. Please try again.");
       router.back();
