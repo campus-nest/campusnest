@@ -21,7 +21,7 @@ export default function PreSignUpScreen() {
     router.push({
       pathname: "/signup",
       params: { role: selectedRole },
-    })
+    });
   };
 
   const getRoleDisplayText = () => {
