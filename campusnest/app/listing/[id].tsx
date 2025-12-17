@@ -40,7 +40,7 @@ export default function ListingDetailScreen() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [landlordName, setLandlordName] = useState<string | null>(null);
   const [role, setRole] = useState<Role | null>(null);
-  console.log(role); // FOR THE FUCKING ESLINT
+  console.log(role);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
 

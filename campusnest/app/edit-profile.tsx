@@ -82,7 +82,7 @@ export default function EditProfileScreen() {
     async function pickImage() {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaType, // IF ITS AN ERROR HOW THE FUCK IS THIS WORKING
+                mediaTypes: ImagePicker.MediaType,
                 allowsEditing: true,
                 aspect: [1, 1],
                 quality: 0.5,

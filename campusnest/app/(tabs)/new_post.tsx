@@ -520,7 +520,6 @@ export default function NewPostScreen() {
               const filePath = `test_uploads/${fileName}`;
               // This was :
               // const { data, error } = await supabase.storage
-              // FUCK YOU ESLINT
               const { error } = await supabase.storage
                 .from("listing_photos")
                 .upload(filePath, blob);
