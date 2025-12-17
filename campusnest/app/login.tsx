@@ -57,12 +57,11 @@ export default function LoginScreen() {
 
       const userId = session.user.id;
 
-      const { data: existingProfile, error: profileCheckError } =
-        await supabase
-          .from("profiles")
-          .select("id")
-          .eq("id", userId)
-          .maybeSingle();
+      const { data: existingProfile, error: profileCheckError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle();
 
       if (profileCheckError) {
         Alert.alert("Error", "Failed to check user profile.");
@@ -77,19 +76,17 @@ export default function LoginScreen() {
         if (!fullName || !role) {
           Alert.alert(
             "Error",
-            "Missing required profile information. Please complete signup again."
+            "Missing required profile information. Please complete signup again.",
           );
           setLoading(false);
           return;
         }
 
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert({
-            id: userId,
-            full_name: fullName,
-            role: role,
-          });
+        const { error: insertError } = await supabase.from("profiles").insert({
+          id: userId,
+          full_name: fullName,
+          role: role,
+        });
 
         if (insertError) {
           Alert.alert("Error", "Failed to create user profile.");
@@ -117,7 +114,6 @@ export default function LoginScreen() {
         setLoading(false);
         return;
       }
-
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
@@ -158,6 +154,12 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry
             />
+            <Pressable
+              onPress={() => router.push("/forgot-password")}
+              style={styles.forgotPasswordButton}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </Pressable>
           </View>
 
           <Pressable
@@ -225,6 +227,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#333",
+    letterSpacing: 0,
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
   },
   button: {
     backgroundColor: "#fff",
@@ -247,5 +251,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 10,
     opacity: 0.7,
+  },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+  },
+  forgotPasswordText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+    opacity: 0.8,
   },
 });
