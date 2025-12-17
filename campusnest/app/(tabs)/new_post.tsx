@@ -13,6 +13,7 @@ import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
+import * as FileSystem from "expo-file-system/legacy";
 
 type Role = "student" | "landlord";
 
@@ -114,7 +115,11 @@ export default function NewPostScreen() {
       const uploadedUrls: string[] = [];
 
       for (const uri of photoUris) {
-        const fileExt = uri.split(".").pop();
+        const base64 = await FileSystem.readAsStringAsync(uri, {
+          encoding: "base64",
+        });
+
+        const fileExt = uri.split(".").pop() || "jpg";
         const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
         const filePath = `listings/${session.user.id}/${fileName}`;
 
@@ -123,21 +128,24 @@ export default function NewPostScreen() {
 
         const { error: uploadError } = await supabase.storage
           .from("listing_photos")
-          .upload(filePath, blob);
+          .upload(filePath, base64, {
+            contentType: `image/${fileExt}`,
+            upsert: true,
+          });
 
         if (uploadError) {
           console.error("Upload error:", uploadError);
           Alert.alert("Error", "Could not upload photos.");
           return;
         }
-        const { data: publicUrlData } = supabase.storage
+
+        const { data } = supabase.storage
           .from("listing_photos")
           .getPublicUrl(filePath);
 
-        if (publicUrlData?.publicUrl) {
-          uploadedUrls.push(publicUrlData.publicUrl);
+        if (data?.publicUrl) {
+          uploadedUrls.push(data.publicUrl);
         }
-
       }
 
       const { error } = await supabase.from("listings").insert({
@@ -156,7 +164,7 @@ export default function NewPostScreen() {
         is_furnished: isFurnished,
         move_in_date: moveInDate ? moveInDate.toISOString() : null,
         location_area: locationArea || null,
-        photo_urls: photoUris.length > 0 ? photoUris : null,
+        photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
       });
 
       if (error) {
@@ -492,7 +500,7 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* PHOTO UPLOAD test gpt */}
+        {/* PHOTO UPLOAD */}
         <Pressable
           style={[styles.uploadButton, { backgroundColor: "#444", marginBottom: 12 }]}
           onPress={async () => {
@@ -550,9 +558,7 @@ export default function NewPostScreen() {
         {/* UPLOAD PHOTOS (stub only) */}
         <Pressable
           style={styles.uploadButton}
-          onPress={() => {
-            Alert.alert("Upload photos", "We'll wire this in the next step.");
-          }}
+          onPress={pickImages}
         >
           <Text style={styles.uploadButtonText}>Upload photos</Text>
         </Pressable>
