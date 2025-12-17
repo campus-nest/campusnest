@@ -24,7 +24,6 @@ export default function EditProfileScreen() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [profile, setProfile] = useState<Profile | null>(null);
-    console.log(profile); // For the fking eslint thing. We really need to get rid of this.
     // Form state
     const [fullName, setFullName] = useState("");
     const [role, setRole] = useState<"student" | "landlord">("student");

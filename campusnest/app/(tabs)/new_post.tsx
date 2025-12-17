@@ -544,7 +544,6 @@ export default function NewPostScreen() {
 
               Alert.alert("Success!", `Uploaded:\n${urlData.publicUrl}`);
 
-              console.log("PUBLIC URL:", urlData.publicUrl);
             } catch (err) {
               console.error(err);
               Alert.alert("Error", "Something went wrong.");

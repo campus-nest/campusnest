@@ -40,13 +40,11 @@ export default function ListingDetailScreen() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [landlordName, setLandlordName] = useState<string | null>(null);
   const [role, setRole] = useState<Role | null>(null);
-  console.log(role);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
-    console.log("ID from router:", id);
 
     const fetchData = async () => {
       setLoading(true);
