@@ -8,7 +8,6 @@ import {
   View,
   Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "@/src/lib/supabaseClient";
 import { PageContainer } from "@/components/page-container";
@@ -46,7 +45,6 @@ export default function ListingDetailScreen() {
 
   useEffect(() => {
     if (!id) return;
-    console.log("ID from router:", id);
 
     const fetchData = async () => {
       setLoading(true);
