@@ -11,6 +11,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "@/src/lib/supabaseClient";
 import { PageContainer } from "@/components/page-container";
+import { Image } from "react-native";
 
 type Role = "student" | "landlord";
 
@@ -31,6 +32,7 @@ type Listing = {
   security_deposit?: number | null;
   nearby_university?: string | null;
   is_furnished?: boolean | null;
+  photo_urls?: string[] | null;
 };
 
 export default function ListingDetailScreen() {
@@ -127,19 +129,40 @@ export default function ListingDetailScreen() {
           <View />
         </View>
 
-        {/* Fake image grid */}
-        <View style={styles.imageRow}>
+        {/* Image grid */}
+        {listing.photo_urls && listing.photo_urls.length > 0 ? (
+          <View style={styles.imageRow}>
+            <Image
+              source={{ uri: listing.photo_urls[0] }}
+              style={styles.mainImage}
+              resizeMode="cover"
+            />
+
+            <View style={styles.sideImages}>
+              {listing.photo_urls.slice(1, 3).map((url, idx) => (
+                <Image
+                  key={idx}
+                  source={{ uri: url }}
+                  style={styles.sideImage}
+                  resizeMode="cover"
+                />
+              ))}
+
+              {listing.photo_urls.length > 3 && (
+                <View style={styles.morePhotos}>
+                  <Text style={styles.morePhotosText}>
+                    +{listing.photo_urls.length - 3} more
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        ) : (
           <View style={styles.mainImage}>
             <Text style={styles.imageEmoji}>🏠</Text>
           </View>
-          <View style={styles.sideImages}>
-            <View style={styles.sideImage} />
-            <View style={styles.sideImage} />
-            <View style={styles.morePhotos}>
-              <Text style={styles.morePhotosText}>More Photos</Text>
-            </View>
-          </View>
-        </View>
+        )}
+
 
         {/* Content */}
         <Text style={styles.title}>{listing.title}</Text>
@@ -259,30 +282,30 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   mainImage: {
-    flex: 2,
+    width: "65%",
     height: 140,
     borderRadius: 16,
+    marginRight: 8,
     backgroundColor: "#333",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 8,
   },
-  imageEmoji: {
-    fontSize: 40,
-  },
+  
   sideImages: {
-    flex: 1,
+    width: "35%",
     justifyContent: "space-between",
   },
+  
   sideImage: {
+    width: "100%",
     height: 40,
     borderRadius: 10,
-    backgroundColor: "#444",
+    marginBottom: 6,
   },
+  
   morePhotos: {
     height: 40,
     borderRadius: 10,
-    backgroundColor: "#222",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -340,5 +363,8 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     fontWeight: "600",
+  },
+  imageEmoji: {
+    fontSize: 50,
   },
 });

@@ -14,6 +14,8 @@ import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
 import * as FileSystem from "expo-file-system/legacy";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Platform } from "react-native";
 
 type Role = "student" | "landlord";
 
@@ -57,6 +59,7 @@ export default function NewPostScreen() {
   // student post form state (simplified)
   const [postTitle, setPostTitle] = useState("");
   const [postBody, setPostBody] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Fetch role
   useEffect(() => {
@@ -82,8 +85,13 @@ export default function NewPostScreen() {
 
   // Handlers
   const handleCreateListing = async () => {
-    if (!listingTitle || !listingAddress || !listingRent || !listingLeaseTerm) {
-      Alert.alert("Missing info", "Please fill in all fields.");
+    if (
+      !listingTitle ||
+      !listingAddress ||
+      !listingRent ||
+      (!leaseTermOption && !listingLeaseTerm)
+    ) {
+      Alert.alert("Missing info", "Please fill in all required fields.");
       return;
     }
 
@@ -115,37 +123,32 @@ export default function NewPostScreen() {
       const uploadedUrls: string[] = [];
 
       for (const uri of photoUris) {
-        const base64 = await FileSystem.readAsStringAsync(uri, {
-          encoding: "base64",
-        });
-
         const fileExt = uri.split(".").pop() || "jpg";
         const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
         const filePath = `listings/${session.user.id}/${fileName}`;
-
-        const response = await fetch(uri);
-        const blob = await response.blob();
-
-        const { error: uploadError } = await supabase.storage
-          .from("listing_photos")
-          .upload(filePath, base64, {
-            contentType: `image/${fileExt}`,
-            upsert: true,
-          });
-
-        if (uploadError) {
-          console.error("Upload error:", uploadError);
-          Alert.alert("Error", "Could not upload photos.");
-          return;
+      
+        const uploadResult = await FileSystem.uploadAsync(
+          `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/listing_photos/${filePath}`,
+          uri,
+          {
+            httpMethod: "POST",
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+              "Content-Type": `image/${fileExt}`,
+            },
+            uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+          }
+        );
+      
+        if (uploadResult.status !== 200) {
+          throw new Error("Upload failed");
         }
-
+      
         const { data } = supabase.storage
           .from("listing_photos")
           .getPublicUrl(filePath);
-
-        if (data?.publicUrl) {
-          uploadedUrls.push(data.publicUrl);
-        }
+      
+        uploadedUrls.push(data.publicUrl);
       }
 
       const { error } = await supabase.from("listings").insert({
@@ -238,24 +241,23 @@ export default function NewPostScreen() {
     }
   };
 
-  // const pickImages = async () => {
-  //   try {
-  //     const result = await ImagePicker.launchImageLibraryAsync({
-  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //       allowsMultipleSelection: true,
-  //       quality: 0.8,
-  //     });
-
-  //     if (!result.canceled) {
-  //       const newUris = result.assets.map((a) => a.uri);
-  //       setPhotoUris((prev) => [...prev, ...newUris]);
-  //     }
-  //   }
-  //   catch (e) {
-  //     console.error("Image pick error:", e);
-  //     Alert.alert("Error", "Could not pick images.");
-  //   }
-  // }
+  const pickImages = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.8,
+      });
+  
+      if (!result.canceled) {
+        const newUris = result.assets.map((a) => a.uri);
+        setPhotoUris((prev) => [...prev, ...newUris]);
+      }
+    } catch (e) {
+      console.error("Image pick error:", e);
+      Alert.alert("Error", "Could not pick images.");
+    }
+  };
 
   // Render pieces
   const renderLandlordForm = () => (
@@ -288,6 +290,31 @@ export default function NewPostScreen() {
         </View>
 
         <View style={styles.cardDivider} />
+
+        {/* LISTING TITLE */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Listing Title</Text>
+          <TextInput
+            style={styles.inputLight}
+            placeholder="Cozy 2-bedroom near campus"
+            placeholderTextColor="#777"
+            value={listingTitle}
+            onChangeText={setListingTitle}
+          />
+        </View>
+
+        {/* LISTING ADDRESS */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Address</Text>
+          <TextInput
+            style={styles.inputLight}
+            placeholder="123 University Ave"
+            placeholderTextColor="#777"
+            value={listingAddress}
+            onChangeText={setListingAddress}
+          />
+        </View>
+
 
         {/* UTILITIES */}
         <Text style={styles.sectionTitle}>Utilities</Text>
@@ -436,22 +463,13 @@ export default function NewPostScreen() {
         </View>
 
         {/* MOVE IN DATE */}
+        {/* MOVE IN DATE */}
         <View style={styles.field}>
           <Text style={styles.label}>Move In Date</Text>
+
           <Pressable
             style={styles.dropdown}
-            onPress={async () => {
-              const { DateTimePickerAndroid } = await import(
-                "@react-native-community/datetimepicker"
-              );
-              DateTimePickerAndroid.open({
-                value: moveInDate || new Date(),
-                mode: "date",
-                onChange: (_event: any, selectedDate?: Date) => {
-                  if (selectedDate) setMoveInDate(selectedDate);
-                },
-              });
-            }}
+            onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.dropdownText}>
               {moveInDate
@@ -460,7 +478,20 @@ export default function NewPostScreen() {
             </Text>
             <Text style={styles.dropdownChevron}>📅</Text>
           </Pressable>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={moveInDate || new Date()}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={(_, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) setMoveInDate(selectedDate);
+              }}
+            />
+          )}
         </View>
+
 
         {/* EXISTING FIELDS (Rent + Lease term text) */}
         <View style={styles.inlineRow}>
@@ -500,58 +531,7 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* PHOTO UPLOAD */}
-        <Pressable
-          style={[styles.uploadButton, { backgroundColor: "#444", marginBottom: 12 }]}
-          onPress={async () => {
-            try {
-              const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsMultipleSelection: false,
-                quality: 0.8,
-              });
-
-              if (result.canceled) {
-                Alert.alert("Cancelled", "Image picking cancelled.");
-                return;
-              }
-
-              const asset = result.assets[0];
-              const uri = asset.uri;
-
-              // Convert to blob
-              const response = await fetch(uri);
-              const blob = await response.blob();
-
-              const fileExt = uri.split(".").pop() || "jpg";
-              const fileName = `${Date.now()}.${fileExt}`;
-              const filePath = `test_uploads/${fileName}`;
-              // This was :
-              // const { data, error } = await supabase.storage
-              const { error } = await supabase.storage
-                .from("listing_photos")
-                .upload(filePath, blob);
-
-              if (error) {
-                console.error(error);
-                Alert.alert("Upload failed", error.message);
-                return;
-              }
-
-              const { data: urlData } = supabase.storage
-                .from("listing_photos")
-                .getPublicUrl(filePath);
-
-              Alert.alert("Success!", `Uploaded:\n${urlData.publicUrl}`);
-
-            } catch (err) {
-              console.error(err);
-              Alert.alert("Error", "Something went wrong.");
-            }
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "600" }}>🧪 Test Upload</Text>
-        </Pressable>
+        
 
 
         {/* UPLOAD PHOTOS (stub only) */}
