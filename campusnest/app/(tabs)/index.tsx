@@ -227,12 +227,23 @@ export default function HomeScreen() {
   );
 
   const renderPostCard = (post: Post) => (
-    <View style={[styles.card, { flexDirection: "column" }]}>
+    <Pressable
+      style={[styles.card, { flexDirection: "column" }]}
+      onPress={() => router.push(`/post/${post.id}`)}
+    >
       <Text style={styles.cardTitle}>{post.title}</Text>
-      <Text style={[styles.cardSubtitle, { marginTop: 6 }]} numberOfLines={4}>
+  
+      <Text
+        style={[styles.cardSubtitle, { marginTop: 6 }]}
+        numberOfLines={4}
+      >
         {post.body}
       </Text>
-    </View>
+  
+      <Text style={styles.postMeta}>
+        {new Date(post.created_at).toLocaleDateString()}
+      </Text>
+    </Pressable>
   );
   
 
@@ -431,4 +442,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginTop: 10,
   },
+  postMeta: {
+    color: "#888",
+    fontSize: 11,
+    marginTop: 8,
+  },
+  
 });
