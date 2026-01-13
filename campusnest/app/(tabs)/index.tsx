@@ -25,8 +25,21 @@ type Listing = {
   address: string;
   rent: number;
   lease_term: string;
-  distanceMinutes?: number;
+  created_at: string;
+  photo_urls?: string[] | null;
 };
+
+type Post = {
+  id: string;
+  user_id: string;
+  title: string;
+  body: string;
+  created_at: string;
+};
+
+type FeedItem =
+  | { type: "listing"; created_at: string; item: Listing }
+  | { type: "post"; created_at: string; item: Post };
 
 export default function HomeScreen() {
   const [role, setRole] = useState<Role | null>(null);
@@ -37,6 +50,9 @@ export default function HomeScreen() {
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
   const router = useRouter();
+
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -62,39 +78,78 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (!role) return;
-
-    const fetchListings = async () => {
+  
+    const fetchFeed = async () => {
       setListingsLoading(true);
-
+  
       const {
         data: { session },
       } = await supabase.auth.getSession();
-
-      let query = supabase.from("listings").select("*");
-
+  
+      // 1) Listings query
+      let listingsQuery = supabase
+        .from("listings")
+        .select("id, landlord_id, title, address, rent, lease_term, created_at, photo_urls");
+  
       if (role === "student") {
-        query = query
-          .eq("status", "active")
-          .eq("visibility", "public");
+        // students see public active listings
+        listingsQuery = listingsQuery.eq("status", "active").eq("visibility", "public");
       } else {
-        query = query.eq("landlord_id", session?.user?.id);
+        // landlord
+        if (activeFilter === "yourListings") {
+          listingsQuery = listingsQuery.eq("landlord_id", session?.user?.id);
+        } else {
+          // "recent" should show public listings from everyone
+          listingsQuery = listingsQuery.eq("status", "active").eq("visibility", "public");
+        }
       }
-
-      const { data, error } = await query.order("created_at", {
-        ascending: false,
-      });
-
-      if (error) {
-        console.error("Listing fetch error:", error);
-      } else {
-        setListings(data as Listing[]);
+  
+      const { data: listingsData, error: listingsError } = await listingsQuery.order(
+        "created_at",
+        { ascending: false }
+      );
+  
+      if (listingsError) {
+        console.error("Listing fetch error:", listingsError);
       }
-
+  
+      // 2) Posts query (for both students + landlords)
+      const { data: postsData, error: postsError } = await supabase
+        .from("posts")
+        .select("id, user_id, title, body, created_at")
+        .order("created_at", { ascending: false });
+  
+      if (postsError) {
+        console.error("Posts fetch error:", postsError);
+      }
+  
+      const safeListings = (listingsData ?? []) as Listing[];
+      const safePosts = (postsData ?? []) as Post[];
+  
+      setListings(safeListings);
+      setPosts(safePosts);
+  
+      // 3) Merge into one feed sorted by created_at
+      const merged: FeedItem[] = [
+        ...safeListings.map((l) => ({
+          type: "listing" as const,
+          created_at: l.created_at,
+          item: l,
+        })),
+        ...safePosts.map((p) => ({
+          type: "post" as const,
+          created_at: p.created_at,
+          item: p,
+        })),
+      ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  
+      setFeed(merged);
       setListingsLoading(false);
     };
-
-    fetchListings();
+  
+    fetchFeed();
   }, [role, activeFilter]);
+  
 
 
   const renderHeader = () => (
@@ -154,29 +209,32 @@ export default function HomeScreen() {
     );
   };
 
-  const renderListingCard = ({ item }: { item: Listing }) => (
-    <Pressable style={styles.card} onPress = {()=> router.push(`/listing/${item.id}`)}>
+  const renderListingCard = (listing: Listing) => (
+    <Pressable style={styles.card} onPress={() => router.push(`/listing/${listing.id}`)}>
       <View style={styles.cardImagePlaceholder}>
         <Text style={styles.cardImageEmoji}>🏠</Text>
       </View>
-
+  
       <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.title}</Text>
-        <Text style={styles.cardSubtitle}>Lease Term: {item.lease_term}</Text>
-        <Text style={styles.cardSubtitle}>Rent: ${item.rent}</Text>
-
+        <Text style={styles.cardTitle}>{listing.title}</Text>
+        <Text style={styles.cardSubtitle}>Lease Term: {listing.lease_term}</Text>
+        <Text style={styles.cardSubtitle}>Rent: ${listing.rent}</Text>
         <Text style={styles.cardAddress} numberOfLines={2}>
-          {item.address}
+          {listing.address}
         </Text>
-
-        <View style={styles.cardMetaRow}>
-          <Text style={styles.cardMetaText}>
-            Dist. to Uni: {item.distanceMinutes ?? "—"} min
-          </Text>
-        </View>
       </View>
     </Pressable>
   );
+
+  const renderPostCard = (post: Post) => (
+    <View style={[styles.card, { flexDirection: "column" }]}>
+      <Text style={styles.cardTitle}>{post.title}</Text>
+      <Text style={[styles.cardSubtitle, { marginTop: 6 }]} numberOfLines={4}>
+        {post.body}
+      </Text>
+    </View>
+  );
+  
 
   // Loading States
   if (roleLoading) {
@@ -202,7 +260,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading listings...</Text>
+        <Text style={styles.centeredText}>Loading feed...</Text>
       </View>
     );
   }
@@ -215,9 +273,13 @@ export default function HomeScreen() {
           {renderFilters()}
 
           <FlatList
-            data={listings}
-            keyExtractor={(item) => item.id}
-            renderItem={renderListingCard}
+            data={feed}
+            keyExtractor={(x) => `${x.type}-${x.item.id}`}
+            renderItem={({ item }) =>
+              item.type === "listing"
+                ? renderListingCard(item.item)
+                : renderPostCard(item.item)
+            }
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />
