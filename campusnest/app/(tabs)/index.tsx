@@ -45,13 +45,11 @@ export default function HomeScreen() {
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
 
-  const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
   const router = useRouter();
 
-  const [posts, setPosts] = useState<Post[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
 
   useEffect(() => {
@@ -125,9 +123,6 @@ export default function HomeScreen() {
   
       const safeListings = (listingsData ?? []) as Listing[];
       const safePosts = (postsData ?? []) as Post[];
-  
-      setListings(safeListings);
-      setPosts(safePosts);
   
       // 3) Merge into one feed sorted by created_at
       const merged: FeedItem[] = [
