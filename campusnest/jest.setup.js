@@ -1,4 +1,3 @@
-import "@testing-library/jest-native/extend-expect";
 import "dotenv/config";
 
 // Reanimated mock
