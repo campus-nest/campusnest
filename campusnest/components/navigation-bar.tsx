@@ -167,7 +167,7 @@ export function NavigationBar() {
         style={styles.navItem}
         onPress={() => router.push("/(tabs)")}
       >
-        <Home 
+        <Home
           width={24}
           height={24}
           color={isActive("/(tabs)") ? "#888" : "#000"}
@@ -180,7 +180,7 @@ export function NavigationBar() {
         style={styles.navItem}
         onPress={() => router.push("/(tabs)/explore")}
       >
-        <SearchListing 
+        <SearchListing
           width={24}
           height={24}
           color={isActive("/explore") ? "#888" : "#000"}
@@ -193,7 +193,7 @@ export function NavigationBar() {
         style={styles.navItem}
         onPress={() => router.push("/(tabs)/new_post")}
       >
-        <CreateListing 
+        <CreateListing
           width={24}
           height={24}
           color={isActive("/new_post") ? "#888" : "#000"}
@@ -219,7 +219,7 @@ export function NavigationBar() {
         style={styles.navItem}
         onPress={() => router.push("/(tabs)/profile")}
       >
-        <Profile 
+        <Profile
           width={24}
           height={24}
           color={isActive("/profile") ? "#888" : "#000"}

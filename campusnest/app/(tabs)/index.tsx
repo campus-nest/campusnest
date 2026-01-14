@@ -75,7 +75,6 @@ export default function HomeScreen() {
     fetchRole();
   }, []);
 
-
   useEffect(() => {
     if (!role) return;
 
@@ -87,47 +86,51 @@ export default function HomeScreen() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-  
+
       // 1) Listings query
       let listingsQuery = supabase
         .from("listings")
-        .select("id, landlord_id, title, address, rent, lease_term, created_at, photo_urls");
-  
+        .select(
+          "id, landlord_id, title, address, rent, lease_term, created_at, photo_urls",
+        );
+
       if (role === "student") {
         // students see public active listings
-        listingsQuery = listingsQuery.eq("status", "active").eq("visibility", "public");
+        listingsQuery = listingsQuery
+          .eq("status", "active")
+          .eq("visibility", "public");
       } else {
         // landlord
         if (activeFilter === "yourListings") {
           listingsQuery = listingsQuery.eq("landlord_id", session?.user?.id);
         } else {
           // "recent" should show public listings from everyone
-          listingsQuery = listingsQuery.eq("status", "active").eq("visibility", "public");
+          listingsQuery = listingsQuery
+            .eq("status", "active")
+            .eq("visibility", "public");
         }
       }
-  
-      const { data: listingsData, error: listingsError } = await listingsQuery.order(
-        "created_at",
-        { ascending: false }
-      );
-  
+
+      const { data: listingsData, error: listingsError } =
+        await listingsQuery.order("created_at", { ascending: false });
+
       if (listingsError) {
         console.error("Listing fetch error:", listingsError);
       }
-  
+
       // 2) Posts query (for both students + landlords)
       const { data: postsData, error: postsError } = await supabase
         .from("posts")
         .select("id, user_id, title, body, created_at")
         .order("created_at", { ascending: false });
-  
+
       if (postsError) {
         console.error("Posts fetch error:", postsError);
       }
-  
+
       const safeListings = (listingsData ?? []) as Listing[];
       const safePosts = (postsData ?? []) as Post[];
-  
+
       // 3) Merge into one feed sorted by created_at
       const merged: FeedItem[] = [
         ...safeListings.map((l) => ({
@@ -141,15 +144,13 @@ export default function HomeScreen() {
           item: p,
         })),
       ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-  
+
       setFeed(merged);
       setListingsLoading(false);
     };
 
     fetchFeed();
   }, [role, activeFilter]);
-  
-
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -188,10 +189,7 @@ export default function HomeScreen() {
             <Pressable
               key={f.key}
               onPress={() => setActiveFilter(f.key)}
-              style={[
-                styles.filterChip,
-                isActive && styles.filterChipActive,
-              ]}
+              style={[styles.filterChip, isActive && styles.filterChipActive]}
             >
               <Text
                 style={[
@@ -209,14 +207,19 @@ export default function HomeScreen() {
   };
 
   const renderListingCard = (listing: Listing) => (
-    <Pressable style={styles.card} onPress={() => router.push(`/listing/${listing.id}`)}>
+    <Pressable
+      style={styles.card}
+      onPress={() => router.push(`/listing/${listing.id}`)}
+    >
       <View style={styles.cardImagePlaceholder}>
         <Text style={styles.cardImageEmoji}>🏠</Text>
       </View>
-  
+
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{listing.title}</Text>
-        <Text style={styles.cardSubtitle}>Lease Term: {listing.lease_term}</Text>
+        <Text style={styles.cardSubtitle}>
+          Lease Term: {listing.lease_term}
+        </Text>
         <Text style={styles.cardSubtitle}>Rent: ${listing.rent}</Text>
         <Text style={styles.cardAddress} numberOfLines={2}>
           {listing.address}
@@ -231,20 +234,16 @@ export default function HomeScreen() {
       onPress={() => router.push(`/post/${post.id}`)}
     >
       <Text style={styles.cardTitle}>{post.title}</Text>
-  
-      <Text
-        style={[styles.cardSubtitle, { marginTop: 6 }]}
-        numberOfLines={4}
-      >
+
+      <Text style={[styles.cardSubtitle, { marginTop: 6 }]} numberOfLines={4}>
         {post.body}
       </Text>
-  
+
       <Text style={styles.postMeta}>
         {new Date(post.created_at).toLocaleDateString()}
       </Text>
     </Pressable>
   );
-  
 
   // Loading States
   if (roleLoading) {
@@ -446,5 +445,4 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 8,
   },
-  
 });

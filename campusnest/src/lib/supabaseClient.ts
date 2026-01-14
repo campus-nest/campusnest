@@ -10,7 +10,7 @@ export function getSupabase(): SupabaseClient {
   if (!client) {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       throw new Error(
-        "Supabase is not configured. Missing environment variables."
+        "Supabase is not configured. Missing environment variables.",
       );
     }
 

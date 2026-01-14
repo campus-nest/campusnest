@@ -95,7 +95,7 @@ export default function ListingDetailScreen() {
   const handleContact = () => {
     Alert.alert(
       "Contact landlord",
-      "Contact options (email/phone) will be wired up next."
+      "Contact options (email/phone) will be wired up next.",
     );
   };
 
@@ -163,13 +163,9 @@ export default function ListingDetailScreen() {
         {/* Content */}
         <Text style={styles.title}>{listing.title}</Text>
 
-        <Text style={styles.detailText}>
-          Rent: ${listing.rent} per month
-        </Text>
+        <Text style={styles.detailText}>Rent: ${listing.rent} per month</Text>
 
-        <Text style={styles.detailText}>
-          Lease Term: {listing.lease_term}
-        </Text>
+        <Text style={styles.detailText}>Lease Term: {listing.lease_term}</Text>
 
         {listing.security_deposit != null && (
           <Text style={styles.detailText}>
@@ -184,15 +180,12 @@ export default function ListingDetailScreen() {
         )}
 
         {listing.utilities && (
-          <Text style={styles.detailText}>
-            Utilities: {listing.utilities}
-          </Text>
+          <Text style={styles.detailText}>Utilities: {listing.utilities}</Text>
         )}
 
         {listing.move_in_date && (
           <Text style={styles.detailText}>
-            Move in date:{" "}
-            {new Date(listing.move_in_date).toLocaleDateString()}
+            Move in date: {new Date(listing.move_in_date).toLocaleDateString()}
           </Text>
         )}
 

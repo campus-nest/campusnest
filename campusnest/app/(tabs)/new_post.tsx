@@ -8,7 +8,8 @@ import {
   Text,
   TextInput,
   View,
-  Platform } from "react-native";
+  Platform,
+} from "react-native";
 import { getSupabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -126,7 +127,7 @@ export default function NewPostScreen() {
         const fileExt = uri.split(".").pop() || "jpg";
         const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
         const filePath = `listings/${session.user.id}/${fileName}`;
-      
+
         const uploadResult = await FileSystem.uploadAsync(
           `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/listing_photos/${filePath}`,
           uri,
@@ -137,17 +138,17 @@ export default function NewPostScreen() {
               "Content-Type": `image/${fileExt}`,
             },
             uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-          }
+          },
         );
-      
+
         if (uploadResult.status !== 200) {
           throw new Error("Upload failed");
         }
-      
+
         const { data } = supabase.storage
           .from("listing_photos")
           .getPublicUrl(filePath);
-      
+
         uploadedUrls.push(data.publicUrl);
       }
 
@@ -182,7 +183,14 @@ export default function NewPostScreen() {
       setListingRent("");
       setListingLeaseTerm("");
 
-      setUtilities({ electricity: false, water: false, internet: false, heating: false, wifi: false, heat: false });
+      setUtilities({
+        electricity: false,
+        water: false,
+        internet: false,
+        heating: false,
+        wifi: false,
+        heat: false,
+      });
       setNearbyUniversity("");
       setDescription("");
       setTenantPreferences("");
@@ -248,7 +256,7 @@ export default function NewPostScreen() {
         allowsMultipleSelection: true,
         quality: 0.8,
       });
-  
+
       if (!result.canceled) {
         const newUris = result.assets.map((a) => a.uri);
         setPhotoUris((prev) => [...prev, ...newUris]);
@@ -267,14 +275,18 @@ export default function NewPostScreen() {
 
       {/* Card container (light grey background) */}
       <View style={styles.formCard}>
-
         {/* Rent / Price Tabs */}
         <View style={styles.tabRow}>
           <Pressable
             onPress={() => setActiveTab("rent")}
             style={[styles.tab, activeTab === "rent" && styles.tabActive]}
           >
-            <Text style={[styles.tabText, activeTab === "rent" && styles.tabTextActive]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "rent" && styles.tabTextActive,
+              ]}
+            >
               Rent
             </Text>
           </Pressable>
@@ -283,7 +295,12 @@ export default function NewPostScreen() {
             onPress={() => setActiveTab("price")}
             style={[styles.tab, activeTab === "price" && styles.tabActive]}
           >
-            <Text style={[styles.tabText, activeTab === "price" && styles.tabTextActive]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "price" && styles.tabTextActive,
+              ]}
+            >
               Price
             </Text>
           </Pressable>
@@ -315,14 +332,15 @@ export default function NewPostScreen() {
           />
         </View>
 
-
         {/* UTILITIES */}
         <Text style={styles.sectionTitle}>Utilities</Text>
         <View style={styles.utilitiesGrid}>
           {["electricity", "water", "wifi", "heat"].map((key) => {
             const typedKey = key as keyof typeof utilities;
             const label =
-              key === "wifi" ? "Wifi" : key.charAt(0).toUpperCase() + key.slice(1);
+              key === "wifi"
+                ? "Wifi"
+                : key.charAt(0).toUpperCase() + key.slice(1);
 
             const selected = utilities[typedKey];
 
@@ -492,7 +510,6 @@ export default function NewPostScreen() {
           )}
         </View>
 
-
         {/* EXISTING FIELDS (Rent + Lease term text) */}
         <View style={styles.inlineRow}>
           <View style={[styles.field, styles.inlineField]}>
@@ -531,21 +548,18 @@ export default function NewPostScreen() {
           />
         </View>
 
-        
-
-
         {/* UPLOAD PHOTOS (stub only) */}
-        <Pressable
-          style={styles.uploadButton}
-          onPress={pickImages}
-        >
+        <Pressable style={styles.uploadButton} onPress={pickImages}>
           <Text style={styles.uploadButtonText}>Upload photos</Text>
         </Pressable>
       </View>
 
       {/* Publish button */}
       <Pressable
-        style={[styles.primaryButton, submitting && styles.primaryButtonDisabled]}
+        style={[
+          styles.primaryButton,
+          submitting && styles.primaryButtonDisabled,
+        ]}
         onPress={handleCreateListing}
         disabled={submitting}
       >
@@ -558,11 +572,12 @@ export default function NewPostScreen() {
     </>
   );
 
-
   const renderStudentForm = () => (
     <>
       <Text style={styles.title}>Create Post</Text>
-      <Text style={styles.subtitle}>Tell others what you&apos;re looking for</Text>
+      <Text style={styles.subtitle}>
+        Tell others what you&apos;re looking for
+      </Text>
 
       <View style={styles.field}>
         <Text style={styles.label}>Title</Text>
@@ -591,7 +606,10 @@ export default function NewPostScreen() {
       {/* Future: university, major, budget slider, move-in date, preferred location */}
 
       <Pressable
-        style={[styles.primaryButton, submitting && styles.primaryButtonDisabled]}
+        style={[
+          styles.primaryButton,
+          submitting && styles.primaryButtonDisabled,
+        ]}
         onPress={handleCreatePost}
         disabled={submitting}
       >
@@ -875,5 +893,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
-
 });

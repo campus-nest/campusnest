@@ -99,7 +99,10 @@ export default function EditProfileScreen() {
     }
   }
 
-  async function uploadAvatar(userId: string, uri: string): Promise<string | null> {
+  async function uploadAvatar(
+    userId: string,
+    uri: string,
+  ): Promise<string | null> {
     try {
       const response = await fetch(uri);
       const arrayBuffer = await response.arrayBuffer();

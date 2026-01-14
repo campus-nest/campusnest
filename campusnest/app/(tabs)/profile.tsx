@@ -56,7 +56,7 @@ export default function ProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchProfile();
-    }, [fetchProfile])
+    }, [fetchProfile]),
   );
 
   const handleSignOut = useCallback(async () => {
@@ -136,7 +136,9 @@ export default function ProfileScreen() {
             <Text style={styles.detailText}>
               University: {profile?.university || "NULL"}
             </Text>
-            <Text style={styles.detailText}>Year: {profile?.year || "NULL"}</Text>
+            <Text style={styles.detailText}>
+              Year: {profile?.year || "NULL"}
+            </Text>
           </View>
 
           <Text style={styles.detailText}>
@@ -145,9 +147,7 @@ export default function ProfileScreen() {
           <Text style={styles.detailText}>
             Current Address: {profile?.current_address || "NULL"}
           </Text>
-          <Text style={styles.detailText}>
-            City: {profile?.city || "NULL"}
-          </Text>
+          <Text style={styles.detailText}>City: {profile?.city || "NULL"}</Text>
           <Text style={styles.detailText}>
             Province: {profile?.province || "NULL"}
           </Text>
