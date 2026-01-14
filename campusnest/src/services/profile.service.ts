@@ -33,7 +33,7 @@ export class ProfileService {
    */
   async createProfile(
     userId: string,
-    profileData: CreateProfileInput
+    profileData: CreateProfileInput,
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const { error } = await this.supabase.from("profiles").insert({
@@ -103,7 +103,7 @@ export class ProfileService {
    */
   async updateProfile(
     userId: string,
-    updates: UpdateProfileInput
+    updates: UpdateProfileInput,
   ): Promise<{ success: boolean; error?: string }> {
     const { error } = await this.supabase
       .from("profiles")

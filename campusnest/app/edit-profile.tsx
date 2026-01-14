@@ -166,7 +166,7 @@ export default function EditProfileScreen() {
           {/* Avatar */}
           <View style={styles.avatarSection}>
             <TouchableOpacity onPress={pickImage}>
-              {(imageUri || avatarUrl) ? (
+              {imageUri || avatarUrl ? (
                 <Image
                   source={{ uri: imageUri || avatarUrl || undefined }}
                   style={styles.avatar}
@@ -295,11 +295,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  safeArea: { 
-    flex: 1, 
-    backgroundColor: "black" 
+  safeArea: {
+    flex: 1,
+    backgroundColor: "black",
   },
-  scrollContent: { 
+  scrollContent: {
     padding: 16,
     paddingBottom: 40,
   },
@@ -312,12 +312,12 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 24,
   },
-  headerTitle: { 
-    fontSize: 18, 
-    fontWeight: "700" 
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
   },
-  avatarSection: { 
-    alignItems: "center", 
+  avatarSection: {
+    alignItems: "center",
     marginBottom: 32,
   },
   avatar: {
@@ -374,11 +374,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
   },
-  saveButtonDisabled: { 
-    opacity: 0.7 
+  saveButtonDisabled: {
+    opacity: 0.7,
   },
-  saveButtonText: { 
-    fontWeight: "700", 
-    fontSize: 16 
+  saveButtonText: {
+    fontWeight: "700",
+    fontSize: 16,
   },
 });
