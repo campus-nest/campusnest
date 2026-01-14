@@ -17,7 +17,7 @@ import { getSupabase } from "@/src/lib/supabaseClient";
 export default function SignUpScreen() {
   const router = useRouter();
   const { role } = useLocalSearchParams<{ role: "student" | "landlord" }>();
-  
+
   // Common fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,17 +27,17 @@ export default function SignUpScreen() {
   const [currentAddress, setCurrentAddress] = useState("");
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
-  
+
   // Student-specific fields
   const [year, setYear] = useState("");
   const [lookingFor, setLookingFor] = useState("");
   const [budget, setBudget] = useState("");
   const [preferredLocation, setPreferredLocation] = useState("");
-  
+
   // Landlord-specific fields
   const [phoneNumber, setPhoneNumber] = useState("");
   const [propertyAddress, setPropertyAddress] = useState("");
-  
+
   const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
@@ -125,13 +125,13 @@ export default function SignUpScreen() {
       Alert.alert(
         "Success",
         "Account created! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.replace("/verify-email") }]
+        [{ text: "OK", onPress: () => router.replace("/verify-email") }],
       );
     } catch (error) {
       console.error("Signup error:", error);
       Alert.alert(
         "Error",
-        error instanceof Error ? error.message : "An unexpected error occurred"
+        error instanceof Error ? error.message : "An unexpected error occurred",
       );
     } finally {
       setLoading(false);
@@ -207,7 +207,7 @@ export default function SignUpScreen() {
             {role === "student" && (
               <>
                 <Text style={styles.sectionTitle}>Student Information</Text>
-                
+
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>University *</Text>
                   <TextInput
@@ -305,7 +305,7 @@ export default function SignUpScreen() {
             {role === "landlord" && (
               <>
                 <Text style={styles.sectionTitle}>Landlord Information</Text>
-                
+
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Phone Number *</Text>
                   <TextInput

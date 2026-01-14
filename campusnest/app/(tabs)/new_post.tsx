@@ -526,7 +526,7 @@ export default function NewPostScreen() {
         <Text style={styles.label}>Description</Text>
         <TextInput
           style={[styles.input, styles.multilineInput]}
-          placeholder="Describe yourself, your preferences, and what you&apos;re looking for."
+          placeholder="Describe yourself, your preferences, and what you're looking for."
           placeholderTextColor="#999"
           value={postBody}
           onChangeText={setPostBody}
