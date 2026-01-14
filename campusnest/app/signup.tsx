@@ -12,12 +12,12 @@ import {
   View,
   Platform,
 } from "react-native";
-import { authService, profileService } from "@/src/services";
+import { getSupabase } from "@/src/lib/supabaseClient";
 
 export default function SignUpScreen() {
   const router = useRouter();
   const { role } = useLocalSearchParams<{ role: "student" | "landlord" }>();
-
+  
   // Common fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,17 +27,17 @@ export default function SignUpScreen() {
   const [currentAddress, setCurrentAddress] = useState("");
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
-
+  
   // Student-specific fields
   const [year, setYear] = useState("");
   const [lookingFor, setLookingFor] = useState("");
   const [budget, setBudget] = useState("");
   const [preferredLocation, setPreferredLocation] = useState("");
-
+  
   // Landlord-specific fields
   const [phoneNumber, setPhoneNumber] = useState("");
   const [propertyAddress, setPropertyAddress] = useState("");
-
+  
   const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
@@ -83,21 +83,11 @@ export default function SignUpScreen() {
     setLoading(true);
 
     try {
-      // Step 1: Create auth user
-      const signUpResult = await authService.signUp({
-        email: email.trim(),
-        password,
-        fullName,
-        role: role!,
-      });
+      const supabase = getSupabase();
 
-      if (!signUpResult.success || !signUpResult.user) {
-        Alert.alert("Sign Up Failed", signUpResult.error || "Unknown error");
-        return;
-      }
-
-      // Step 2: Create profile with role-specific data
-      const profileData: any = {
+      // Build profile data that will be stored in user metadata
+      // The database trigger will create the profile automatically
+      const userData: any = {
         full_name: fullName,
         role: role,
         email: email.trim(),
@@ -107,34 +97,41 @@ export default function SignUpScreen() {
       };
 
       if (role === "student") {
-        profileData.university = university;
-        profileData.year = year;
-        // Store additional student data in a JSON field or separate table
-        // For now, we can use university field to store looking_for info
+        userData.university = university;
+        userData.year = year;
+        userData.looking_for = lookingFor;
+        userData.budget = budget;
+        userData.preferred_location = preferredLocation;
       } else if (role === "landlord") {
-        // Store landlord-specific data
+        userData.phone_number = phoneNumber;
+        userData.property_address = propertyAddress;
       }
 
-      const createProfileResult = await profileService.createProfile(
-        signUpResult.user.id,
-        profileData,
-      );
+      // Sign up the user - the database trigger will create the profile
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: "https://campusnest.uofacs.ca/",
+          data: userData,
+        },
+      });
 
-      if (!createProfileResult.success) {
-        console.error("Profile creation failed:", createProfileResult.error);
-        // Auth user is created but profile failed - this is ok, profile can be created later
+      if (signUpError) {
+        Alert.alert("Sign Up Failed", signUpError.message);
+        return;
       }
 
       Alert.alert(
         "Success",
         "Account created! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.replace("/verify-email") }],
+        [{ text: "OK", onPress: () => router.replace("/verify-email") }]
       );
     } catch (error) {
       console.error("Signup error:", error);
       Alert.alert(
         "Error",
-        error instanceof Error ? error.message : "An unexpected error occurred",
+        error instanceof Error ? error.message : "An unexpected error occurred"
       );
     } finally {
       setLoading(false);
@@ -210,7 +207,7 @@ export default function SignUpScreen() {
             {role === "student" && (
               <>
                 <Text style={styles.sectionTitle}>Student Information</Text>
-
+                
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>University *</Text>
                   <TextInput
@@ -308,7 +305,7 @@ export default function SignUpScreen() {
             {role === "landlord" && (
               <>
                 <Text style={styles.sectionTitle}>Landlord Information</Text>
-
+                
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Phone Number *</Text>
                   <TextInput

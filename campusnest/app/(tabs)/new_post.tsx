@@ -508,7 +508,7 @@ export default function NewPostScreen() {
     <>
       <Text style={styles.title}>Create Post</Text>
       <Text style={styles.subtitle}>
-        Tell others what you&aposre looking for
+        Tell others what you&apos;re looking for
       </Text>
 
       <View style={styles.field}>
@@ -526,7 +526,7 @@ export default function NewPostScreen() {
         <Text style={styles.label}>Description</Text>
         <TextInput
           style={[styles.input, styles.multilineInput]}
-          placeholder="Describe yourself, your preferences, and what you&aposre looking for."
+          placeholder="Describe yourself, your preferences, and what you&apos;re looking for."
           placeholderTextColor="#999"
           value={postBody}
           onChangeText={setPostBody}

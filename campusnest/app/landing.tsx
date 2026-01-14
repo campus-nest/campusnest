@@ -20,7 +20,7 @@ export default function LandingScreen() {
         <Text style={styles.title}>CampusNest</Text>
 
         {/* Subtitle */}
-        <Text style={styles.subtitle}>Let&apos;s get Started!</Text>
+        <Text style={styles.subtitle}>Let&aposs get Started!</Text>
 
         {/* Login Button */}
         <Pressable
