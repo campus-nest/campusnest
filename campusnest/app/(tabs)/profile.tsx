@@ -19,18 +19,14 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchProfile();
-    }, [])
-  );
-
-  async function fetchProfile() {
+  const fetchProfile = useCallback(async () => {
     try {
-      // Only set loading true on first load or if profile is null to avoid flicker
-      if (!profile) setLoading(true);
+      // Only show the spinner if we don't already have a profile (prevents flicker)
+      setLoading((prev) => (profile ? prev : true));
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         console.log("No user logged in");
@@ -45,15 +41,22 @@ export default function ProfileScreen() {
 
       if (error) {
         console.error("Error fetching profile:", error);
-      } else {
-        setProfile(data);
+        return;
       }
+
+      setProfile(data as Profile);
     } catch (error) {
       console.error("Unexpected error:", error);
     } finally {
       setLoading(false);
     }
-  }
+  }, [profile]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [fetchProfile])
+  );
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -70,7 +73,10 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -98,6 +104,7 @@ export default function ProfileScreen() {
                   </View>
                 )}
               </View>
+
               <View style={styles.nameContainer}>
                 <Text style={styles.nameText}>
                   {profile?.full_name || "FirstName LastName"}
@@ -107,6 +114,7 @@ export default function ProfileScreen() {
                 </Text>
               </View>
             </View>
+
             <View style={styles.actionButtons}>
               <TouchableOpacity
                 style={styles.actionButton}
@@ -122,24 +130,36 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
           </View>
+
           <View style={styles.detailRow}>
-            <Text style={styles.detailText}>University: {profile?.university || "NULL"}</Text>
+            <Text style={styles.detailText}>
+              University: {profile?.university || "NULL"}
+            </Text>
             <Text style={styles.detailText}>Year: {profile?.year || "NULL"}</Text>
           </View>
-          <Text style={styles.detailText}>Email: {profile?.email || "NULL"}</Text>
-          <Text style={styles.detailText}>Current Address: {profile?.current_address || "NULL"}</Text>
-          <Text style={styles.detailText}>City: {profile?.city || "NULL"}</Text>
-          <Text style={styles.detailText}>Province: {profile?.province || "NULL"}</Text>
+
+          <Text style={styles.detailText}>
+            Email: {profile?.email || "NULL"}
+          </Text>
+          <Text style={styles.detailText}>
+            Current Address: {profile?.current_address || "NULL"}
+          </Text>
+          <Text style={styles.detailText}>
+            City: {profile?.city || "NULL"}
+          </Text>
+          <Text style={styles.detailText}>
+            Province: {profile?.province || "NULL"}
+          </Text>
         </View>
 
         {/* Saved Posts Section */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
-            {<View style={styles.sectionIndicator} />}
+            <View style={styles.sectionIndicator} />
             <Text style={styles.sectionTitle}>Saved Posts</Text>
           </View>
-          { /* TODO: Add saved posts from supabase */}
 
+          {/* TODO: Add saved posts from Supabase */}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -176,7 +196,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   profileCard: {
-    backgroundColor: "#27272a", // zinc-800
+    backgroundColor: "#27272a",
     borderRadius: 24,
     padding: 24,
     marginBottom: 24,
@@ -195,7 +215,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     width: 64,
     height: 64,
-    backgroundColor: "#52525b", // zinc-600
+    backgroundColor: "#52525b",
     borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
@@ -230,14 +250,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   roleText: {
-    color: "#a1a1aa", // zinc-400
+    color: "#a1a1aa",
     fontStyle: "italic",
   },
   actionButtons: {
     gap: 8,
   },
   actionButton: {
-    backgroundColor: "#3f3f46", // zinc-700
+    backgroundColor: "#3f3f46",
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 8,
@@ -256,7 +276,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   sectionContainer: {
-    backgroundColor: "#27272a", // zinc-800
+    backgroundColor: "#27272a",
     borderRadius: 24,
     padding: 16,
     marginBottom: 80,
@@ -269,141 +289,12 @@ const styles = StyleSheet.create({
   sectionIndicator: {
     width: 4,
     height: 24,
-    backgroundColor: "#52525b", // zinc-600
-    marginRight: 8,
-  },
-  bookmarkIconPlaceholder: {
-    width: 16,
-    height: 24,
-    backgroundColor: "#3f3f46", // zinc-700
+    backgroundColor: "#52525b",
     marginRight: 8,
   },
   sectionTitle: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
-  },
-  postCard: {
-    backgroundColor: "#18181b", // zinc-900
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 16,
-  },
-  postContent: {
-    flexDirection: "row",
-    marginBottom: 12,
-  },
-  postImageContainer: {
-    width: 96,
-    height: 96,
-    backgroundColor: "#bbf7d0", // green-200
-    borderRadius: 12,
-    marginRight: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  postImagePlaceholder: {
-    width: 64,
-    height: 64,
-    backgroundColor: "#fdba74", // orange-300
-    position: "relative",
-  },
-  roof: {
-    position: "absolute",
-    top: 0,
-    width: "100%",
-    height: 16,
-    backgroundColor: "#16a34a", // green-600
-  },
-  door: {
-    position: "absolute",
-    bottom: 0,
-    left: "50%",
-    transform: [{ translateX: -12 }],
-    width: 24,
-    height: 32,
-    backgroundColor: "#ef4444", // red-500
-    borderWidth: 2,
-    borderColor: "white",
-  },
-  postDetails: {
-    flex: 1,
-  },
-  postTitle: {
-    color: "white",
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  postSubtext: {
-    color: "#d4d4d8", // zinc-300
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  postRent: {
-    color: "white",
-    fontSize: 12,
-    fontStyle: "italic",
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  viewDetailsButton: {
-    backgroundColor: "white",
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 9999,
-    alignSelf: "flex-start",
-  },
-  viewDetailsText: {
-    color: "black",
-    fontWeight: "bold",
-    fontSize: 12,
-  },
-  addressText: {
-    color: "white",
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  distanceContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  distanceLabel: {
-    color: "#a1a1aa", // zinc-400
-    fontSize: 12,
-    fontStyle: "italic",
-  },
-  distanceIcons: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  distanceText: {
-    color: "white",
-    fontSize: 12,
-  },
-  roommateCard: {
-    backgroundColor: "#18181b", // zinc-900
-    borderRadius: 16,
-    padding: 16,
-  },
-  roommateTitle: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-    marginBottom: 8,
-  },
-  roommateDescription: {
-    color: "#d4d4d8", // zinc-300
-    fontSize: 12,
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  roommateActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 16,
-  },
-  actionIcon: {
-    color: "white",
-    fontSize: 20,
   },
 });

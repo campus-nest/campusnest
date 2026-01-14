@@ -8,14 +8,13 @@ import {
   Text,
   TextInput,
   View,
-} from "react-native";
+  Platform } from "react-native";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
 import * as FileSystem from "expo-file-system/legacy";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Platform } from "react-native";
 
 type Role = "student" | "landlord";
 

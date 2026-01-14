@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
-  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "@/src/lib/supabaseClient";
 import { PageContainer } from "@/components/page-container";
-import { Image } from "react-native";
-
-type Role = "student" | "landlord";
 
 type Listing = {
   id: string;
@@ -41,7 +39,6 @@ export default function ListingDetailScreen() {
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [landlordName, setLandlordName] = useState<string | null>(null);
-  const [role, setRole] = useState<Role | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -49,47 +46,46 @@ export default function ListingDetailScreen() {
     if (!id) return;
 
     const fetchData = async () => {
-      setLoading(true);
+      try {
+        setLoading(true);
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      const userRole = session?.user?.user_metadata?.role as Role | undefined;
-      if (userRole === "student" || userRole === "landlord") {
-        setRole(userRole);
-      }
+        const { data, error } = await supabase
+          .from("listings")
+          .select("*")
+          .eq("id", id)
+          .single();
 
-      const { data, error } = await supabase
-        .from("listings")
-        .select("*")
-        .eq("id", id)
-        .single();
+        if (error || !data) {
+          console.error("Listing detail error:", error);
+          Alert.alert("Error", "Could not load listing.");
+          return;
+        }
 
-      if (error || !data) {
-        console.error("Listing detail error:", error);
-        Alert.alert("Error", "Could not load listing.");
+        setListing(data as Listing);
+
+        if (session?.user?.id === data.landlord_id) {
+          setIsOwner(true);
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", data.landlord_id)
+          .single();
+
+        if (profile?.full_name) {
+          setLandlordName(profile.full_name);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        Alert.alert("Error", "Something went wrong.");
+      } finally {
         setLoading(false);
-        return;
       }
-
-      setListing(data as Listing);
-
-      if (session?.user?.id && data.landlord_id === session.user.id) {
-        setIsOwner(true);
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", data.landlord_id)
-        .single();
-
-      if (profile?.full_name) {
-        setLandlordName(profile.full_name);
-      }
-
-      setLoading(false);
     };
 
     fetchData();
@@ -163,7 +159,6 @@ export default function ListingDetailScreen() {
           </View>
         )}
 
-
         {/* Content */}
         <Text style={styles.title}>{listing.title}</Text>
 
@@ -223,7 +218,7 @@ export default function ListingDetailScreen() {
           <Text style={styles.bodyText}>{landlordName ?? "Landlord"}</Text>
         </View>
 
-        {/* TODO: Map placeholder */}
+        {/* Map placeholder */}
         <View style={styles.mapPlaceholder}>
           <Text style={styles.mapText}>Map placeholder</Text>
         </View>
@@ -246,12 +241,6 @@ export default function ListingDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  scroll: {
-    flex: 1,
-  },
   scrollContent: {
     paddingTop: 24,
     paddingBottom: 40,
@@ -290,19 +279,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  
   sideImages: {
     width: "35%",
     justifyContent: "space-between",
   },
-  
   sideImage: {
     width: "100%",
     height: 40,
     borderRadius: 10,
     marginBottom: 6,
   },
-  
   morePhotos: {
     height: 40,
     borderRadius: 10,
