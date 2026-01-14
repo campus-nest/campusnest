@@ -2,7 +2,7 @@ import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View, Platform } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import LandingTopHome from "../assets/images/landing_page_top_home.svg";
 import PreSignUpBottomHouse from "../assets/images/pre_sign_up_bottom_house.svg";
 
@@ -21,7 +21,7 @@ export default function PreSignUpScreen() {
     router.push({
       pathname: "/signup",
       params: { role: selectedRole },
-    })
+    });
   };
 
   const getRoleDisplayText = () => {

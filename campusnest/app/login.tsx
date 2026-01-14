@@ -33,7 +33,9 @@ export default function LoginScreen() {
 
     setLoading(true);
 
+
     try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -116,6 +118,10 @@ export default function LoginScreen() {
         Alert.alert("Error", "Unknown user role.");
         setLoading(false);
         return;
+      } else {
+        Alert.alert("Error", "Unknown user role.");
+        setLoading(false);
+        return;
       }
 
     } catch (error) {
@@ -158,6 +164,12 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry
             />
+            <Pressable
+              onPress={() => router.push("/forgot-password")}
+              style={styles.forgotPasswordButton}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </Pressable>
           </View>
 
           <Pressable
@@ -225,6 +237,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#333",
+    letterSpacing: 0,
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
   },
   button: {
     backgroundColor: "#fff",
@@ -247,5 +261,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 10,
     opacity: 0.7,
+  },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+  },
+  forgotPasswordText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+    opacity: 0.8,
   },
 });

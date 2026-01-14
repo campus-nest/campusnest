@@ -1,6 +1,7 @@
 import { PageContainer } from "@/components/page-container";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
@@ -44,13 +45,21 @@ export default function SignUpScreen() {
       return;
     }
 
+    if (!role) {
+      Alert.alert("Error", "Missing role. Please go back and select a role.");
+      return;
+    }
+
     setLoading(true);
 
+
     try {
+      const { error: signUpError } = await supabase.auth.signUp({
       const { error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
+          emailRedirectTo: "https://campusnest.uofacs.ca/",
           emailRedirectTo: "https://campusnest.uofacs.ca/",
           data: {
             full_name: fullName,
@@ -153,11 +162,11 @@ export default function SignUpScreen() {
               </Text>
             </Pressable>
 
-          {Platform.OS === "android" && (
-            <Pressable onPress={() => router.back()}>
-              <Text style={styles.backText}>Back to Landing</Text>
-            </Pressable>
-          )}
+            {Platform.OS === "android" && (
+              <Pressable onPress={() => router.back()}>
+                <Text style={styles.backText}>Back to Landing</Text>
+              </Pressable>
+            )}
           </View>
         </View>
       </ScrollView>

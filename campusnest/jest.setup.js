@@ -1,9 +1,8 @@
-import "@testing-library/jest-native/extend-expect";
 import "dotenv/config";
 
 // Reanimated mock
 jest.mock("react-native-reanimated", () =>
-  require("react-native-reanimated/mock")
+  require("react-native-reanimated/mock"),
 );
 
 // Expo mocks
