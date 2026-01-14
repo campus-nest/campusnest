@@ -1,3 +1,4 @@
 .DS_Store
 coverage/
 run-ci.sh
+files.sh

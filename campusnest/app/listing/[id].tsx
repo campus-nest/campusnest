@@ -10,28 +10,9 @@ import {
   View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { getSupabase } from "@/src/lib/supabaseClient";
 import { PageContainer } from "@/components/page-container";
-
-type Listing = {
-  id: string;
-  landlord_id: string;
-  title: string;
-  address: string;
-  rent: number;
-  lease_term: string;
-  utilities?: string | null;
-  bedrooms?: number | null;
-  bathrooms?: number | null;
-  move_in_date?: string | null;
-  status: string;
-  visibility: string;
-  description?: string | null;
-  security_deposit?: number | null;
-  nearby_university?: string | null;
-  is_furnished?: boolean | null;
-  photo_urls?: string[] | null;
-};
+import { authService, listingService, profileService } from "@/src/services";
+import { Listing } from "@/src/types/listing";
 
 export default function ListingDetailScreen() {
   const router = useRouter();
@@ -41,7 +22,6 @@ export default function ListingDetailScreen() {
   const [landlordName, setLandlordName] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
-  const supabase = getSupabase();
 
   useEffect(() => {
     if (!id) return;
@@ -50,36 +30,37 @@ export default function ListingDetailScreen() {
       try {
         setLoading(true);
 
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+        const session = await authService.getSession();
+        const listingData = await listingService.getListingById(id);
 
-        const { data, error } = await supabase
-          .from("listings")
-          .select("*")
-          .eq("id", id)
-          .single();
-
-        if (error || !data) {
-          console.error("Listing detail error:", error);
+        if (!listingData) {
+          console.error("Listing not found");
           Alert.alert("Error", "Could not load listing.");
           return;
         }
 
-        setListing(data as Listing);
+        setListing(listingData);
 
-        if (session?.user?.id === data.landlord_id) {
+        if (session?.user?.id === listingData.landlord_id) {
           setIsOwner(true);
         }
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", data.landlord_id)
-          .single();
+        // Fetch landlord profile with proper error handling
+        try {
+          const profile = await profileService.getProfileById(
+            listingData.landlord_id,
+          );
 
-        if (profile?.full_name) {
-          setLandlordName(profile.full_name);
+          if (profile?.full_name) {
+            setLandlordName(profile.full_name);
+          } else {
+            // Fallback to a default name if profile doesn't exist or has no name
+            setLandlordName("Landlord");
+          }
+        } catch (profileError) {
+          console.warn("Could not fetch landlord profile:", profileError);
+          // Continue anyway, just use default name
+          setLandlordName("Landlord");
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -90,7 +71,7 @@ export default function ListingDetailScreen() {
     };
 
     fetchData();
-  }, [id, supabase]);
+  }, [id]);
 
   const handleContact = () => {
     Alert.alert(
@@ -209,7 +190,7 @@ export default function ListingDetailScreen() {
         {/* Listed by */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>Listed by</Text>
-          <Text style={styles.bodyText}>{landlordName ?? "Landlord"}</Text>
+          <Text style={styles.bodyText}>{landlordName || "Landlord"}</Text>
         </View>
 
         {/* Map placeholder */}

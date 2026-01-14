@@ -7,16 +7,9 @@ import {
   View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { supabase } from "@/src/lib/supabaseClient";
 import { PageContainer } from "@/components/page-container";
-
-type Post = {
-  id: string;
-  user_id: string;
-  title: string;
-  body: string;
-  created_at: string;
-};
+import { postService } from "@/src/services";
+import { Post } from "@/src/types/post";
 
 export default function PostDetailScreen() {
   const router = useRouter();
@@ -31,19 +24,15 @@ export default function PostDetailScreen() {
     const fetchPost = async () => {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const postData = await postService.getPostById(id);
 
-      if (error) {
-        console.error("Post fetch error:", error);
+      if (!postData) {
+        console.error("Post not found");
         setLoading(false);
         return;
       }
 
-      setPost(data as Post);
+      setPost(postData);
       setLoading(false);
     };
 

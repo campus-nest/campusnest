@@ -8,50 +8,39 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getSupabase } from "@/src/lib/supabaseClient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Profile } from "@/src/types/profile";
 import { Bell, ChevronLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { authService, profileService } from "@/src/services";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = getSupabase();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const fetchProfile = useCallback(async () => {
+    // Don't fetch if we're in the process of logging out
+    if (isLoggingOut) return;
+
     try {
-      // Only show the spinner if we don't already have a profile (prevents flicker)
-      setLoading((prev) => (profile ? prev : true));
+      setLoading(true);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const profileData = await profileService.getCurrentUserProfile();
 
-      if (!user) {
-        console.log("No user logged in");
+      if (!profileData) {
+        console.log("No profile found");
         return;
       }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return;
-      }
-
-      setProfile(data as Profile);
+      setProfile(profileData);
     } catch (error) {
       console.error("Unexpected error:", error);
     } finally {
       setLoading(false);
     }
-  }, [profile, supabase]);
+  }, [isLoggingOut]);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,14 +49,32 @@ export default function ProfileScreen() {
   );
 
   const handleSignOut = useCallback(async () => {
-    await supabase.auth.signOut();
-    router.replace("/landing");
-  }, [supabase, router]);
+    try {
+      setIsLoggingOut(true);
+      const result = await authService.signOut();
+      if (result.success) {
+        // Navigate first, then the screen will unmount
+        router.replace("/landing");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      setIsLoggingOut(false);
+    }
+  }, [router]);
 
-  if (loading) {
+  if (loading && !profile) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#ffffff" />
+      </View>
+    );
+  }
+
+  if (isLoggingOut) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ffffff" />
+        <Text style={styles.loadingText}>Logging out...</Text>
       </View>
     );
   }
@@ -126,6 +133,7 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={handleSignOut}
+                disabled={isLoggingOut}
               >
                 <Text style={styles.actionButtonText}>Log Out</Text>
               </TouchableOpacity>
@@ -160,7 +168,7 @@ export default function ProfileScreen() {
             <Text style={styles.sectionTitle}>Saved Posts</Text>
           </View>
 
-          {/* TODO: Add saved posts from Supabase */}
+          {/* TODO: Add saved posts from database service */}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -173,6 +181,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "black",
+  },
+  loadingText: {
+    color: "#ffffff",
+    marginTop: 12,
+    fontSize: 14,
   },
   safeArea: {
     flex: 1,

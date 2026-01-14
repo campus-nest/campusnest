@@ -10,20 +10,14 @@ import {
   View,
   Platform,
 } from "react-native";
-import { getSupabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
-import * as FileSystem from "expo-file-system/legacy";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { authService, listingService, postService } from "@/src/services";
 
 type Role = "student" | "landlord";
 
-/**
- * NewPostScreen
- * - Landlord: Create Listing
- * - Student: Create Post
- */
 export default function NewPostScreen() {
   const router = useRouter();
 
@@ -31,12 +25,11 @@ export default function NewPostScreen() {
   const [roleLoading, setRoleLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // landlord form state (simplified first version)
+  // Landlord form state
   const [listingTitle, setListingTitle] = useState("");
   const [listingAddress, setListingAddress] = useState("");
   const [listingRent, setListingRent] = useState("");
   const [listingLeaseTerm, setListingLeaseTerm] = useState("");
-  const supabase = getSupabase();
 
   const [utilities, setUtilities] = useState({
     electricity: false,
@@ -57,7 +50,7 @@ export default function NewPostScreen() {
   const [photoUris, setPhotoUris] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"rent" | "price">("rent");
 
-  // student post form state (simplified)
+  // Student post form state
   const [postTitle, setPostTitle] = useState("");
   const [postBody, setPostBody] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -66,23 +59,15 @@ export default function NewPostScreen() {
   useEffect(() => {
     const loadRole = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        const r = session?.user?.user_metadata?.role as Role | undefined;
-        if (r === "student" || r === "landlord") {
-          setRole(r);
-        } else {
-          setRole(null);
-        }
+        const userRole = await authService.getUserRole();
+        setRole(userRole);
       } finally {
         setRoleLoading(false);
       }
     };
 
     loadRole();
-  }, [supabase]);
+  }, []);
 
   // Handlers
   const handleCreateListing = async () => {
@@ -105,63 +90,33 @@ export default function NewPostScreen() {
     setSubmitting(true);
 
     try {
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
+      const user = await authService.getCurrentUser();
 
-      if (sessionError || !session?.user) {
+      if (!user) {
         Alert.alert("Error", "Could not get current user.");
         return;
       }
 
-      const utilitesSelected = Object.entries(utilities)
+      const utilitiesSelected = Object.entries(utilities)
         .filter(([, on]) => on)
         .map(([key]) => key)
         .join(", ");
 
-      //upload photos to supabase
-      const uploadedUrls: string[] = [];
+      // Upload photos
+      const uploadedUrls = await listingService.uploadListingPhotos(
+        user.id,
+        photoUris,
+      );
 
-      for (const uri of photoUris) {
-        const fileExt = uri.split(".").pop() || "jpg";
-        const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
-        const filePath = `listings/${session.user.id}/${fileName}`;
-
-        const uploadResult = await FileSystem.uploadAsync(
-          `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/listing_photos/${filePath}`,
-          uri,
-          {
-            httpMethod: "POST",
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-              "Content-Type": `image/${fileExt}`,
-            },
-            uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-          },
-        );
-
-        if (uploadResult.status !== 200) {
-          throw new Error("Upload failed");
-        }
-
-        const { data } = supabase.storage
-          .from("listing_photos")
-          .getPublicUrl(filePath);
-
-        uploadedUrls.push(data.publicUrl);
-      }
-
-      const { error } = await supabase.from("listings").insert({
-        landlord_id: session.user.id,
+      const result = await listingService.createListing({
+        landlord_id: user.id,
         title: listingTitle,
         address: listingAddress,
         rent: rentNumber,
         lease_term: leaseTermOption || listingLeaseTerm,
         status: "active",
         visibility: "public",
-
-        utilities: utilitesSelected || null,
+        utilities: utilitiesSelected || null,
         nearby_university: nearbyUniversity || null,
         description: description || null,
         tenant_preferences: tenantPreferences || null,
@@ -171,18 +126,16 @@ export default function NewPostScreen() {
         photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
       });
 
-      if (error) {
-        console.error("Create listing error:", error);
-        Alert.alert("Error", "Could not create listing.");
+      if (!result.success) {
+        Alert.alert("Error", result.error || "Could not create listing.");
         return;
       }
 
-      // reset form
+      // Reset form
       setListingTitle("");
       setListingAddress("");
       setListingRent("");
       setListingLeaseTerm("");
-
       setUtilities({
         electricity: false,
         water: false,
@@ -202,7 +155,7 @@ export default function NewPostScreen() {
       setActiveTab("rent");
 
       Alert.alert("Success", "Listing created.");
-      router.push("/(tabs)"); // back to home feed
+      router.push("/(tabs)");
     } finally {
       setSubmitting(false);
     }
@@ -217,25 +170,21 @@ export default function NewPostScreen() {
     setSubmitting(true);
 
     try {
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
+      const user = await authService.getCurrentUser();
 
-      if (sessionError || !session?.user) {
+      if (!user) {
         Alert.alert("Error", "Could not get current user.");
         return;
       }
 
-      const { error } = await supabase.from("posts").insert({
-        user_id: session.user.id,
+      const result = await postService.createPost({
+        user_id: user.id,
         title: postTitle,
         body: postBody,
       });
 
-      if (error) {
-        console.error("Create post error:", error);
-        Alert.alert("Error", "Could not create post.");
+      if (!result.success) {
+        Alert.alert("Error", result.error || "Could not create post.");
         return;
       }
 
@@ -243,7 +192,7 @@ export default function NewPostScreen() {
       setPostBody("");
 
       Alert.alert("Success", "Post created.");
-      router.push("/(tabs)"); // back to home
+      router.push("/(tabs)");
     } finally {
       setSubmitting(false);
     }
@@ -273,9 +222,7 @@ export default function NewPostScreen() {
       <Text style={styles.title}>Create Listing</Text>
       <Text style={styles.subtitle}>Share a place students can rent</Text>
 
-      {/* Card container (light grey background) */}
       <View style={styles.formCard}>
-        {/* Rent / Price Tabs */}
         <View style={styles.tabRow}>
           <Pressable
             onPress={() => setActiveTab("rent")}
@@ -308,7 +255,6 @@ export default function NewPostScreen() {
 
         <View style={styles.cardDivider} />
 
-        {/* LISTING TITLE */}
         <View style={styles.field}>
           <Text style={styles.label}>Listing Title</Text>
           <TextInput
@@ -320,7 +266,6 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* LISTING ADDRESS */}
         <View style={styles.field}>
           <Text style={styles.label}>Address</Text>
           <TextInput
@@ -332,7 +277,6 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* UTILITIES */}
         <Text style={styles.sectionTitle}>Utilities</Text>
         <View style={styles.utilitiesGrid}>
           {["electricity", "water", "wifi", "heat"].map((key) => {
@@ -371,7 +315,6 @@ export default function NewPostScreen() {
           })}
         </View>
 
-        {/* NEARBY UNIVERSITY */}
         <View style={styles.field}>
           <Text style={styles.label}>Nearby University</Text>
           <TextInput
@@ -382,7 +325,6 @@ export default function NewPostScreen() {
             onChangeText={setNearbyUniversity}
           />
 
-          {/* simple suggestion list */}
           {nearbyUniversity.length === 0 && (
             <Pressable
               style={styles.universitySuggestionBox}
@@ -395,7 +337,6 @@ export default function NewPostScreen() {
           )}
         </View>
 
-        {/* DESCRIPTION */}
         <View style={styles.field}>
           <Text style={styles.label}>Description</Text>
           <TextInput
@@ -409,7 +350,6 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* TENANT PREFERENCES */}
         <View style={styles.field}>
           <Text style={styles.label}>Tenant Preferences</Text>
           <TextInput
@@ -423,7 +363,6 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* LEASE TERM OPTION (dropdown) */}
         <View style={styles.field}>
           <Text style={styles.label}>Lease Term</Text>
           <Pressable
@@ -443,7 +382,6 @@ export default function NewPostScreen() {
           </Pressable>
         </View>
 
-        {/* FURNISHED / UNFURNISHED */}
         <View style={styles.toggleRow}>
           <Pressable
             style={[
@@ -480,8 +418,6 @@ export default function NewPostScreen() {
           </Pressable>
         </View>
 
-        {/* MOVE IN DATE */}
-        {/* MOVE IN DATE */}
         <View style={styles.field}>
           <Text style={styles.label}>Move In Date</Text>
 
@@ -510,7 +446,6 @@ export default function NewPostScreen() {
           )}
         </View>
 
-        {/* EXISTING FIELDS (Rent + Lease term text) */}
         <View style={styles.inlineRow}>
           <View style={[styles.field, styles.inlineField]}>
             <Text style={styles.label}>Rent / month</Text>
@@ -536,7 +471,6 @@ export default function NewPostScreen() {
           </View>
         </View>
 
-        {/* LOCATION */}
         <View style={styles.field}>
           <Text style={styles.label}>Location</Text>
           <TextInput
@@ -548,13 +482,11 @@ export default function NewPostScreen() {
           />
         </View>
 
-        {/* UPLOAD PHOTOS (stub only) */}
         <Pressable style={styles.uploadButton} onPress={pickImages}>
           <Text style={styles.uploadButtonText}>Upload photos</Text>
         </Pressable>
       </View>
 
-      {/* Publish button */}
       <Pressable
         style={[
           styles.primaryButton,
@@ -603,8 +535,6 @@ export default function NewPostScreen() {
         />
       </View>
 
-      {/* Future: university, major, budget slider, move-in date, preferred location */}
-
       <Pressable
         style={[
           styles.primaryButton,
@@ -621,7 +551,6 @@ export default function NewPostScreen() {
       </Pressable>
     </>
   );
-
   // Loading / role checks
   if (roleLoading) {
     return (
@@ -631,7 +560,6 @@ export default function NewPostScreen() {
       </View>
     );
   }
-
   if (!role) {
     return (
       <View style={styles.centered}>
@@ -641,7 +569,6 @@ export default function NewPostScreen() {
       </View>
     );
   }
-
   return (
     <PageContainer>
       <ScrollView
@@ -653,7 +580,6 @@ export default function NewPostScreen() {
     </PageContainer>
   );
 }
-
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -738,7 +664,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 8,
   },
-
   tabRow: {
     flexDirection: "row",
     backgroundColor: "#e0e0e0",
@@ -764,27 +689,23 @@ const styles = StyleSheet.create({
   tabTextActive: {
     color: "#000",
   },
-
   cardDivider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: "#d0d0d0",
     marginBottom: 12,
   },
-
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 8,
     color: "#111",
   },
-
   utilitiesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
     marginBottom: 16,
   },
-
   utilityChip: {
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -804,7 +725,6 @@ const styles = StyleSheet.create({
   utilityChipTextSelected: {
     color: "#fff",
   },
-
   inputLight: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -815,7 +735,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
   },
-
   universitySuggestionBox: {
     marginTop: 6,
     borderRadius: 10,
@@ -830,7 +749,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#333",
   },
-
   dropdown: {
     flexDirection: "row",
     alignItems: "center",
@@ -851,7 +769,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
   },
-
   toggleRow: {
     flexDirection: "row",
     gap: 8,
@@ -877,7 +794,6 @@ const styles = StyleSheet.create({
   toggleChipTextActive: {
     color: "#fff",
   },
-
   uploadButton: {
     marginTop: 12,
     borderRadius: 999,
