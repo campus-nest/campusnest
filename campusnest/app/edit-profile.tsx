@@ -8,14 +8,15 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { getSupabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { ChevronLeft, Upload } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { authService, profileService } from "@/src/services";
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -34,48 +35,40 @@ export default function EditProfileScreen() {
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const supabase = getSupabase();
 
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await authService.getCurrentUser();
 
       if (!user) {
         router.replace("/");
         return;
       }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      const profile = await profileService.getProfileById(user.id);
 
-      if (error) {
-        console.error("Error fetching profile:", error);
+      if (!profile) {
         Alert.alert("Error", "Could not fetch profile data.");
         return;
       }
 
-      setFullName(data.full_name || "");
-      setRole(data.role || "student");
-      setUniversity(data.university || "");
-      setYear(data.year || "");
-      setCurrentAddress(data.current_address || "");
-      setCity(data.city || "");
-      setProvince(data.province || "");
-      setEmail(data.email || "");
-      setAvatarUrl(data.avatar_url || null);
+      setFullName(profile.full_name || "");
+      setRole(profile.role || "student");
+      setUniversity(profile.university || "");
+      setYear(profile.year || "");
+      setCurrentAddress(profile.current_address || "");
+      setCity(profile.city || "");
+      setProvince(profile.province || "");
+      setEmail(profile.email || "");
+      setAvatarUrl(profile.avatar_url || null);
     } catch (err) {
       console.error("Unexpected error:", err);
     } finally {
       setLoading(false);
     }
-  }, [router, supabase]);
+  }, [router]);
 
   useEffect(() => {
     fetchProfile();
@@ -99,71 +92,42 @@ export default function EditProfileScreen() {
     }
   }
 
-  async function uploadAvatar(
-    userId: string,
-    uri: string,
-  ): Promise<string | null> {
-    try {
-      const response = await fetch(uri);
-      const arrayBuffer = await response.arrayBuffer();
-
-      const fileExt = uri.split(".").pop() ?? "jpg";
-      const filePath = `${userId}/${userId}.${fileExt}`;
-
-      const { error } = await supabase.storage
-        .from("profile_photos")
-        .upload(filePath, new Uint8Array(arrayBuffer), {
-          contentType: "image/jpeg",
-          upsert: true,
-        });
-
-      if (error) throw error;
-
-      const { data } = supabase.storage
-        .from("profile_photos")
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
-    } catch (error) {
-      console.error("Upload error:", error);
-      Alert.alert("Error", "Could not upload profile picture.");
-      return null;
-    }
-  }
-
   async function handleSave() {
+    if (!fullName.trim()) {
+      Alert.alert("Error", "Full name is required");
+      return;
+    }
+
     try {
       setSaving(true);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await authService.getCurrentUser();
 
       if (!user) return;
 
       let finalAvatarUrl = avatarUrl;
 
       if (imageUri) {
-        const uploaded = await uploadAvatar(user.id, imageUri);
+        const uploaded = await profileService.uploadAvatar(user.id, imageUri);
         if (uploaded) finalAvatarUrl = uploaded;
       }
 
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          full_name: fullName,
-          role,
-          university,
-          year,
-          current_address: currentAddress,
-          city,
-          province,
-          email,
-          avatar_url: finalAvatarUrl,
-        })
-        .eq("id", user.id);
+      const result = await profileService.updateProfile(user.id, {
+        full_name: fullName,
+        role,
+        university,
+        year,
+        current_address: currentAddress,
+        city,
+        province,
+        email,
+        avatar_url: finalAvatarUrl || undefined,
+      });
 
-      if (error) throw error;
+      if (!result.success) {
+        Alert.alert("Error", result.error || "Could not update profile.");
+        return;
+      }
 
       Alert.alert("Success", "Profile updated successfully!");
       router.back();
@@ -202,17 +166,111 @@ export default function EditProfileScreen() {
           {/* Avatar */}
           <View style={styles.avatarSection}>
             <TouchableOpacity onPress={pickImage}>
-              <Image
-                source={{ uri: imageUri || avatarUrl || undefined }}
-                style={styles.avatar}
-              />
+              {imageUri || avatarUrl ? (
+                <Image
+                  source={{ uri: imageUri || avatarUrl || undefined }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarPlaceholder}>Add Photo</Text>
+                </View>
+              )}
               <View style={styles.editIconContainer}>
                 <Upload color="white" size={16} />
               </View>
             </TouchableOpacity>
           </View>
 
-          {/* Save */}
+          {/* Form Fields */}
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Full Name *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your full name"
+                placeholderTextColor="#666"
+                value={fullName}
+                onChangeText={setFullName}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="#666"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            {role === "student" && (
+              <>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>University</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., University of Calgary"
+                    placeholderTextColor="#666"
+                    value={university}
+                    onChangeText={setUniversity}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Year of Study</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., 2nd Year"
+                    placeholderTextColor="#666"
+                    value={year}
+                    onChangeText={setYear}
+                  />
+                </View>
+              </>
+            )}
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Current Address</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your address"
+                placeholderTextColor="#666"
+                value={currentAddress}
+                onChangeText={setCurrentAddress}
+              />
+            </View>
+
+            <View style={styles.rowContainer}>
+              <View style={[styles.inputContainer, styles.halfWidth]}>
+                <Text style={styles.label}>City</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="City"
+                  placeholderTextColor="#666"
+                  value={city}
+                  onChangeText={setCity}
+                />
+              </View>
+
+              <View style={[styles.inputContainer, styles.halfWidth]}>
+                <Text style={styles.label}>Province</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Province"
+                  placeholderTextColor="#666"
+                  value={province}
+                  onChangeText={setProvince}
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* Save Button */}
           <TouchableOpacity
             style={[styles.saveButton, saving && styles.saveButtonDisabled]}
             onPress={handleSave}
@@ -237,8 +295,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  safeArea: { flex: 1, backgroundColor: "black" },
-  scrollContent: { padding: 16 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "black",
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -248,13 +312,25 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 24,
   },
-  headerTitle: { fontSize: 18, fontWeight: "700" },
-  avatarSection: { alignItems: "center", marginBottom: 24 },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  avatarSection: {
+    alignItems: "center",
+    marginBottom: 32,
+  },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
     backgroundColor: "#27272a",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarPlaceholder: {
+    color: "#666",
+    fontSize: 14,
   },
   editIconContainer: {
     position: "absolute",
@@ -264,12 +340,45 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
   },
+  form: {
+    gap: 16,
+    marginBottom: 24,
+  },
+  inputContainer: {
+    gap: 8,
+  },
+  label: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  input: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    padding: 16,
+    color: "#fff",
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  rowContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  halfWidth: {
+    flex: 1,
+  },
   saveButton: {
     backgroundColor: "white",
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
   },
-  saveButtonDisabled: { opacity: 0.7 },
-  saveButtonText: { fontWeight: "700", fontSize: 16 },
+  saveButtonDisabled: {
+    opacity: 0.7,
+  },
+  saveButtonText: {
+    fontWeight: "700",
+    fontSize: 16,
+  },
 });

@@ -1,5 +1,4 @@
 import { PageContainer } from "@/components/page-container";
-import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
@@ -12,6 +11,8 @@ import {
   View,
   Platform,
 } from "react-native";
+import { authService, profileService } from "@/src/services";
+import { getSupabase } from "@/src/lib/supabaseClient";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -34,6 +35,8 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
+      const supabase = getSupabase();
+
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -45,9 +48,7 @@ export default function LoginScreen() {
         return;
       }
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const session = await authService.getSession();
 
       if (!session?.user) {
         Alert.alert("Error", "No user session found.");
@@ -57,19 +58,10 @@ export default function LoginScreen() {
 
       const userId = session.user.id;
 
-      const { data: existingProfile, error: profileCheckError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", userId)
-        .maybeSingle();
+      // Check if profile exists
+      let profile = await profileService.getProfileById(userId);
 
-      if (profileCheckError) {
-        Alert.alert("Error", "Failed to check user profile.");
-        setLoading(false);
-        return;
-      }
-
-      if (!existingProfile) {
+      if (!profile) {
         const fullName = session.user.user_metadata?.full_name;
         const role = session.user.user_metadata?.role;
 
@@ -82,6 +74,7 @@ export default function LoginScreen() {
           return;
         }
 
+        // Create profile using direct Supabase call (since service doesn't have insert method yet)
         const { error: insertError } = await supabase.from("profiles").insert({
           id: userId,
           full_name: fullName,
@@ -93,15 +86,11 @@ export default function LoginScreen() {
           setLoading(false);
           return;
         }
+
+        profile = await profileService.getProfileById(userId);
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
-
-      if (profileError || !profile) {
+      if (!profile) {
         Alert.alert("Error", "Failed to fetch user profile.");
         setLoading(false);
         return;

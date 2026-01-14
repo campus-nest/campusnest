@@ -9,33 +9,16 @@ import {
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { getSupabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
+import { authService, listingService, postService } from "@/src/services";
+import { Listing } from "@/src/types/listing";
+import { Post } from "@/src/types/post";
 
 type Role = "student" | "landlord";
 
 type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
 type LandlordFilter = "yourListings" | "recent";
 type FilterKey = StudentFilter | LandlordFilter;
-
-type Listing = {
-  id: string;
-  landlord_id: string;
-  title: string;
-  address: string;
-  rent: number;
-  lease_term: string;
-  created_at: string;
-  photo_urls?: string[] | null;
-};
-
-type Post = {
-  id: string;
-  user_id: string;
-  title: string;
-  body: string;
-  created_at: string;
-};
 
 type FeedItem =
   | { type: "listing"; created_at: string; item: Listing }
@@ -44,24 +27,15 @@ type FeedItem =
 export default function HomeScreen() {
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
-
   const [listingsLoading, setListingsLoading] = useState(true);
-
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
   const router = useRouter();
-
   const [feed, setFeed] = useState<FeedItem[]>([]);
 
   useEffect(() => {
-    const supabase = getSupabase();
-
     const fetchRole = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        const userRole = session?.user?.user_metadata?.role as Role | undefined;
+        const userRole = await authService.getUserRole();
 
         if (userRole) {
           setRole(userRole);
@@ -78,67 +52,46 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!role) return;
 
-    const supabase = getSupabase();
-
     const fetchFeed = async () => {
       setListingsLoading(true);
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const session = await authService.getSession();
 
-      // 1) Listings query
-      let listingsQuery = supabase
-        .from("listings")
-        .select(
-          "id, landlord_id, title, address, rent, lease_term, created_at, photo_urls",
-        );
+      // 1) Fetch listings based on role and filter
+      let listings: Listing[] = [];
 
       if (role === "student") {
-        // students see public active listings
-        listingsQuery = listingsQuery
-          .eq("status", "active")
-          .eq("visibility", "public");
+        // Students see public active listings
+        listings = await listingService.getListings({
+          status: "active",
+          visibility: "public",
+        });
       } else {
-        // landlord
+        // Landlord
         if (activeFilter === "yourListings") {
-          listingsQuery = listingsQuery.eq("landlord_id", session?.user?.id);
+          listings = await listingService.getListings({
+            landlord_id: session?.user?.id,
+          });
         } else {
-          // "recent" should show public listings from everyone
-          listingsQuery = listingsQuery
-            .eq("status", "active")
-            .eq("visibility", "public");
+          // "recent" shows public listings from everyone
+          listings = await listingService.getListings({
+            status: "active",
+            visibility: "public",
+          });
         }
       }
 
-      const { data: listingsData, error: listingsError } =
-        await listingsQuery.order("created_at", { ascending: false });
-
-      if (listingsError) {
-        console.error("Listing fetch error:", listingsError);
-      }
-
-      // 2) Posts query (for both students + landlords)
-      const { data: postsData, error: postsError } = await supabase
-        .from("posts")
-        .select("id, user_id, title, body, created_at")
-        .order("created_at", { ascending: false });
-
-      if (postsError) {
-        console.error("Posts fetch error:", postsError);
-      }
-
-      const safeListings = (listingsData ?? []) as Listing[];
-      const safePosts = (postsData ?? []) as Post[];
+      // 2) Fetch all posts
+      const posts = await postService.getPosts();
 
       // 3) Merge into one feed sorted by created_at
       const merged: FeedItem[] = [
-        ...safeListings.map((l) => ({
+        ...listings.map((l) => ({
           type: "listing" as const,
           created_at: l.created_at,
           item: l,
         })),
-        ...safePosts.map((p) => ({
+        ...posts.map((p) => ({
           type: "post" as const,
           created_at: p.created_at,
           item: p,
@@ -304,19 +257,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     paddingTop: 10,
   },
-
   contentWrapper: {
     width: "100%",
     paddingHorizontal: 16,
   },
-
   header: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     paddingTop: 12,
   },
-
   searchInput: {
     flex: 1,
     backgroundColor: "#f2f2f2",
@@ -325,7 +275,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 14,
   },
-
   iconButton: {
     width: 40,
     height: 40,
@@ -334,18 +283,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   iconText: {
     fontSize: 18,
   },
-
   filtersRow: {
     flexDirection: "row",
     gap: 8,
     paddingTop: 10,
     paddingBottom: 16,
   },
-
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -354,27 +300,22 @@ const styles = StyleSheet.create({
     borderColor: "#aaa",
     backgroundColor: "#fff",
   },
-
   filterChipActive: {
     backgroundColor: "#000",
     borderColor: "#000",
   },
-
   filterChipText: {
     fontSize: 13,
     color: "#333",
     fontWeight: "500",
   },
-
   filterChipTextActive: {
     color: "#fff",
   },
-
   listContent: {
     width: "100%",
     paddingBottom: 50,
   },
-
   card: {
     flexDirection: "row",
     backgroundColor: "#1a1a1a",
@@ -382,7 +323,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
-
   cardImagePlaceholder: {
     width: 70,
     height: 70,
@@ -392,50 +332,41 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 12,
   },
-
   cardContent: {
     flex: 1,
   },
-
   cardImageEmoji: {
     fontSize: 28,
   },
-
   cardTitle: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "700",
     marginBottom: 4,
   },
-
   cardSubtitle: {
     color: "#ddd",
     fontSize: 12,
   },
-
   cardAddress: {
     color: "#aaa",
     fontSize: 11,
     marginTop: 4,
   },
-
   cardMetaRow: {
     flexDirection: "row",
     marginTop: 6,
   },
-
   cardMetaText: {
     color: "#fff",
     fontSize: 11,
   },
-
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#000",
   },
-
   centeredText: {
     color: "#fff",
     marginTop: 10,
