@@ -49,3 +49,6 @@ myenv/
 venv/
 
 tests/__snapshots__
+
+tree.txt
+temp.txt
