@@ -90,7 +90,7 @@ export default function ListingDetailScreen() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, supabase]);
 
   const handleContact = () => {
     Alert.alert(

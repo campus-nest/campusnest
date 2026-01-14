@@ -75,7 +75,7 @@ export default function EditProfileScreen() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, supabase]);
 
   useEffect(() => {
     fetchProfile();

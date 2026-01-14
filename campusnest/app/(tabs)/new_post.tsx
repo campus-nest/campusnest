@@ -81,7 +81,7 @@ export default function NewPostScreen() {
     };
 
     loadRole();
-  }, []);
+  }, [supabase]);
 
   // Handlers
   const handleCreateListing = async () => {

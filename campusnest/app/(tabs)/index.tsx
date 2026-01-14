@@ -51,9 +51,10 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const [feed, setFeed] = useState<FeedItem[]>([]);
-  const supabase = getSupabase();
 
   useEffect(() => {
+    const supabase = getSupabase();
+
     const fetchRole = async () => {
       try {
         const {
@@ -77,10 +78,12 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (!role) return;
-  
+
+    const supabase = getSupabase();
+
     const fetchFeed = async () => {
       setListingsLoading(true);
-  
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -142,7 +145,7 @@ export default function HomeScreen() {
       setFeed(merged);
       setListingsLoading(false);
     };
-  
+
     fetchFeed();
   }, [role, activeFilter]);
   

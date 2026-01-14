@@ -51,7 +51,7 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
-  }, [profile]);
+  }, [profile, supabase]);
 
   useFocusEffect(
     useCallback(() => {
@@ -59,10 +59,10 @@ export default function ProfileScreen() {
     }, [fetchProfile])
   );
 
-  async function handleSignOut() {
+  const handleSignOut = useCallback(async () => {
     await supabase.auth.signOut();
     router.replace("/landing");
-  }
+  }, [supabase, router]);
 
   if (loading) {
     return (
