@@ -1,5 +1,9 @@
 import { getSupabase } from "@/src/lib/supabaseClient";
-import { Listing, CreateListingInput, ListingFilters } from "@/src/types/listing";
+import {
+  Listing,
+  CreateListingInput,
+  ListingFilters,
+} from "@/src/types/listing";
 import * as FileSystem from "expo-file-system/legacy";
 
 export class ListingService {
@@ -58,7 +62,7 @@ export class ListingService {
    * Create a new listing
    */
   async createListing(
-    input: CreateListingInput
+    input: CreateListingInput,
   ): Promise<{ success: boolean; listingId?: string; error?: string }> {
     const { data, error } = await this.supabase
       .from("listings")
@@ -79,10 +83,12 @@ export class ListingService {
    */
   async uploadListingPhotos(
     landlordId: string,
-    photoUris: string[]
+    photoUris: string[],
   ): Promise<string[]> {
-    const { data: { session } } = await this.supabase.auth.getSession();
-    
+    const {
+      data: { session },
+    } = await this.supabase.auth.getSession();
+
     if (!session) {
       console.error("No active session for photo upload");
       return [];
@@ -106,7 +112,7 @@ export class ListingService {
               "Content-Type": `image/${fileExt}`,
             },
             uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-          }
+          },
         );
 
         if (uploadResult.status === 200) {

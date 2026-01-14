@@ -38,8 +38,10 @@ export class ProfileService {
    * Get the current user's profile
    */
   async getCurrentUserProfile(): Promise<Profile | null> {
-    const { data: { user } } = await this.supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
+
     if (!user) {
       console.error("No user logged in");
       return null;
@@ -53,7 +55,7 @@ export class ProfileService {
    */
   async updateProfile(
     userId: string,
-    updates: UpdateProfileInput
+    updates: UpdateProfileInput,
   ): Promise<{ success: boolean; error?: string }> {
     const { error } = await this.supabase
       .from("profiles")
@@ -71,10 +73,7 @@ export class ProfileService {
   /**
    * Upload avatar to storage and return public URL
    */
-  async uploadAvatar(
-    userId: string,
-    uri: string
-  ): Promise<string | null> {
+  async uploadAvatar(userId: string, uri: string): Promise<string | null> {
     try {
       const response = await fetch(uri);
       const arrayBuffer = await response.arrayBuffer();

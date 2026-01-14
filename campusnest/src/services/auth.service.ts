@@ -9,12 +9,12 @@ export class AuthService {
    */
   async getCurrentUser(): Promise<User | null> {
     const { data, error } = await this.supabase.auth.getUser();
-    
+
     if (error) {
       console.error("Error getting current user:", error);
       return null;
     }
-    
+
     return data.user;
   }
 
@@ -23,12 +23,12 @@ export class AuthService {
    */
   async getSession(): Promise<Session | null> {
     const { data, error } = await this.supabase.auth.getSession();
-    
+
     if (error) {
       console.error("Error getting session:", error);
       return null;
     }
-    
+
     return data.session;
   }
 
@@ -37,12 +37,12 @@ export class AuthService {
    */
   async signOut(): Promise<{ success: boolean; error?: string }> {
     const { error } = await this.supabase.auth.signOut();
-    
+
     if (error) {
       console.error("Error signing out:", error);
       return { success: false, error: error.message };
     }
-    
+
     return { success: true };
   }
 
@@ -51,7 +51,9 @@ export class AuthService {
    */
   async getUserRole(): Promise<"student" | "landlord" | null> {
     const session = await this.getSession();
-    return (session?.user?.user_metadata?.role as "student" | "landlord") ?? null;
+    return (
+      (session?.user?.user_metadata?.role as "student" | "landlord") ?? null
+    );
   }
 }
 

@@ -43,7 +43,7 @@ export class PostService {
    * Create a new post
    */
   async createPost(
-    input: CreatePostInput
+    input: CreatePostInput,
   ): Promise<{ success: boolean; postId?: string; error?: string }> {
     const { data, error } = await this.supabase
       .from("posts")
