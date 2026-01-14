@@ -11,11 +11,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getSupabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { ChevronLeft, Upload } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { authService, profileService } from "@/src/services";
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -34,48 +34,40 @@ export default function EditProfileScreen() {
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const supabase = getSupabase();
 
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await authService.getCurrentUser();
 
       if (!user) {
         router.replace("/");
         return;
       }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      const profile = await profileService.getProfileById(user.id);
 
-      if (error) {
-        console.error("Error fetching profile:", error);
+      if (!profile) {
         Alert.alert("Error", "Could not fetch profile data.");
         return;
       }
 
-      setFullName(data.full_name || "");
-      setRole(data.role || "student");
-      setUniversity(data.university || "");
-      setYear(data.year || "");
-      setCurrentAddress(data.current_address || "");
-      setCity(data.city || "");
-      setProvince(data.province || "");
-      setEmail(data.email || "");
-      setAvatarUrl(data.avatar_url || null);
+      setFullName(profile.full_name || "");
+      setRole(profile.role || "student");
+      setUniversity(profile.university || "");
+      setYear(profile.year || "");
+      setCurrentAddress(profile.current_address || "");
+      setCity(profile.city || "");
+      setProvince(profile.province || "");
+      setEmail(profile.email || "");
+      setAvatarUrl(profile.avatar_url || null);
     } catch (err) {
       console.error("Unexpected error:", err);
     } finally {
       setLoading(false);
     }
-  }, [router, supabase]);
+  }, [router]);
 
   useEffect(() => {
     fetchProfile();
@@ -99,71 +91,37 @@ export default function EditProfileScreen() {
     }
   }
 
-  async function uploadAvatar(
-    userId: string,
-    uri: string,
-  ): Promise<string | null> {
-    try {
-      const response = await fetch(uri);
-      const arrayBuffer = await response.arrayBuffer();
-
-      const fileExt = uri.split(".").pop() ?? "jpg";
-      const filePath = `${userId}/${userId}.${fileExt}`;
-
-      const { error } = await supabase.storage
-        .from("profile_photos")
-        .upload(filePath, new Uint8Array(arrayBuffer), {
-          contentType: "image/jpeg",
-          upsert: true,
-        });
-
-      if (error) throw error;
-
-      const { data } = supabase.storage
-        .from("profile_photos")
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
-    } catch (error) {
-      console.error("Upload error:", error);
-      Alert.alert("Error", "Could not upload profile picture.");
-      return null;
-    }
-  }
-
   async function handleSave() {
     try {
       setSaving(true);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await authService.getCurrentUser();
 
       if (!user) return;
 
       let finalAvatarUrl = avatarUrl;
 
       if (imageUri) {
-        const uploaded = await uploadAvatar(user.id, imageUri);
+        const uploaded = await profileService.uploadAvatar(user.id, imageUri);
         if (uploaded) finalAvatarUrl = uploaded;
       }
 
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          full_name: fullName,
-          role,
-          university,
-          year,
-          current_address: currentAddress,
-          city,
-          province,
-          email,
-          avatar_url: finalAvatarUrl,
-        })
-        .eq("id", user.id);
+      const result = await profileService.updateProfile(user.id, {
+        full_name: fullName,
+        role,
+        university,
+        year,
+        current_address: currentAddress,
+        city,
+        province,
+        email,
+        avatar_url: finalAvatarUrl,
+      });
 
-      if (error) throw error;
+      if (!result.success) {
+        Alert.alert("Error", result.error || "Could not update profile.");
+        return;
+      }
 
       Alert.alert("Success", "Profile updated successfully!");
       router.back();

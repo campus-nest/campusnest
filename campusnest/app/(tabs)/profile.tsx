@@ -8,50 +8,36 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getSupabase } from "@/src/lib/supabaseClient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Profile } from "@/src/types/profile";
 import { Bell, ChevronLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { authService, profileService } from "@/src/services";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = getSupabase();
 
   const fetchProfile = useCallback(async () => {
     try {
       // Only show the spinner if we don't already have a profile (prevents flicker)
       setLoading((prev) => (profile ? prev : true));
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const profileData = await profileService.getCurrentUserProfile();
 
-      if (!user) {
-        console.log("No user logged in");
+      if (!profileData) {
+        console.log("No profile found");
         return;
       }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return;
-      }
-
-      setProfile(data as Profile);
+      setProfile(profileData);
     } catch (error) {
       console.error("Unexpected error:", error);
     } finally {
       setLoading(false);
     }
-  }, [profile, supabase]);
+  }, [profile]);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,9 +46,11 @@ export default function ProfileScreen() {
   );
 
   const handleSignOut = useCallback(async () => {
-    await supabase.auth.signOut();
-    router.replace("/landing");
-  }, [supabase, router]);
+    const result = await authService.signOut();
+    if (result.success) {
+      router.replace("/landing");
+    }
+  }, [router]);
 
   if (loading) {
     return (
@@ -160,7 +148,7 @@ export default function ProfileScreen() {
             <Text style={styles.sectionTitle}>Saved Posts</Text>
           </View>
 
-          {/* TODO: Add saved posts from Supabase */}
+          {/* TODO: Add saved posts from database service */}
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,5 +1,4 @@
 import { PageContainer } from "@/components/page-container";
-import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
@@ -13,6 +12,7 @@ import {
   View,
   Platform,
 } from "react-native";
+import { getSupabase } from "@/src/lib/supabaseClient";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -47,6 +47,8 @@ export default function SignUpScreen() {
     setLoading(true);
 
     try {
+      const supabase = getSupabase();
+
       const { error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -151,91 +153,90 @@ export default function SignUpScreen() {
                 {loading ? "Creating Account..." : "Sign Up"}
               </Text>
             </Pressable>
+          {Platform.OS === "android" && (
+            <Pressable onPress={() => router.back()}>
+              <Text style={styles.backText}>Back to Landing</Text>
+            </Pressable>
+                )}
+              </View>
+            </View>
+          </ScrollView>
+        </PageContainer>
 
-            {Platform.OS === "android" && (
-              <Pressable onPress={() => router.back()}>
-                <Text style={styles.backText}>Back to Landing</Text>
-              </Pressable>
-            )}
-          </View>
-        </View>
-      </ScrollView>
-    </PageContainer>
-  );
-}
-
-const styles = StyleSheet.create({
-  outerContainer: {
-    backgroundColor: "#000",
-  },
-  scrollContainer: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 30,
-    paddingVertical: 60,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "400",
-    marginBottom: 40,
-    textAlign: "center",
-    opacity: 0.8,
-  },
-  form: {
-    gap: 20,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    color: "#fff",
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  button: {
-    backgroundColor: "#fff",
-    borderRadius: 100,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  backText: {
-    color: "#fff",
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 10,
-    opacity: 0.7,
-  },
-});
+        );
+        }
+        const styles = StyleSheet.create({
+        outerContainer: {
+        backgroundColor: "#000",
+        },
+        scrollContainer: {
+        flex: 1,
+        backgroundColor: "#000",
+        },
+        scrollContent: {
+        flexGrow: 1,
+        },
+        content: {
+        flex: 1,
+        justifyContent: "center",
+        paddingHorizontal: 30,
+        paddingVertical: 60,
+        },
+        title: {
+        color: "#fff",
+        fontSize: 32,
+        fontWeight: "600",
+        marginBottom: 8,
+        textAlign: "center",
+        },
+        subtitle: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "400",
+        marginBottom: 40,
+        textAlign: "center",
+        opacity: 0.8,
+        },
+        form: {
+        gap: 20,
+        },
+        inputContainer: {
+        gap: 8,
+        },
+        label: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "500",
+        },
+        input: {
+        backgroundColor: "#1a1a1a",
+        borderRadius: 12,
+        padding: 16,
+        color: "#fff",
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: "#333",
+        },
+        button: {
+        backgroundColor: "#fff",
+        borderRadius: 100,
+        padding: 16,
+        alignItems: "center",
+        marginTop: 10,
+        },
+        buttonDisabled: {
+        opacity: 0.6,
+        },
+        buttonText: {
+        color: "#000",
+        fontSize: 16,
+        fontWeight: "600",
+        },
+        backText: {
+        color: "#fff",
+        fontSize: 14,
+        textAlign: "center",
+        marginTop: 10,
+        opacity: 0.7,
+        },
+        });
