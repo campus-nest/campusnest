@@ -1,16 +1,12 @@
-import { PageContainer } from "@/components/page-container";
+import Button from "@/components/ui/Button";
+import { H1, H4 } from "@/components/ui/Headings";
+import Input from "@/components/ui/Input";
+import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
-  Alert,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+  Alert
 } from "react-native";
 
 export default function ForgotPasswordScreen() {
@@ -63,119 +59,20 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <PageContainer style={styles.container}>
-      <StatusBar style="light" />
+    <Screen>
 
-      <View style={styles.content}>
-        {Platform.OS === "android" && (
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← Back</Text>
-          </Pressable>
-        )}
+        <H1>Forgot Password</H1>
+        <H4>Enter your email to receive a reset code</H4>
 
-        <Text style={styles.title}>Forgot Password</Text>
-        <Text style={styles.subtitle}>
-          Enter your email to receive a reset code
-        </Text>
-
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor="#666"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <Pressable
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleSendCode}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? "Sending..." : "Send Code"}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-    </PageContainer>
+        <Input
+          label="Email"
+          placeholder="Enter your email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address" />
+        
+        <Button fullWidth onPress={handleSendCode}>{loading ? "Sending..." : "Send Code"}</Button>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 30,
-  },
-  backButton: {
-    position: "absolute",
-    top: 60,
-    left: 30,
-    zIndex: 10,
-  },
-  backButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    opacity: 0.8,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "400",
-    marginBottom: 40,
-    textAlign: "center",
-    opacity: 0.8,
-  },
-  form: {
-    gap: 20,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    color: "#fff",
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  button: {
-    backgroundColor: "#fff",
-    borderRadius: 100,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
