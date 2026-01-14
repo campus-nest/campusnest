@@ -33,7 +33,7 @@ export class ProfileService {
    */
   async createProfile(
     userId: string,
-    profileData: CreateProfileInput,
+    profileData: CreateProfileInput
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const { error } = await this.supabase.from("profiles").insert({
@@ -75,7 +75,12 @@ export class ProfileService {
       .single();
 
     if (error) {
-      console.error("Error fetching profile:", error);
+      // PGRST116 means no rows found - this is expected for some cases
+      if (error.code === "PGRST116") {
+        console.warn(`Profile not found for user ${userId}`);
+      } else {
+        console.error("Error fetching profile:", error);
+      }
       return null;
     }
 
@@ -91,7 +96,7 @@ export class ProfileService {
     } = await this.supabase.auth.getUser();
 
     if (!user) {
-      console.error("No user logged in");
+      // This is expected when user is not logged in or during logout
       return null;
     }
 
@@ -103,7 +108,7 @@ export class ProfileService {
    */
   async updateProfile(
     userId: string,
-    updates: UpdateProfileInput,
+    updates: UpdateProfileInput
   ): Promise<{ success: boolean; error?: string }> {
     const { error } = await this.supabase
       .from("profiles")

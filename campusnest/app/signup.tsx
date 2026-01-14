@@ -319,10 +319,10 @@ export default function SignUpScreen() {
                 </View>
 
                 <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Property Address</Text>
+                  <Text style={styles.label}>Property Location</Text>
                   <TextInput
                     style={styles.input}
-                    placeholder="Main property address"
+                    placeholder="Main property location"
                     placeholderTextColor="#666"
                     value={propertyAddress}
                     onChangeText={setPropertyAddress}

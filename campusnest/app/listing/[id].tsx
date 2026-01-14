@@ -45,12 +45,22 @@ export default function ListingDetailScreen() {
           setIsOwner(true);
         }
 
-        const profile = await profileService.getProfileById(
-          listingData.landlord_id,
-        );
+        // Fetch landlord profile with proper error handling
+        try {
+          const profile = await profileService.getProfileById(
+            listingData.landlord_id,
+          );
 
-        if (profile?.full_name) {
-          setLandlordName(profile.full_name);
+          if (profile?.full_name) {
+            setLandlordName(profile.full_name);
+          } else {
+            // Fallback to a default name if profile doesn't exist or has no name
+            setLandlordName("Landlord");
+          }
+        } catch (profileError) {
+          console.warn("Could not fetch landlord profile:", profileError);
+          // Continue anyway, just use default name
+          setLandlordName("Landlord");
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -180,7 +190,7 @@ export default function ListingDetailScreen() {
         {/* Listed by */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>Listed by</Text>
-          <Text style={styles.bodyText}>{landlordName ?? "Landlord"}</Text>
+          <Text style={styles.bodyText}>{landlordName || "Landlord"}</Text>
         </View>
 
         {/* Map placeholder */}

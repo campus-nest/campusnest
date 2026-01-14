@@ -18,11 +18,14 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const fetchProfile = useCallback(async () => {
+    // Don't fetch if we're in the process of logging out
+    if (isLoggingOut) return;
+
     try {
-      // Only show the spinner if we don't already have a profile (prevents flicker)
-      setLoading((prev) => (profile ? prev : true));
+      setLoading(true);
 
       const profileData = await profileService.getCurrentUserProfile();
 
@@ -37,7 +40,7 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
-  }, [profile]);
+  }, [isLoggingOut]);
 
   useFocusEffect(
     useCallback(() => {
@@ -46,16 +49,32 @@ export default function ProfileScreen() {
   );
 
   const handleSignOut = useCallback(async () => {
-    const result = await authService.signOut();
-    if (result.success) {
-      router.replace("/landing");
+    try {
+      setIsLoggingOut(true);
+      const result = await authService.signOut();
+      if (result.success) {
+        // Navigate first, then the screen will unmount
+        router.replace("/landing");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      setIsLoggingOut(false);
     }
   }, [router]);
 
-  if (loading) {
+  if (loading && !profile) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#ffffff" />
+      </View>
+    );
+  }
+
+  if (isLoggingOut) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ffffff" />
+        <Text style={styles.loadingText}>Logging out...</Text>
       </View>
     );
   }
@@ -114,6 +133,7 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={handleSignOut}
+                disabled={isLoggingOut}
               >
                 <Text style={styles.actionButtonText}>Log Out</Text>
               </TouchableOpacity>
@@ -161,6 +181,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "black",
+  },
+  loadingText: {
+    color: "#ffffff",
+    marginTop: 12,
+    fontSize: 14,
   },
   safeArea: {
     flex: 1,
