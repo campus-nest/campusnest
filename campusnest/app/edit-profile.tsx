@@ -8,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -92,6 +93,11 @@ export default function EditProfileScreen() {
   }
 
   async function handleSave() {
+    if (!fullName.trim()) {
+      Alert.alert("Error", "Full name is required");
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -115,7 +121,7 @@ export default function EditProfileScreen() {
         city,
         province,
         email,
-        avatar_url: finalAvatarUrl,
+        avatar_url: finalAvatarUrl || undefined,
       });
 
       if (!result.success) {
@@ -160,17 +166,111 @@ export default function EditProfileScreen() {
           {/* Avatar */}
           <View style={styles.avatarSection}>
             <TouchableOpacity onPress={pickImage}>
-              <Image
-                source={{ uri: imageUri || avatarUrl || undefined }}
-                style={styles.avatar}
-              />
+              {(imageUri || avatarUrl) ? (
+                <Image
+                  source={{ uri: imageUri || avatarUrl || undefined }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarPlaceholder}>Add Photo</Text>
+                </View>
+              )}
               <View style={styles.editIconContainer}>
                 <Upload color="white" size={16} />
               </View>
             </TouchableOpacity>
           </View>
 
-          {/* Save */}
+          {/* Form Fields */}
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Full Name *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your full name"
+                placeholderTextColor="#666"
+                value={fullName}
+                onChangeText={setFullName}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="#666"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            {role === "student" && (
+              <>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>University</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., University of Calgary"
+                    placeholderTextColor="#666"
+                    value={university}
+                    onChangeText={setUniversity}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Year of Study</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., 2nd Year"
+                    placeholderTextColor="#666"
+                    value={year}
+                    onChangeText={setYear}
+                  />
+                </View>
+              </>
+            )}
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Current Address</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your address"
+                placeholderTextColor="#666"
+                value={currentAddress}
+                onChangeText={setCurrentAddress}
+              />
+            </View>
+
+            <View style={styles.rowContainer}>
+              <View style={[styles.inputContainer, styles.halfWidth]}>
+                <Text style={styles.label}>City</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="City"
+                  placeholderTextColor="#666"
+                  value={city}
+                  onChangeText={setCity}
+                />
+              </View>
+
+              <View style={[styles.inputContainer, styles.halfWidth]}>
+                <Text style={styles.label}>Province</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Province"
+                  placeholderTextColor="#666"
+                  value={province}
+                  onChangeText={setProvince}
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* Save Button */}
           <TouchableOpacity
             style={[styles.saveButton, saving && styles.saveButtonDisabled]}
             onPress={handleSave}
@@ -195,8 +295,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  safeArea: { flex: 1, backgroundColor: "black" },
-  scrollContent: { padding: 16 },
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: "black" 
+  },
+  scrollContent: { 
+    padding: 16,
+    paddingBottom: 40,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -206,13 +312,25 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 24,
   },
-  headerTitle: { fontSize: 18, fontWeight: "700" },
-  avatarSection: { alignItems: "center", marginBottom: 24 },
+  headerTitle: { 
+    fontSize: 18, 
+    fontWeight: "700" 
+  },
+  avatarSection: { 
+    alignItems: "center", 
+    marginBottom: 32,
+  },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
     backgroundColor: "#27272a",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarPlaceholder: {
+    color: "#666",
+    fontSize: 14,
   },
   editIconContainer: {
     position: "absolute",
@@ -222,12 +340,45 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
   },
+  form: {
+    gap: 16,
+    marginBottom: 24,
+  },
+  inputContainer: {
+    gap: 8,
+  },
+  label: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  input: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    padding: 16,
+    color: "#fff",
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  rowContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  halfWidth: {
+    flex: 1,
+  },
   saveButton: {
     backgroundColor: "white",
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
   },
-  saveButtonDisabled: { opacity: 0.7 },
-  saveButtonText: { fontWeight: "700", fontSize: 16 },
+  saveButtonDisabled: { 
+    opacity: 0.7 
+  },
+  saveButtonText: { 
+    fontWeight: "700", 
+    fontSize: 16 
+  },
 });

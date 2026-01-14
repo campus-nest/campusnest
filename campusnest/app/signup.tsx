@@ -12,70 +12,129 @@ import {
   View,
   Platform,
 } from "react-native";
-import { getSupabase } from "@/src/lib/supabaseClient";
+import { authService, profileService } from "@/src/services";
 
 export default function SignUpScreen() {
   const router = useRouter();
-  const { role } = useLocalSearchParams();
+  const { role } = useLocalSearchParams<{ role: "student" | "landlord" }>();
+  
+  // Common fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [university, setUniversity] = useState("");
+  const [currentAddress, setCurrentAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [province, setProvince] = useState("");
+  
+  // Student-specific fields
+  const [year, setYear] = useState("");
+  const [lookingFor, setLookingFor] = useState("");
+  const [budget, setBudget] = useState("");
+  const [preferredLocation, setPreferredLocation] = useState("");
+  
+  // Landlord-specific fields
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [propertyAddress, setPropertyAddress] = useState("");
+  
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async () => {
+  const validateForm = () => {
     if (!email || !password || !confirmPassword || !fullName) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
+      Alert.alert("Error", "Please fill in all required fields");
+      return false;
     }
 
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
-      return;
+      return false;
     }
 
     if (password.length < 6) {
       Alert.alert("Error", "Password must be at least 6 characters");
-      return;
+      return false;
     }
 
     if (!role) {
       Alert.alert("Error", "Missing role. Please go back and select a role.");
-      return;
+      return false;
     }
+
+    // Role-specific validation
+    if (role === "student") {
+      if (!university || !year || !lookingFor || !budget) {
+        Alert.alert("Error", "Please fill in all student-specific fields");
+        return false;
+      }
+    } else if (role === "landlord") {
+      if (!phoneNumber || !city || !province) {
+        Alert.alert("Error", "Please fill in all landlord-specific fields");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleSignUp = async () => {
+    if (!validateForm()) return;
 
     setLoading(true);
 
     try {
-      const supabase = getSupabase();
-
-      const { error: signUpError } = await supabase.auth.signUp({
+      // Step 1: Create auth user
+      const signUpResult = await authService.signUp({
         email: email.trim(),
         password,
-        options: {
-          emailRedirectTo: "https://campusnest.uofacs.ca/",
-          data: {
-            full_name: fullName,
-            role: role,
-          },
-        },
+        fullName,
+        role: role!,
       });
 
-      if (signUpError) {
-        Alert.alert("Sign Up Failed", signUpError.message);
+      if (!signUpResult.success || !signUpResult.user) {
+        Alert.alert("Sign Up Failed", signUpResult.error || "Unknown error");
         return;
+      }
+
+      // Step 2: Create profile with role-specific data
+      const profileData: any = {
+        full_name: fullName,
+        role: role,
+        email: email.trim(),
+        city,
+        province,
+        current_address: currentAddress,
+      };
+
+      if (role === "student") {
+        profileData.university = university;
+        profileData.year = year;
+        // Store additional student data in a JSON field or separate table
+        // For now, we can use university field to store looking_for info
+      } else if (role === "landlord") {
+        // Store landlord-specific data
+      }
+
+      const createProfileResult = await profileService.createProfile(
+        signUpResult.user.id,
+        profileData
+      );
+
+      if (!createProfileResult.success) {
+        console.error("Profile creation failed:", createProfileResult.error);
+        // Auth user is created but profile failed - this is ok, profile can be created later
       }
 
       Alert.alert(
         "Success",
         "Account created! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.replace("/verify-email") }],
+        [{ text: "OK", onPress: () => router.replace("/verify-email") }]
       );
     } catch (error) {
       console.error("Signup error:", error);
       Alert.alert(
         "Error",
-        error instanceof Error ? error.message : "An unexpected error occurred",
+        error instanceof Error ? error.message : "An unexpected error occurred"
       );
     } finally {
       setLoading(false);
@@ -93,11 +152,14 @@ export default function SignUpScreen() {
 
         <View style={styles.content}>
           <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join CampusNest today</Text>
+          <Text style={styles.subtitle}>
+            Join CampusNest as a {role === "student" ? "Student" : "Landlord"}
+          </Text>
 
           <View style={styles.form}>
+            {/* Common Fields */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Full Name</Text>
+              <Text style={styles.label}>Full Name *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Enter your full name"
@@ -108,7 +170,7 @@ export default function SignUpScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Email *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Enter your email"
@@ -121,10 +183,10 @@ export default function SignUpScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>Password *</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Create a password"
+                placeholder="Create a password (min 6 characters)"
                 placeholderTextColor="#666"
                 value={password}
                 onChangeText={setPassword}
@@ -133,7 +195,7 @@ export default function SignUpScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirm Password</Text>
+              <Text style={styles.label}>Confirm Password *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Confirm your password"
@@ -144,6 +206,169 @@ export default function SignUpScreen() {
               />
             </View>
 
+            {/* Student-Specific Fields */}
+            {role === "student" && (
+              <>
+                <Text style={styles.sectionTitle}>Student Information</Text>
+                
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>University *</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., University of Calgary"
+                    placeholderTextColor="#666"
+                    value={university}
+                    onChangeText={setUniversity}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Year of Study *</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., 2nd Year, 3rd Year"
+                    placeholderTextColor="#666"
+                    value={year}
+                    onChangeText={setYear}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>What are you looking for? *</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., 1-bedroom apartment, shared room"
+                    placeholderTextColor="#666"
+                    value={lookingFor}
+                    onChangeText={setLookingFor}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Monthly Budget *</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., $800-1200"
+                    placeholderTextColor="#666"
+                    value={budget}
+                    onChangeText={setBudget}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Preferred Location</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., Near campus, Downtown"
+                    placeholderTextColor="#666"
+                    value={preferredLocation}
+                    onChangeText={setPreferredLocation}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Current Address</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Your current address"
+                    placeholderTextColor="#666"
+                    value={currentAddress}
+                    onChangeText={setCurrentAddress}
+                  />
+                </View>
+
+                <View style={styles.rowContainer}>
+                  <View style={[styles.inputContainer, styles.halfWidth]}>
+                    <Text style={styles.label}>City</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="City"
+                      placeholderTextColor="#666"
+                      value={city}
+                      onChangeText={setCity}
+                    />
+                  </View>
+
+                  <View style={[styles.inputContainer, styles.halfWidth]}>
+                    <Text style={styles.label}>Province</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Province"
+                      placeholderTextColor="#666"
+                      value={province}
+                      onChangeText={setProvince}
+                    />
+                  </View>
+                </View>
+              </>
+            )}
+
+            {/* Landlord-Specific Fields */}
+            {role === "landlord" && (
+              <>
+                <Text style={styles.sectionTitle}>Landlord Information</Text>
+                
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Phone Number *</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., (403) 123-4567"
+                    placeholderTextColor="#666"
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                    keyboardType="phone-pad"
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Property Address</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Main property address"
+                    placeholderTextColor="#666"
+                    value={propertyAddress}
+                    onChangeText={setPropertyAddress}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Current Address</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Your current address"
+                    placeholderTextColor="#666"
+                    value={currentAddress}
+                    onChangeText={setCurrentAddress}
+                  />
+                </View>
+
+                <View style={styles.rowContainer}>
+                  <View style={[styles.inputContainer, styles.halfWidth]}>
+                    <Text style={styles.label}>City *</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="City"
+                      placeholderTextColor="#666"
+                      value={city}
+                      onChangeText={setCity}
+                    />
+                  </View>
+
+                  <View style={[styles.inputContainer, styles.halfWidth]}>
+                    <Text style={styles.label}>Province *</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Province"
+                      placeholderTextColor="#666"
+                      value={province}
+                      onChangeText={setProvince}
+                    />
+                  </View>
+                </View>
+              </>
+            )}
+
             <Pressable
               style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleSignUp}
@@ -153,9 +378,10 @@ export default function SignUpScreen() {
                 {loading ? "Creating Account..." : "Sign Up"}
               </Text>
             </Pressable>
+
             {Platform.OS === "android" && (
               <Pressable onPress={() => router.back()}>
-                <Text style={styles.backText}>Back to Landing</Text>
+                <Text style={styles.backText}>Back</Text>
               </Pressable>
             )}
           </View>
@@ -164,6 +390,7 @@ export default function SignUpScreen() {
     </PageContainer>
   );
 }
+
 const styles = StyleSheet.create({
   outerContainer: {
     backgroundColor: "#000",
@@ -174,6 +401,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 40,
   },
   content: {
     flex: 1,
@@ -196,6 +424,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     opacity: 0.8,
   },
+  sectionTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+    marginTop: 10,
+    marginBottom: 10,
+  },
   form: {
     gap: 20,
   },
@@ -215,6 +450,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#333",
+  },
+  rowContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  halfWidth: {
+    flex: 1,
   },
   button: {
     backgroundColor: "#fff",

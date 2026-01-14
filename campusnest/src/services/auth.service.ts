@@ -1,8 +1,54 @@
 import { User, Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/src/lib/supabaseClient";
 
+interface SignUpInput {
+  email: string;
+  password: string;
+  fullName: string;
+  role: "student" | "landlord";
+}
+
 export class AuthService {
   private supabase = getSupabase();
+
+  /**
+   * Sign up a new user
+   */
+  async signUp(input: SignUpInput): Promise<{
+    success: boolean;
+    user?: User;
+    error?: string;
+  }> {
+    try {
+      const { data, error } = await this.supabase.auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: {
+          emailRedirectTo: "https://campusnest.uofacs.ca/",
+          data: {
+            full_name: input.fullName,
+            role: input.role,
+          },
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (!data.user) {
+        return { success: false, error: "No user returned from signup" };
+      }
+
+      return { success: true, user: data.user };
+    } catch (error) {
+      console.error("Sign up error:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 
   /**
    * Get the current authenticated user

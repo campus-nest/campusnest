@@ -13,8 +13,56 @@ export interface UpdateProfileInput {
   avatar_url?: string;
 }
 
+export interface CreateProfileInput {
+  full_name: string;
+  role: "student" | "landlord";
+  email: string;
+  university?: string;
+  year?: string;
+  current_address?: string;
+  city?: string;
+  province?: string;
+  avatar_url?: string;
+}
+
 export class ProfileService {
   private supabase = getSupabase();
+
+  /**
+   * Create a new profile
+   */
+  async createProfile(
+    userId: string,
+    profileData: CreateProfileInput
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { error } = await this.supabase.from("profiles").insert({
+        id: userId,
+        full_name: profileData.full_name,
+        role: profileData.role,
+        email: profileData.email,
+        university: profileData.university || null,
+        year: profileData.year || null,
+        current_address: profileData.current_address || null,
+        city: profileData.city || null,
+        province: profileData.province || null,
+        avatar_url: profileData.avatar_url || null,
+      });
+
+      if (error) {
+        console.error("Error creating profile:", error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("Unexpected error creating profile:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 
   /**
    * Get profile by user ID
@@ -55,7 +103,7 @@ export class ProfileService {
    */
   async updateProfile(
     userId: string,
-    updates: UpdateProfileInput,
+    updates: UpdateProfileInput
   ): Promise<{ success: boolean; error?: string }> {
     const { error } = await this.supabase
       .from("profiles")
