@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
   Platform } from "react-native";
-import { supabase } from "@/src/lib/supabaseClient";
+import { getSupabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
@@ -35,6 +35,7 @@ export default function NewPostScreen() {
   const [listingAddress, setListingAddress] = useState("");
   const [listingRent, setListingRent] = useState("");
   const [listingLeaseTerm, setListingLeaseTerm] = useState("");
+  const supabase = getSupabase();
 
   const [utilities, setUtilities] = useState({
     electricity: false,

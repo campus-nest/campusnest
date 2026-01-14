@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { supabase } from "@/src/lib/supabaseClient";
+import { getSupabase } from "@/src/lib/supabaseClient";
 import { PageContainer } from "@/components/page-container";
 
 type Listing = {
@@ -41,6 +41,7 @@ export default function ListingDetailScreen() {
   const [landlordName, setLandlordName] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
+  const supabase = getSupabase();
 
   useEffect(() => {
     if (!id) return;

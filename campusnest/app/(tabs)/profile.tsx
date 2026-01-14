@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { supabase } from "@/src/lib/supabaseClient";
+import { getSupabase } from "@/src/lib/supabaseClient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Profile } from "@/src/types/profile";
 import { Bell, ChevronLeft } from "lucide-react-native";
@@ -18,6 +18,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabase = getSupabase();
 
   const fetchProfile = useCallback(async () => {
     try {

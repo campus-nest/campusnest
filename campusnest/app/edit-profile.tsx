@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { supabase } from "@/src/lib/supabaseClient";
+import { getSupabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { ChevronLeft, Upload } from "lucide-react-native";
@@ -34,6 +34,7 @@ export default function EditProfileScreen() {
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const supabase = getSupabase();
 
   const fetchProfile = useCallback(async () => {
     try {

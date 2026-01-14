@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { supabase } from "@/src/lib/supabaseClient";
+import { getSupabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 
 type Role = "student" | "landlord";
@@ -51,6 +51,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const [feed, setFeed] = useState<FeedItem[]>([]);
+  const supabase = getSupabase();
 
   useEffect(() => {
     const fetchRole = async () => {
