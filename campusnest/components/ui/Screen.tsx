@@ -30,5 +30,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
     gap : 15,
+    padding: 50,
   },
 });

@@ -1,18 +1,17 @@
-import { PageContainer } from "@/components/page-container";
+import Button from "@/components/ui/Button";
+import { H1, H3 } from "@/components/ui/Headings";
+import Input from "@/components/ui/Input";
+import Screen from "@/components/ui/Screen";
+import { getSupabase } from "@/src/lib/supabaseClient";
+import { authService, profileService } from "@/src/services";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
   Alert,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
-  View,
-  Platform,
+  Text
 } from "react-native";
-import { authService, profileService } from "@/src/services";
-import { getSupabase } from "@/src/lib/supabaseClient";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -112,128 +111,42 @@ export default function LoginScreen() {
   };
 
   return (
-    <PageContainer style={styles.container}>
-      <StatusBar style="light" />
+    <Screen>
+        <H1 bold>Welcome Back</H1>
+        <H3>Login to CampusNest</H3>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Login to CampusNest</Text>
+        <Input 
+          label="Email"
+          placeholder="Enter your email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address" />
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor="#666"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              placeholderTextColor="#666"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            <Pressable
-              onPress={() => router.push("/forgot-password")}
-              style={styles.forgotPasswordButton}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </Pressable>
-          </View>
+        <Input
+          label="Password"
+          placeholder="Enter your password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          />
 
           <Pressable
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? "Logging in..." : "Login"}
-            </Text>
+            onPress={() => router.push("/forgot-password")}
+            style={styles.forgotPasswordButton}>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </Pressable>
 
-          {Platform.OS === "android" && (
-            <Pressable onPress={() => router.back()}>
-              <Text style={styles.backText}>Back to Landing</Text>
-            </Pressable>
-          )}
-        </View>
-      </View>
-    </PageContainer>
+        <Button fullWidth onPress={handleLogin}>{loading ? "Logging in..." : "Login"}</Button>
+
+        <Pressable onPress={() => router.back()}>
+          <Text style={styles.backText}>Back to Landing</Text>
+        </Pressable>
+    </Screen >
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 30,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "400",
-    marginBottom: 40,
-    textAlign: "center",
-    opacity: 0.8,
-  },
-  form: {
-    gap: 20,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    color: "#fff",
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#333",
-    letterSpacing: 0,
-    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
-  },
-  button: {
-    backgroundColor: "#fff",
-    borderRadius: 100,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "600",
-  },
   backText: {
     color: "#fff",
     fontSize: 14,
