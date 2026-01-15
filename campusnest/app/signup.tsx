@@ -36,42 +36,39 @@ export default function SignUpScreen() {
 
   const validateForm = () => {
     if (!role) {
-      Alert.alert(
-        "Error",
-        "Missing role. Please go back and select a role."
-      );
+      Alert.alert("Error", "Missing role. Please go back and select a role.");
       return false;
     }
-  
+
     if (!fullName || !email || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all required fields");
       return false;
     }
-  
+
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
       return false;
     }
-  
+
     if (password.length < 6) {
       Alert.alert("Error", "Password must be at least 6 characters");
       return false;
     }
-  
+
     if (role === "student") {
       if (!university || !year || !lookingFor || !budget) {
         Alert.alert("Error", "Please fill in all student-specific fields");
         return false;
       }
     }
-  
+
     if (role === "landlord") {
       if (!phoneNumber || !city || !province) {
         Alert.alert("Error", "Please fill in all landlord-specific fields");
         return false;
       }
     }
-  
+
     return true;
   };
 
@@ -125,7 +122,7 @@ export default function SignUpScreen() {
       Alert.alert(
         "Success",
         "Account created! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.replace("/verify-email") }]
+        [{ text: "OK", onPress: () => router.replace("/verify-email") }],
       );
     } finally {
       setLoading(false);
@@ -134,7 +131,6 @@ export default function SignUpScreen() {
 
   return (
     <Screen>
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
@@ -201,11 +197,31 @@ export default function SignUpScreen() {
           <>
             <H3>Student Information</H3>
 
-            <Input label="University *" value={university} onChangeText={setUniversity} />
-            <Input label="Year of Study *" value={year} onChangeText={setYear} />
-            <Input label="What are you looking for? *" value={lookingFor} onChangeText={setLookingFor} />
-            <Input label="Monthly Budget *" value={budget} onChangeText={setBudget} />
-            <Input label="Preferred Location" value={preferredLocation} onChangeText={setPreferredLocation} />
+            <Input
+              label="University *"
+              value={university}
+              onChangeText={setUniversity}
+            />
+            <Input
+              label="Year of Study *"
+              value={year}
+              onChangeText={setYear}
+            />
+            <Input
+              label="What are you looking for? *"
+              value={lookingFor}
+              onChangeText={setLookingFor}
+            />
+            <Input
+              label="Monthly Budget *"
+              value={budget}
+              onChangeText={setBudget}
+            />
+            <Input
+              label="Preferred Location"
+              value={preferredLocation}
+              onChangeText={setPreferredLocation}
+            />
           </>
         )}
 
@@ -218,10 +234,18 @@ export default function SignUpScreen() {
 
         <View style={styles.row}>
           <View style={styles.half}>
-            <Input label="City" value={city} onChangeText={setCity} />
+            <Input
+              label={role === "landlord" ? "City *" : "City"}
+              value={city}
+              onChangeText={setCity}
+            />
           </View>
           <View style={styles.half}>
-            <Input label="Province" value={province} onChangeText={setProvince} />
+            <Input
+              label={role === "landlord" ? "Province *" : "Province"}
+              value={province}
+              onChangeText={setProvince}
+            />
           </View>
         </View>
 
