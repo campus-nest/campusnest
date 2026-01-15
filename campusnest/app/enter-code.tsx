@@ -4,7 +4,6 @@ import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -64,12 +63,11 @@ export default function EnterCodeScreen() {
 
   return (
     <Screen>
-      <StatusBar style="light" />
       <H1 bold>Enter Code</H1>
       <H4>Enter the 6-digit code sent to {email}</H4>
 
       <Input
-        label="Verfication Code"
+        label="Verification Code"
         placeholder="Enter your verfication code here; Ex: 123456"
         onChangeText={setCode}
         value={code}

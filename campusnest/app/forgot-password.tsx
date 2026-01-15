@@ -72,7 +72,7 @@ export default function ForgotPasswordScreen() {
           autoCapitalize="none"
           keyboardType="email-address" />
         
-        <Button fullWidth onPress={handleSendCode}>{loading ? "Sending..." : "Send Code"}</Button>
+        <Button fullWidth disabled={loading} onPress={handleSendCode}>{loading ? "Sending..." : "Send Code"}</Button>
     </Screen>
   );
 }

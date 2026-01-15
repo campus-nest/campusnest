@@ -137,7 +137,7 @@ export default function LoginScreen() {
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </Pressable>
 
-        <Button fullWidth onPress={handleLogin}>{loading ? "Logging in..." : "Login"}</Button>
+        <Button disabled={loading} fullWidth onPress={handleLogin}>{loading ? "Logging in..." : "Login"}</Button>
 
         <Pressable onPress={() => router.back()}>
           <Text style={styles.backText}>Back to Landing</Text>
