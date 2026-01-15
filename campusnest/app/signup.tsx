@@ -2,7 +2,6 @@ import Button from "@/components/ui/Button";
 import { H1, H3, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
-import BackButton from "@/components/ui/BackButton";
 import { getSupabase } from "@/src/lib/supabaseClient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -122,7 +121,6 @@ export default function SignUpScreen() {
 
   return (
     <Screen>
-      <BackButton />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

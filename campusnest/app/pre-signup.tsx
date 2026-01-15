@@ -2,7 +2,6 @@ import Button from "@/components/ui/Button";
 import { H1, H4 } from "@/components/ui/Headings";
 import Logo from "@/components/ui/Logo";
 import Screen from "@/components/ui/Screen";
-import BackButton from "@/components/ui/BackButton";
 import Select from "@/components/ui/Select";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -26,7 +25,6 @@ export default function PreSignUpScreen() {
 
   return (
     <Screen>
-      <BackButton />
       <Logo />
       <H1>Select a Role</H1>
       <H4 italic>Choose how you want to continue</H4>
