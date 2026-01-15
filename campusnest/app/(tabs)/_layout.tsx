@@ -1,7 +1,7 @@
+import { NavigationBar } from "@/components/ui/navigation-bar";
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
-import { NavigationBar } from "../../components/navigation-bar";
 
 export default function TabLayout() {
   return (
