@@ -60,7 +60,6 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
   },
   disabled: {
-    backgroundColor: "#666",
     opacity: 0.5,
   },
   smallSize: {

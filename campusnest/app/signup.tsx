@@ -35,30 +35,43 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
+    if (!role) {
+      Alert.alert(
+        "Error",
+        "Missing role. Please go back and select a role."
+      );
+      return false;
+    }
+  
     if (!fullName || !email || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all required fields");
       return false;
     }
+  
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
       return false;
     }
+  
     if (password.length < 6) {
       Alert.alert("Error", "Password must be at least 6 characters");
       return false;
     }
+  
     if (role === "student") {
       if (!university || !year || !lookingFor || !budget) {
         Alert.alert("Error", "Please fill in all student-specific fields");
         return false;
       }
     }
+  
     if (role === "landlord") {
       if (!phoneNumber || !city || !province) {
         Alert.alert("Error", "Please fill in all landlord-specific fields");
         return false;
       }
     }
+  
     return true;
   };
 

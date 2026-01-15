@@ -142,7 +142,7 @@ export default function LoginScreen() {
         <Pressable onPress={() => router.back()}>
           <Text style={styles.backText}>Back to Landing</Text>
         </Pressable>
-    </Screen >
+    </Screen>
   );
 }
 
