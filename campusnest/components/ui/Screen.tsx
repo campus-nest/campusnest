@@ -8,13 +8,13 @@ interface ScreenProps {
   useSafeArea?: boolean;
 }
 
-export default function Screen({ 
-  children, 
+export default function Screen({
+  children,
   style,
-  useSafeArea = false 
+  useSafeArea = false,
 }: ScreenProps) {
   const Container = useSafeArea ? SafeAreaView : View;
-  
+
   return (
     <Container style={[styles.container, style]}>
       <StatusBar style="light" />
@@ -28,8 +28,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
     justifyContent: "center",
-    alignItems: "center",
-    gap : 15,
+    alignContent: "center",
+    gap: 15,
     padding: 50,
   },
 });
+
