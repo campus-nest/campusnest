@@ -1,16 +1,11 @@
-import { PageContainer } from "@/components/page-container";
+import Button from "@/components/ui/Button";
+import { H1, H4 } from "@/components/ui/Headings";
+import Input from "@/components/ui/Input";
+import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
@@ -35,7 +30,7 @@ export default function VerifyEmailScreen() {
       } else {
         Alert.alert(
           "Success",
-          "Verification email sent! Please check your inbox.",
+          "Verification email sent! Please check your inbox."
         );
       }
     } catch (err) {
@@ -47,161 +42,66 @@ export default function VerifyEmailScreen() {
   };
 
   return (
-    <PageContainer>
-      <StatusBar style="light" />
+    <Screen>
       <View style={styles.container}>
-        <View style={styles.content}>
-          {/* Icon/Emoji */}
-          <Text style={styles.icon}>📧</Text>
+        {/* Icon */}
+        <Text style={styles.icon}>📧</Text>
 
-          {/* Title */}
-          <Text style={styles.title}>Check Your Email</Text>
+        {/* Title */}
+        <H1>Check Your Email</H1>
 
-          {/* Description */}
-          <Text style={styles.description}>
-            We&apos;ve sent a verification link to your email address. Please
-            check your inbox and click the link to verify your account.
-          </Text>
+        {/* Description */}
+        <H4 style={styles.description}>
+          We&apos;ve sent a verification link to your email address. Please
+          check your inbox and click the link to verify your account.
+        </H4>
 
-          {/* Resend Section */}
-          <View style={styles.resendSection}>
-            <Text style={styles.resendText}>
-              Didn&apos;t receive the email?
-            </Text>
-            <Pressable
-              onPress={handleResendEmail}
-              disabled={loading}
-              style={({ pressed }) => [
-                styles.resendButton,
-                pressed && styles.resendButtonPressed,
-                loading && styles.resendButtonDisabled,
-              ]}
-            >
-              <Text style={styles.resendButtonText}>
-                {loading ? "Sending..." : "Resend Email"}
-              </Text>
-            </Pressable>
-          </View>
+        {/* Email input */}
+        <Input
+          label="Email address:"
+          placeholder="your.email@example.com"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
 
-          {/* Input for resend */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Email address:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="your.email@example.com"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
+        {/* Resend button */}
+        <Button
+          variant="outline"
+          onPress={handleResendEmail}
+          disabled={loading}
+        >
+          {loading ? "Sending..." : "Resend Email"}
+        </Button>
 
-          {/* Back to Login */}
-          <Pressable
-            onPress={() => router.replace("/login")}
-            style={({ pressed }) => [
-              styles.backButton,
-              pressed && styles.backButtonPressed,
-            ]}
-          >
-            <Text style={styles.backButtonText}>Back to Login</Text>
-          </Pressable>
-        </View>
+        {/* Back to login */}
+        <Button
+          variant="primary"
+          onPress={() => router.replace("/login")}
+        >
+          Back to Login
+        </Button>
       </View>
-    </PageContainer>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#000",
-    justifyContent: "center",
     alignItems: "center",
-    padding: 20,
-  },
-  content: {
-    width: "100%",
     maxWidth: 400,
-    alignItems: "center",
+    alignSelf: "center",
+    gap: 20,
   },
   icon: {
     fontSize: 80,
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  description: {
-    fontSize: 16,
-    color: "#ccc",
-    textAlign: "center",
-    marginBottom: 32,
-    lineHeight: 24,
-  },
-  resendSection: {
-    marginBottom: 32,
-    alignItems: "center",
-  },
-  resendText: {
-    fontSize: 14,
-    color: "#999",
-    marginBottom: 12,
-  },
-  resendButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#fff",
-  },
-  resendButtonPressed: {
-    opacity: 0.7,
-    backgroundColor: "#333",
-  },
-  resendButtonDisabled: {
-    opacity: 0.5,
-  },
-  resendButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  inputContainer: {
-    width: "100%",
-    marginBottom: 24,
-  },
-  inputLabel: {
-    fontSize: 14,
-    color: "#ccc",
     marginBottom: 8,
   },
-  input: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: "#fff",
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  backButton: {
-    paddingVertical: 12,
-  },
-  backButtonPressed: {
-    opacity: 0.7,
-  },
-  backButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    textDecoration: "underline",
+  description: {
+    textAlign: "center",
+    color: "#ccc",
+    lineHeight: 22,
   },
 });
