@@ -87,7 +87,7 @@ export default function UsersScreen() {
       <Text style={styles.headerTitle}>Student Posts</Text>
       <Pressable
         style={styles.savedButton}
-        onPress={() => router.push("/saved")}
+        onPress={() => router.push("/(tabs)/saved")}
       >
         <Text style={styles.savedIcon}>❤️</Text>
       </Pressable>
