@@ -5,13 +5,13 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
+import { ListingCard } from "@/components/listings/ListingCard";
 
 type Role = "student" | "landlord";
 
@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
   const [listingsLoading, setListingsLoading] = useState(true);
+
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
   const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
@@ -31,7 +32,6 @@ export default function HomeScreen() {
     const fetchRole = async () => {
       try {
         const userRole = await authService.getUserRole();
-
         if (userRole) {
           setRole(userRole);
           setActiveFilter(userRole === "student" ? "new" : "yourListings");
@@ -49,7 +49,6 @@ export default function HomeScreen() {
 
     const fetchListings = async () => {
       setListingsLoading(true);
-
       const session = await authService.getSession();
 
       // Fetch listings based on role and filter
@@ -81,6 +80,7 @@ export default function HomeScreen() {
     };
 
     fetchListings();
+    fetchListings();
   }, [role, activeFilter]);
 
   const renderHeader = () => (
@@ -96,7 +96,7 @@ export default function HomeScreen() {
   const renderFilters = () => {
     if (!role) return null;
 
-    const filters: { key: FilterKey; label: string }[] =
+    const filters =
       role === "student"
         ? [
             { key: "new", label: "New" },
@@ -112,17 +112,17 @@ export default function HomeScreen() {
     return (
       <View style={styles.filtersRow}>
         {filters.map((f) => {
-          const isActive = activeFilter === f.key;
+          const active = activeFilter === f.key;
           return (
             <Pressable
               key={f.key}
-              onPress={() => setActiveFilter(f.key)}
-              style={[styles.filterChip, isActive && styles.filterChipActive]}
+              onPress={() => setActiveFilter(f.key as FilterKey)}
+              style={[styles.filterChip, active && styles.filterChipActive]}
             >
               <Text
                 style={[
                   styles.filterChipText,
-                  isActive && styles.filterChipTextActive,
+                  active && styles.filterChipTextActive,
                 ]}
               >
                 {f.label}
@@ -188,9 +188,7 @@ export default function HomeScreen() {
   return (
     <PageContainer>
       <View style={styles.screen}>
-        <View style={styles.contentWrapper}>
-          {renderHeader()}
-          {renderFilters()}
+        {renderFilters()}
 
           <FlatList
             data={listings}
@@ -207,19 +205,15 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
+    flex: 0,
     backgroundColor: "#000",
-    paddingTop: 10,
-  },
-  contentWrapper: {
-    width: "100%",
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingTop: 12,
+    gap: 5,
   },
   searchInput: {
     flex: 1,
@@ -232,20 +226,16 @@ const styles = StyleSheet.create({
   filtersRow: {
     flexDirection: "row",
     gap: 8,
-    paddingTop: 10,
-    paddingBottom: 16,
+    marginVertical: 14,
   },
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#aaa",
     backgroundColor: "#fff",
   },
   filterChipActive: {
     backgroundColor: "#000",
-    borderColor: "#000",
   },
   filterChipText: {
     fontSize: 13,
@@ -256,8 +246,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   listContent: {
-    width: "100%",
-    paddingBottom: 50,
+    paddingBottom: 60,
   },
   card: {
     flexDirection: "row",
@@ -266,20 +255,20 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
-  cardImagePlaceholder: {
-    width: 70,
-    height: 70,
+  cardImage: {
+    width: 72,
+    height: 72,
     borderRadius: 12,
     backgroundColor: "#333",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
-  cardContent: {
-    flex: 1,
-  },
   cardImageEmoji: {
     fontSize: 28,
+  },
+  cardContent: {
+    flex: 1,
   },
   cardTitle: {
     color: "#fff",
