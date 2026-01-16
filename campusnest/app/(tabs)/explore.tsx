@@ -21,6 +21,7 @@ let Marker: any;
 let UrlTile: any;
 
 if (Platform.OS !== "web") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const maps = require("react-native-maps");
   MapView = maps.default;
   Marker = maps.Marker;
@@ -48,33 +49,6 @@ export default function ExploreScreen() {
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
-
-  useEffect(() => {
-    checkUserRoleAndFetchListings();
-  }, []);
-
-  const checkUserRoleAndFetchListings = async () => {
-    try {
-      setLoading(true);
-
-      // Check user role first
-      const role = await authService.getUserRole();
-      setUserRole(role);
-
-      // If landlord, don't fetch listings (they shouldn't see this page)
-      if (role === "landlord") {
-        setLoading(false);
-        return;
-      }
-
-      // Fetch listings for students
-      await fetchListings();
-    } catch (error) {
-      console.error("Error in explore screen:", error);
-      Alert.alert("Error", "Failed to load explore page");
-      setLoading(false);
-    }
-  };
 
   const fetchListings = async () => {
     try {
@@ -120,6 +94,33 @@ export default function ExploreScreen() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const initializeScreen = async () => {
+      try {
+        setLoading(true);
+
+        // Check user role first
+        const role = await authService.getUserRole();
+        setUserRole(role);
+
+        // If landlord, don't fetch listings (they shouldn't see this page)
+        if (role === "landlord") {
+          setLoading(false);
+          return;
+        }
+
+        // Fetch listings for students
+        await fetchListings();
+      } catch (error) {
+        console.error("Error in explore screen:", error);
+        Alert.alert("Error", "Failed to load explore page");
+        setLoading(false);
+      }
+    };
+
+    initializeScreen();
+  }, []);
 
   const handleMarkerPress = (listingId: string) => {
     router.push(`/listing/${listingId}`);
