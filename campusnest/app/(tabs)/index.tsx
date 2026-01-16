@@ -11,7 +11,6 @@ import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
-import { ListingCard } from "@/components/listings/ListingCard";
 
 type Role = "student" | "landlord";
 
@@ -80,18 +79,17 @@ export default function HomeScreen() {
     };
 
     fetchListings();
-    fetchListings();
   }, [role, activeFilter]);
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search listings"
-        placeholderTextColor="#999"
-      />
-    </View>
-  );
+  // const renderHeader = () => (
+  //   <View style={styles.header}>
+  //     <TextInput
+  //       style={styles.searchInput}
+  //       placeholder="Search listings"
+  //       placeholderTextColor="#999"
+  //     />
+  //   </View>
+  // );
 
   const renderFilters = () => {
     if (!role) return null;
@@ -190,14 +188,13 @@ export default function HomeScreen() {
       <View style={styles.screen}>
         {renderFilters()}
 
-          <FlatList
-            data={listings}
-            keyExtractor={(listing) => listing.id}
-            renderItem={({ item }) => renderListingCard(item)}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+        <FlatList
+          data={listings}
+          keyExtractor={(listing) => listing.id}
+          renderItem={({ item }) => renderListingCard(item)}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
       </View>
     </PageContainer>
   );
