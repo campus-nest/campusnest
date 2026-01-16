@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
-import { authService, postService } from "@/src/services";
+import { authService, postService, savedPostService } from "@/src/services";
 import { Post } from "@/src/types/post";
 
 type PostFilter = "yourPost" | "recent";
@@ -19,6 +19,7 @@ export default function UsersScreen() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<PostFilter>("yourPost");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
   const router = useRouter();
 
   useEffect(() => {
@@ -40,24 +41,55 @@ export default function UsersScreen() {
       let filteredPosts = allPosts;
       if (activeFilter === "yourPost" && currentUserId) {
         filteredPosts = allPosts.filter(
-          (post) => post.user_id === currentUserId,
+          (post) => post.user_id === currentUserId
         );
       }
 
       setPosts(filteredPosts);
+
+      // Fetch saved posts for current user
+      if (currentUserId) {
+        const savedPosts = await savedPostService.getSavedPosts(currentUserId);
+        const savedIds = new Set(savedPosts.map((p) => p.id));
+        setSavedPostIds(savedIds);
+      }
+
       setLoading(false);
     };
 
     fetchPosts();
   }, [activeFilter, currentUserId]);
 
+  const handleToggleSave = async (postId: string) => {
+    if (!currentUserId) return;
+
+    const isSaved = savedPostIds.has(postId);
+
+    if (isSaved) {
+      const result = await savedPostService.unsavePost(postId, currentUserId);
+      if (result.success) {
+        setSavedPostIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(postId);
+          return newSet;
+        });
+      }
+    } else {
+      const result = await savedPostService.savePost(postId, currentUserId);
+      if (result.success) {
+        setSavedPostIds((prev) => new Set(prev).add(postId));
+      }
+    }
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
-      <Pressable onPress={() => router.back()}>
-        <Text style={styles.backButton}>←</Text>
-      </Pressable>
-      <Pressable style={styles.iconButton}>
-        <Text style={styles.iconText}>🔔</Text>
+      <Text style={styles.headerTitle}>Student Posts</Text>
+      <Pressable
+        style={styles.savedButton}
+        onPress={() => router.push("/saved")}
+      >
+        <Text style={styles.savedIcon}>❤️</Text>
       </Pressable>
     </View>
   );
@@ -94,34 +126,35 @@ export default function UsersScreen() {
     );
   };
 
-  const renderPostCard = (post: Post) => (
-    <Pressable
-      style={styles.card}
-      onPress={() => router.push(`/post/${post.id}`)}
-    >
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{post.title}</Text>
-        <Text style={styles.cardBody} numberOfLines={4}>
-          {post.body}
-        </Text>
-      </View>
+  const renderPostCard = (post: Post) => {
+    const isSaved = savedPostIds.has(post.id);
 
-      <View style={styles.cardActions}>
-        <Pressable style={styles.actionButton}>
-          <Text style={styles.actionIcon}>👍</Text>
-        </Pressable>
-        <Pressable style={styles.actionButton}>
-          <Text style={styles.actionIcon}>💬</Text>
-        </Pressable>
-        <Pressable
-          style={styles.actionButton}
-          onPress={() => router.push(`/post/${post.id}`)}
-        >
-          <Text style={styles.actionIcon}>→</Text>
-        </Pressable>
-      </View>
-    </Pressable>
-  );
+    return (
+      <Pressable
+        style={styles.card}
+        onPress={() => router.push(`/post/${post.id}`)}
+      >
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle}>{post.title}</Text>
+          <Text style={styles.cardBody} numberOfLines={4}>
+            {post.body}
+          </Text>
+        </View>
+
+        <View style={styles.cardActions}>
+          <Pressable
+            style={styles.actionButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              handleToggleSave(post.id);
+            }}
+          >
+            <Text style={styles.actionIcon}>{isSaved ? "❤️" : "🤍"}</Text>
+          </Pressable>
+        </View>
+      </Pressable>
+    );
+  };
 
   if (loading) {
     return (
@@ -174,21 +207,21 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 16,
   },
-  backButton: {
+  headerTitle: {
     color: "#fff",
-    fontSize: 28,
-    fontWeight: "300",
+    fontSize: 24,
+    fontWeight: "700",
   },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 999,
-    backgroundColor: "#f2f2f2",
+  savedButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#2a2a2a",
     alignItems: "center",
     justifyContent: "center",
   },
-  iconText: {
-    fontSize: 18,
+  savedIcon: {
+    fontSize: 20,
   },
   filtersRow: {
     flexDirection: "row",
@@ -244,18 +277,18 @@ const styles = StyleSheet.create({
   },
   cardActions: {
     flexDirection: "row",
-    gap: 16,
+    justifyContent: "flex-end",
   },
   actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: "transparent",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#1a1a1a",
     alignItems: "center",
     justifyContent: "center",
   },
   actionIcon: {
-    fontSize: 18,
+    fontSize: 20,
   },
   centered: {
     flex: 1,

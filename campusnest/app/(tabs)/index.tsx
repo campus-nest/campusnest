@@ -90,9 +90,6 @@ export default function HomeScreen() {
         placeholder="Search listings"
         placeholderTextColor="#999"
       />
-      <Pressable style={styles.iconButton}>
-        <Text style={styles.iconText}>🔔</Text>
-      </Pressable>
     </View>
   );
 
@@ -231,17 +228,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 14,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 999,
-    backgroundColor: "#f2f2f2",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconText: {
-    fontSize: 18,
   },
   filtersRow: {
     flexDirection: "row",
