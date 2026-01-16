@@ -10,9 +10,8 @@ import {
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
-import { authService, listingService, postService } from "@/src/services";
+import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
-import { Post } from "@/src/types/post";
 
 type Role = "student" | "landlord";
 
@@ -20,17 +19,13 @@ type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
 type LandlordFilter = "yourListings" | "recent";
 type FilterKey = StudentFilter | LandlordFilter;
 
-type FeedItem =
-  | { type: "listing"; created_at: string; item: Listing }
-  | { type: "post"; created_at: string; item: Post };
-
 export default function HomeScreen() {
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
   const router = useRouter();
-  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -52,57 +47,40 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!role) return;
 
-    const fetchFeed = async () => {
+    const fetchListings = async () => {
       setListingsLoading(true);
 
       const session = await authService.getSession();
 
-      // 1) Fetch listings based on role and filter
-      let listings: Listing[] = [];
+      // Fetch listings based on role and filter
+      let fetchedListings: Listing[] = [];
 
       if (role === "student") {
         // Students see public active listings
-        listings = await listingService.getListings({
+        fetchedListings = await listingService.getListings({
           status: "active",
           visibility: "public",
         });
       } else {
         // Landlord
         if (activeFilter === "yourListings") {
-          listings = await listingService.getListings({
+          fetchedListings = await listingService.getListings({
             landlord_id: session?.user?.id,
           });
         } else {
           // "recent" shows public listings from everyone
-          listings = await listingService.getListings({
+          fetchedListings = await listingService.getListings({
             status: "active",
             visibility: "public",
           });
         }
       }
 
-      // 2) Fetch all posts
-      const posts = await postService.getPosts();
-
-      // 3) Merge into one feed sorted by created_at
-      const merged: FeedItem[] = [
-        ...listings.map((l) => ({
-          type: "listing" as const,
-          created_at: l.created_at,
-          item: l,
-        })),
-        ...posts.map((p) => ({
-          type: "post" as const,
-          created_at: p.created_at,
-          item: p,
-        })),
-      ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-
-      setFeed(merged);
+      setListings(fetchedListings);
       setListingsLoading(false);
     };
 
-    fetchFeed();
+    fetchListings();
   }, [role, activeFilter]);
 
   const renderHeader = () => (
@@ -181,23 +159,6 @@ export default function HomeScreen() {
     </Pressable>
   );
 
-  const renderPostCard = (post: Post) => (
-    <Pressable
-      style={[styles.card, { flexDirection: "column" }]}
-      onPress={() => router.push(`/post/${post.id}`)}
-    >
-      <Text style={styles.cardTitle}>{post.title}</Text>
-
-      <Text style={[styles.cardSubtitle, { marginTop: 6 }]} numberOfLines={4}>
-        {post.body}
-      </Text>
-
-      <Text style={styles.postMeta}>
-        {new Date(post.created_at).toLocaleDateString()}
-      </Text>
-    </Pressable>
-  );
-
   // Loading States
   if (roleLoading) {
     return (
@@ -222,7 +183,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading feed...</Text>
+        <Text style={styles.centeredText}>Loading listings...</Text>
       </View>
     );
   }
@@ -235,13 +196,9 @@ export default function HomeScreen() {
           {renderFilters()}
 
           <FlatList
-            data={feed}
-            keyExtractor={(x) => `${x.type}-${x.item.id}`}
-            renderItem={({ item }) =>
-              item.type === "listing"
-                ? renderListingCard(item.item)
-                : renderPostCard(item.item)
-            }
+            data={listings}
+            keyExtractor={(listing) => listing.id}
+            renderItem={({ item }) => renderListingCard(item)}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />
@@ -353,14 +310,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 4,
   },
-  cardMetaRow: {
-    flexDirection: "row",
-    marginTop: 6,
-  },
-  cardMetaText: {
-    color: "#fff",
-    fontSize: 11,
-  },
   centered: {
     flex: 1,
     justifyContent: "center",
@@ -371,9 +320,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginTop: 10,
   },
-  postMeta: {
-    color: "#888",
-    fontSize: 11,
-    marginTop: 8,
-  },
 });
+
