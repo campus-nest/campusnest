@@ -41,7 +41,7 @@ export default function PostDetailScreen() {
 
       // Fetch creator profile
       const creatorProfile = await profileService.getProfileById(
-        postData.user_id
+        postData.user_id,
       );
       setCreator(creatorProfile);
 

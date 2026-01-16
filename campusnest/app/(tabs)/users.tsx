@@ -39,7 +39,9 @@ export default function UsersScreen() {
       // Filter posts based on active filter
       let filteredPosts = allPosts;
       if (activeFilter === "yourPost" && currentUserId) {
-        filteredPosts = allPosts.filter((post) => post.user_id === currentUserId);
+        filteredPosts = allPosts.filter(
+          (post) => post.user_id === currentUserId,
+        );
       }
 
       setPosts(filteredPosts);

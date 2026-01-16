@@ -16,11 +16,11 @@ export default function LandingScreen() {
       <H1>Campus Nest</H1>
       <H3 italic>Let&apos;s get Started!</H3>
 
-      <View style={{alignSelf: "center"}}>
+      <View style={{ alignSelf: "center" }}>
         <Button onPress={() => router.push("/login")}>Login</Button>
       </View>
       <H3 italic>Don&apos;t have an account?</H3>
-      <View style={{alignSelf: "center"}}>
+      <View style={{ alignSelf: "center" }}>
         <Button onPress={() => router.push("/pre-signup")}>Sign Up</Button>
       </View>
       <View style={styles.houseImageContainer}>
@@ -32,9 +32,9 @@ export default function LandingScreen() {
 
 const styles = StyleSheet.create({
   houseImageContainer: {
-    position:"absolute",
-    bottom:25,
-    alignSelf:"center",
+    position: "absolute",
+    bottom: 25,
+    alignSelf: "center",
     height: 150,
     width: "92%",
     maxWidth: 700,

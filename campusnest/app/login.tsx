@@ -6,12 +6,7 @@ import { getSupabase } from "@/src/lib/supabaseClient";
 import { authService, profileService } from "@/src/services";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text
-} from "react-native";
+import { Alert, Pressable, StyleSheet, Text } from "react-native";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -112,36 +107,40 @@ export default function LoginScreen() {
 
   return (
     <Screen>
-        <H1 bold>Welcome Back</H1>
-        <H3>Login to CampusNest</H3>
+      <H1 bold>Welcome Back</H1>
+      <H3>Login to CampusNest</H3>
 
-        <Input 
-          label="Email"
-          placeholder="Enter your email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address" />
+      <Input
+        label="Email"
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
 
-        <Input
-          label="Password"
-          placeholder="Enter your password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          />
+      <Input
+        label="Password"
+        placeholder="Enter your password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
 
-          <Pressable
-            onPress={() => router.push("/forgot-password")}
-            style={styles.forgotPasswordButton}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </Pressable>
+      <Pressable
+        onPress={() => router.push("/forgot-password")}
+        style={styles.forgotPasswordButton}
+      >
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+      </Pressable>
 
-        <Button disabled={loading} fullWidth onPress={handleLogin}>{loading ? "Logging in..." : "Login"}</Button>
+      <Button disabled={loading} fullWidth onPress={handleLogin}>
+        {loading ? "Logging in..." : "Login"}
+      </Button>
 
-        <Pressable onPress={() => router.back()}>
-          <Text style={styles.backText}>Back to Landing</Text>
-        </Pressable>
+      <Pressable onPress={() => router.back()}>
+        <Text style={styles.backText}>Back to Landing</Text>
+      </Pressable>
     </Screen>
   );
 }

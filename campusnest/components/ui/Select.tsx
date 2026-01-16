@@ -30,10 +30,7 @@ export default function Select<T extends string>({
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
 
-      <Pressable
-        style={styles.input}
-        onPress={() => setOpen((prev) => !prev)}
-      >
+      <Pressable style={styles.input} onPress={() => setOpen((prev) => !prev)}>
         <Text style={styles.valueText}>{selectedLabel}</Text>
       </Pressable>
 

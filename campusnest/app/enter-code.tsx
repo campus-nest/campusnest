@@ -5,10 +5,7 @@ import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  Alert,
-  Keyboard
-} from "react-native";
+import { Alert, Keyboard } from "react-native";
 
 export default function EnterCodeScreen() {
   const router = useRouter();
@@ -75,8 +72,9 @@ export default function EnterCodeScreen() {
         maxLength={6}
         textAlign="center"
       />
-      <Button fullWidth onPress={handleVerifyCode} disabled={loading}>{loading ? "Verifying..." : "Verify Code"}</Button>
-      
+      <Button fullWidth onPress={handleVerifyCode} disabled={loading}>
+        {loading ? "Verifying..." : "Verify Code"}
+      </Button>
     </Screen>
   );
 }

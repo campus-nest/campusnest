@@ -1,15 +1,23 @@
-import { Platform, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+  ViewStyle,
+} from "react-native";
 
 interface InputProps extends TextInputProps {
   label?: string;
   containerStyle?: ViewStyle;
 }
 
-export default function Input({ 
-  label, 
+export default function Input({
+  label,
   containerStyle,
   style,
-  ...props 
+  ...props
 }: InputProps) {
   return (
     <View style={[styles.inputContainer, containerStyle]}>
