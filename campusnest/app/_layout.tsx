@@ -58,7 +58,7 @@ export default function RootLayout() {
       // User is not authenticated and trying to access protected pages - redirect to landing
       router.replace("/landing");
     }
-  }, [isAuthenticated, segments]);
+  }, [isAuthenticated, segments, router]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

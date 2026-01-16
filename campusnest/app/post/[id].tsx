@@ -11,7 +11,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { PageContainer } from "@/components/page-container";
 import {
   postService,
@@ -24,7 +24,6 @@ import { Profile } from "@/src/types/profile";
 import { CommentWithProfile } from "@/src/types/comment";
 
 export default function PostDetailScreen() {
-  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [post, setPost] = useState<Post | null>(null);

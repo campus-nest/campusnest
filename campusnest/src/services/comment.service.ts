@@ -1,9 +1,5 @@
 import { getSupabase } from "@/src/lib/supabaseClient";
-import {
-  Comment,
-  CommentWithProfile,
-  CreateCommentInput,
-} from "@/src/types/comment";
+import { CommentWithProfile, CreateCommentInput } from "@/src/types/comment";
 
 export class CommentService {
   private supabase = getSupabase();

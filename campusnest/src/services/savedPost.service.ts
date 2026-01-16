@@ -72,19 +72,15 @@ export class SavedPostService {
    */
   async isPostSaved(postId: string, userId: string): Promise<boolean> {
     try {
-      const { data, error } = await this.supabase
+      const { data } = await this.supabase
         .from("saved_posts")
         .select("id")
         .eq("user_id", userId)
         .eq("post_id", postId)
         .single();
 
-      if (error) {
-        return false;
-      }
-
       return !!data;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -94,7 +90,7 @@ export class SavedPostService {
    */
   async getSavedPosts(userId: string): Promise<any[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error: _error } = await this.supabase
         .from("saved_posts")
         .select(
           `
@@ -112,8 +108,8 @@ export class SavedPostService {
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching saved posts:", error);
+      if (_error) {
+        console.error("Error fetching saved posts:", _error);
         return [];
       }
 
