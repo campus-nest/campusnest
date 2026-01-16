@@ -12,6 +12,8 @@ import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
+import { Image } from "react-native";
+
 
 type Role = "student" | "landlord";
 
@@ -138,7 +140,15 @@ export default function HomeScreen() {
       onPress={() => router.push(`/listing/${listing.id}`)}
     >
       <View style={styles.cardImage}>
-        <Text style={styles.cardImageEmoji}>🏠</Text>
+        {listing.photo_urls?.length ? (
+          <Image
+            source={{ uri: listing.photo_urls[0] }}
+            style={styles.cardImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <Text style={styles.cardImageEmoji}>🏠</Text>
+        )}
       </View>
 
       <View style={styles.cardContent}>
