@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
 import { Image } from "react-native";
+import { ListingCard } from "@/components/listings/ListingCard";
 
 
 type Role = "student" | "landlord";
@@ -134,35 +135,6 @@ export default function HomeScreen() {
     );
   };
 
-  const renderListingCard = (listing: Listing) => (
-    <Pressable
-      style={styles.card}
-      onPress={() => router.push(`/listing/${listing.id}`)}
-    >
-      <View style={styles.cardImage}>
-        {listing.photo_urls?.length ? (
-          <Image
-            source={{ uri: listing.photo_urls[0] }}
-            style={styles.cardImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <Text style={styles.cardImageEmoji}>🏠</Text>
-        )}
-      </View>
-
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{listing.title}</Text>
-        <Text style={styles.cardSubtitle}>
-          Lease Term: {listing.lease_term}
-        </Text>
-        <Text style={styles.cardSubtitle}>Rent: ${listing.rent}</Text>
-        <Text style={styles.cardAddress} numberOfLines={2}>
-          {listing.address}
-        </Text>
-      </View>
-    </Pressable>
-  );
 
   if (roleLoading) {
     return (
@@ -201,7 +173,7 @@ export default function HomeScreen() {
         <FlatList
           data={listings}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => renderListingCard(item)}
+          renderItem={({ item }) => <ListingCard listing={item} />}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
         />
