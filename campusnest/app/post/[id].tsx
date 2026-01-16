@@ -39,7 +39,7 @@ export default function PostDetailScreen() {
 
       // Fetch creator profile
       const creatorProfile = await profileService.getProfileById(
-        postData.user_id
+        postData.user_id,
       );
       setCreator(creatorProfile);
 
@@ -84,64 +84,63 @@ export default function PostDetailScreen() {
     </PageContainer>
   );
 }
-  const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   centered: {
-  flex: 1,
-  backgroundColor: "#000",
-  justifyContent: "center",
-  alignItems: "center",
+    flex: 1,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
   },
   centeredText: {
-  color: "#fff",
-  marginTop: 10,
+    color: "#fff",
+    marginTop: 10,
   },
   scrollView: {
-  flex: 1,
-  backgroundColor: "#000",
+    flex: 1,
+    backgroundColor: "#000",
   },
   container: {
-  padding: 16,
-  paddingBottom: 40,
+    padding: 16,
+    paddingBottom: 40,
   },
   postCard: {
-  backgroundColor: "#2a2a2a",
-  borderRadius: 12,
-  padding: 16,
-  marginTop: 20,
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 20,
   },
   title: {
-  color: "#fff",
-  fontSize: 18,
-  fontWeight: "700",
-  marginBottom: 12,
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 12,
   },
   body: {
-  color: "#ddd",
-  fontSize: 14,
-  lineHeight: 20,
-  marginBottom: 16,
-  paddingBottom: 16,
-  borderBottomWidth: 1,
-  borderBottomColor: "#444",
+    color: "#ddd",
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#444",
   },
   creatorInfo: {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   creatorLabel: {
-  color: "#999",
-  fontSize: 12,
+    color: "#999",
+    fontSize: 12,
   },
   creatorName: {
-  color: "#fff",
-  fontSize: 13,
-  fontWeight: "600",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "600",
   },
   date: {
-  color: "#999",
-  fontSize: 11,
-  marginLeft: "auto",
+    color: "#999",
+    fontSize: 11,
+    marginLeft: "auto",
   },
 });
-

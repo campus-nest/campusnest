@@ -15,7 +15,7 @@ export class SavedPostService {
    */
   async savePost(
     postId: string,
-    userId: string
+    userId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const { error } = await this.supabase.from("saved_posts").insert({
@@ -43,7 +43,7 @@ export class SavedPostService {
    */
   async unsavePost(
     postId: string,
-    userId: string
+    userId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const { error } = await this.supabase
@@ -107,7 +107,7 @@ export class SavedPostService {
             body,
             created_at
           )
-        `
+        `,
         )
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
