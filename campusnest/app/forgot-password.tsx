@@ -5,9 +5,7 @@ import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Alert
-} from "react-native";
+import { Alert } from "react-native";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -60,19 +58,21 @@ export default function ForgotPasswordScreen() {
 
   return (
     <Screen>
+      <H1>Forgot Password</H1>
+      <H4>Enter your email to receive a reset code</H4>
 
-        <H1>Forgot Password</H1>
-        <H4>Enter your email to receive a reset code</H4>
+      <Input
+        label="Email"
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
 
-        <Input
-          label="Email"
-          placeholder="Enter your email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address" />
-        
-        <Button fullWidth disabled={loading} onPress={handleSendCode}>{loading ? "Sending..." : "Send Code"}</Button>
+      <Button fullWidth disabled={loading} onPress={handleSendCode}>
+        {loading ? "Sending..." : "Send Code"}
+      </Button>
     </Screen>
   );
 }

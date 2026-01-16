@@ -40,11 +40,7 @@ export default function PreSignUpScreen() {
         onChange={setSelectedRole}
       />
 
-      <Button
-        fullWidth
-        onPress={handleCreateAccount}
-        disabled={!selectedRole}
-      >
+      <Button fullWidth onPress={handleCreateAccount} disabled={!selectedRole}>
         Create Account
       </Button>
 
