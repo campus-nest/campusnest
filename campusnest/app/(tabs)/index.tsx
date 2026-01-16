@@ -10,9 +10,8 @@ import {
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
-import { authService, listingService, postService } from "@/src/services";
+import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
-import { Post } from "@/src/types/post";
 
 type Role = "student" | "landlord";
 
@@ -20,23 +19,20 @@ type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
 type LandlordFilter = "yourListings" | "recent";
 type FilterKey = StudentFilter | LandlordFilter;
 
-type FeedItem =
-  | { type: "listing"; created_at: string; item: Listing }
-  | { type: "post"; created_at: string; item: Post };
-
 export default function HomeScreen() {
+  const router = useRouter();
+
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
   const [listingsLoading, setListingsLoading] = useState(true);
+
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
-  const router = useRouter();
-  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
     const fetchRole = async () => {
       try {
         const userRole = await authService.getUserRole();
-
         if (userRole) {
           setRole(userRole);
           setActiveFilter(userRole === "student" ? "new" : "yourListings");
@@ -52,57 +48,34 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!role) return;
 
-    const fetchFeed = async () => {
+    const fetchListings = async () => {
       setListingsLoading(true);
-
       const session = await authService.getSession();
 
-      // 1) Fetch listings based on role and filter
-      let listings: Listing[] = [];
+      let data: Listing[] = [];
 
       if (role === "student") {
-        // Students see public active listings
-        listings = await listingService.getListings({
+        data = await listingService.getListings({
           status: "active",
           visibility: "public",
         });
       } else {
-        // Landlord
-        if (activeFilter === "yourListings") {
-          listings = await listingService.getListings({
-            landlord_id: session?.user?.id,
-          });
-        } else {
-          // "recent" shows public listings from everyone
-          listings = await listingService.getListings({
-            status: "active",
-            visibility: "public",
-          });
-        }
+        data =
+          activeFilter === "yourListings"
+            ? await listingService.getListings({
+                landlord_id: session?.user?.id,
+              })
+            : await listingService.getListings({
+                status: "active",
+                visibility: "public",
+              });
       }
 
-      // 2) Fetch all posts
-      const posts = await postService.getPosts();
-
-      // 3) Merge into one feed sorted by created_at
-      const merged: FeedItem[] = [
-        ...listings.map((l) => ({
-          type: "listing" as const,
-          created_at: l.created_at,
-          item: l,
-        })),
-        ...posts.map((p) => ({
-          type: "post" as const,
-          created_at: p.created_at,
-          item: p,
-        })),
-      ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-
-      setFeed(merged);
+      setListings(data);
       setListingsLoading(false);
     };
 
-    fetchFeed();
+    fetchListings();
   }, [role, activeFilter]);
 
   const renderHeader = () => (
@@ -121,7 +94,7 @@ export default function HomeScreen() {
   const renderFilters = () => {
     if (!role) return null;
 
-    const filters: { key: FilterKey; label: string }[] =
+    const filters =
       role === "student"
         ? [
             { key: "new", label: "New" },
@@ -137,17 +110,17 @@ export default function HomeScreen() {
     return (
       <View style={styles.filtersRow}>
         {filters.map((f) => {
-          const isActive = activeFilter === f.key;
+          const active = activeFilter === f.key;
           return (
             <Pressable
               key={f.key}
-              onPress={() => setActiveFilter(f.key)}
-              style={[styles.filterChip, isActive && styles.filterChipActive]}
+              onPress={() => setActiveFilter(f.key as FilterKey)}
+              style={[styles.filterChip, active && styles.filterChipActive]}
             >
               <Text
                 style={[
                   styles.filterChipText,
-                  isActive && styles.filterChipTextActive,
+                  active && styles.filterChipTextActive,
                 ]}
               >
                 {f.label}
@@ -164,7 +137,7 @@ export default function HomeScreen() {
       style={styles.card}
       onPress={() => router.push(`/listing/${listing.id}`)}
     >
-      <View style={styles.cardImagePlaceholder}>
+      <View style={styles.cardImage}>
         <Text style={styles.cardImageEmoji}>🏠</Text>
       </View>
 
@@ -181,24 +154,6 @@ export default function HomeScreen() {
     </Pressable>
   );
 
-  const renderPostCard = (post: Post) => (
-    <Pressable
-      style={[styles.card, { flexDirection: "column" }]}
-      onPress={() => router.push(`/post/${post.id}`)}
-    >
-      <Text style={styles.cardTitle}>{post.title}</Text>
-
-      <Text style={[styles.cardSubtitle, { marginTop: 6 }]} numberOfLines={4}>
-        {post.body}
-      </Text>
-
-      <Text style={styles.postMeta}>
-        {new Date(post.created_at).toLocaleDateString()}
-      </Text>
-    </Pressable>
-  );
-
-  // Loading States
   if (roleLoading) {
     return (
       <View style={styles.centered}>
@@ -222,7 +177,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading feed...</Text>
+        <Text style={styles.centeredText}>Loading listings...</Text>
       </View>
     );
   }
@@ -230,22 +185,16 @@ export default function HomeScreen() {
   return (
     <PageContainer>
       <View style={styles.screen}>
-        <View style={styles.contentWrapper}>
-          {renderHeader()}
-          {renderFilters()}
+        {renderHeader()}
+        {renderFilters()}
 
-          <FlatList
-            data={feed}
-            keyExtractor={(x) => `${x.type}-${x.item.id}`}
-            renderItem={({ item }) =>
-              item.type === "listing"
-                ? renderListingCard(item.item)
-                : renderPostCard(item.item)
-            }
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+        <FlatList
+          data={listings}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => renderListingCard(item)}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+        />
       </View>
     </PageContainer>
   );
@@ -255,17 +204,13 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",
-    paddingTop: 10,
-  },
-  contentWrapper: {
-    width: "100%",
     paddingHorizontal: 16,
+    paddingTop: 12,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingTop: 12,
   },
   searchInput: {
     flex: 1,
@@ -289,20 +234,16 @@ const styles = StyleSheet.create({
   filtersRow: {
     flexDirection: "row",
     gap: 8,
-    paddingTop: 10,
-    paddingBottom: 16,
+    marginVertical: 14,
   },
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#aaa",
     backgroundColor: "#fff",
   },
   filterChipActive: {
     backgroundColor: "#000",
-    borderColor: "#000",
   },
   filterChipText: {
     fontSize: 13,
@@ -313,8 +254,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   listContent: {
-    width: "100%",
-    paddingBottom: 50,
+    paddingBottom: 60,
   },
   card: {
     flexDirection: "row",
@@ -323,20 +263,20 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
-  cardImagePlaceholder: {
-    width: 70,
-    height: 70,
+  cardImage: {
+    width: 72,
+    height: 72,
     borderRadius: 12,
     backgroundColor: "#333",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
-  cardContent: {
-    flex: 1,
-  },
   cardImageEmoji: {
     fontSize: 28,
+  },
+  cardContent: {
+    flex: 1,
   },
   cardTitle: {
     color: "#fff",
@@ -353,14 +293,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 4,
   },
-  cardMetaRow: {
-    flexDirection: "row",
-    marginTop: 6,
-  },
-  cardMetaText: {
-    color: "#fff",
-    fontSize: 11,
-  },
   centered: {
     flex: 1,
     justifyContent: "center",
@@ -370,10 +302,5 @@ const styles = StyleSheet.create({
   centeredText: {
     color: "#fff",
     marginTop: 10,
-  },
-  postMeta: {
-    color: "#888",
-    fontSize: 11,
-    marginTop: 8,
   },
 });
