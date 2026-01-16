@@ -30,7 +30,7 @@ export default function VerifyEmailScreen() {
       } else {
         Alert.alert(
           "Success",
-          "Verification email sent! Please check your inbox."
+          "Verification email sent! Please check your inbox.",
         );
       }
     } catch (err) {
@@ -77,10 +77,7 @@ export default function VerifyEmailScreen() {
         </Button>
 
         {/* Back to login */}
-        <Button
-          variant="primary"
-          onPress={() => router.replace("/login")}
-        >
+        <Button variant="primary" onPress={() => router.replace("/login")}>
           Back to Login
         </Button>
       </View>

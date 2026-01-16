@@ -14,7 +14,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 export default function EditProfileScreen() {
@@ -236,13 +236,8 @@ export default function EditProfileScreen() {
         </View>
       </View>
 
-
       {/* Save Button */}
-      <Button 
-        fullWidth
-        onPress={handleSave}
-        disabled={saving}
-      >
+      <Button fullWidth onPress={handleSave} disabled={saving}>
         {saving ? "Please wait" : "Save Changes"}
       </Button>
     </Screen>
@@ -286,5 +281,5 @@ const styles = StyleSheet.create({
   },
   halfWidth: {
     flex: 1,
-  }
+  },
 });

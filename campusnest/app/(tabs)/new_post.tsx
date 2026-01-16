@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { authService, listingService, postService } from "@/src/services";
+import { ImagePickerPreview } from "@/components/listings/ImagePickerPreview";
 
 type Role = "student" | "landlord";
 
@@ -208,7 +209,11 @@ export default function NewPostScreen() {
 
       if (!result.canceled) {
         const newUris = result.assets.map((a) => a.uri);
-        setPhotoUris((prev) => [...prev, ...newUris]);
+
+        setPhotoUris((prev) => {
+          const merged = [...prev, ...newUris];
+          return Array.from(new Set(merged)); // dedupe
+        });
       }
     } catch (e) {
       console.error("Image pick error:", e);
@@ -482,8 +487,19 @@ export default function NewPostScreen() {
           />
         </View>
 
+        {photoUris.length > 0 && (
+          <ImagePickerPreview
+            photos={photoUris}
+            onRemove={(uri) =>
+              setPhotoUris((prev) => prev.filter((p) => p !== uri))
+            }
+          />
+        )}
+
         <Pressable style={styles.uploadButton} onPress={pickImages}>
-          <Text style={styles.uploadButtonText}>Upload photos</Text>
+          <Text style={styles.uploadButtonText}>
+            {photoUris.length ? "Add more photos" : "Upload photos"}
+          </Text>
         </Pressable>
       </View>
 

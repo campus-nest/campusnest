@@ -12,6 +12,13 @@ export class AuthService {
   private supabase = getSupabase();
 
   /**
+   * Get Supabase client instance
+   */
+  getSupabase() {
+    return this.supabase;
+  }
+
+  /**
    * Sign up a new user
    */
   async signUp(input: SignUpInput): Promise<{
