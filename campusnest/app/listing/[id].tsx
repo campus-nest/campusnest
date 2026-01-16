@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { PageContainer } from "@/components/page-container";
 import { authService, listingService, profileService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
+import { ListingImageGallery } from "@/components/listings/ListingImageGallery";
 
 export default function ListingDetailScreen() {
   const router = useRouter();
@@ -107,40 +108,8 @@ export default function ListingDetailScreen() {
           <View />
         </View>
 
-        {/* Image grid */}
-        {listing.photo_urls && listing.photo_urls.length > 0 ? (
-          <View style={styles.imageRow}>
-            <Image
-              source={{ uri: listing.photo_urls[0] }}
-              style={styles.mainImage}
-              resizeMode="cover"
-            />
-
-            <View style={styles.sideImages}>
-              {listing.photo_urls.slice(1, 3).map((url, idx) => (
-                <Image
-                  key={idx}
-                  source={{ uri: url }}
-                  style={styles.sideImage}
-                  resizeMode="cover"
-                />
-              ))}
-
-              {listing.photo_urls.length > 3 && (
-                <View style={styles.morePhotos}>
-                  <Text style={styles.morePhotosText}>
-                    +{listing.photo_urls.length - 3} more
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-        ) : (
-          <View style={styles.mainImage}>
-            <Text style={styles.imageEmoji}>🏠</Text>
-          </View>
-        )}
-
+        <ListingImageGallery photos={listing.photo_urls ?? []} />
+        
         {/* Content */}
         <Text style={styles.title}>{listing.title}</Text>
 
@@ -241,39 +210,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 22,
   },
-  imageRow: {
-    flexDirection: "row",
-    marginBottom: 16,
-  },
-  mainImage: {
-    width: "65%",
-    height: 140,
-    borderRadius: 16,
-    marginRight: 8,
-    backgroundColor: "#333",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sideImages: {
-    width: "35%",
-    justifyContent: "space-between",
-  },
-  sideImage: {
-    width: "100%",
-    height: 40,
-    borderRadius: 10,
-    marginBottom: 6,
-  },
-  morePhotos: {
-    height: 40,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  morePhotosText: {
-    color: "#fff",
-    fontSize: 11,
-  },
+
   title: {
     color: "#fff",
     fontSize: 18,
@@ -325,7 +262,6 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontWeight: "600",
   },
-  imageEmoji: {
-    fontSize: 50,
-  },
+  
+
 });
