@@ -56,7 +56,7 @@ class GeocodingService {
    */
   async geocodeAddresses(
     addresses: string[],
-    delayMs: number = 1100
+    delayMs: number = 1100,
   ): Promise<Map<string, GeocodingResult>> {
     const results = new Map<string, GeocodingResult>();
 
@@ -81,7 +81,7 @@ class GeocodingService {
    */
   async reverseGeocode(
     latitude: number,
-    longitude: number
+    longitude: number,
   ): Promise<string | null> {
     try {
       const params = new URLSearchParams({
@@ -96,7 +96,7 @@ class GeocodingService {
           headers: {
             "User-Agent": "CampusNest/1.0",
           },
-        }
+        },
       );
 
       if (!response.ok) {

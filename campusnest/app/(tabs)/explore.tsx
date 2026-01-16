@@ -89,7 +89,7 @@ export default function ExploreScreen() {
           listing.latitude != null &&
           listing.longitude != null &&
           !isNaN(listing.latitude) &&
-          !isNaN(listing.longitude)
+          !isNaN(listing.longitude),
       );
 
       setListings(listingsWithCoords);
@@ -226,7 +226,7 @@ export default function ExploreScreen() {
                 maximumZ={19}
                 flipY={false}
                 tileSize={256}
-                subdomains={['a', 'b', 'c', 'd']}
+                subdomains={["a", "b", "c", "d"]}
               />
             )}
 
@@ -258,9 +258,7 @@ export default function ExploreScreen() {
 
         {/* Attribution for CartoDB */}
         <Pressable style={styles.attribution} onPress={openOSMAttribution}>
-          <Text style={styles.attributionText}>
-            © OpenStreetMap | © CARTO
-          </Text>
+          <Text style={styles.attributionText}>© OpenStreetMap | © CARTO</Text>
         </Pressable>
 
         {/* Listing count badge */}
