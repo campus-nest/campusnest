@@ -81,19 +81,6 @@ export default function HomeScreen() {
     fetchListings();
   }, [role, activeFilter]);
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search listings"
-        placeholderTextColor="#999"
-      />
-      <Pressable style={styles.iconButton}>
-        <Text style={styles.iconText}>🔔</Text>
-      </Pressable>
-    </View>
-  );
-
   const renderFilters = () => {
     if (!role) return null;
 
@@ -167,7 +154,6 @@ export default function HomeScreen() {
   return (
     <PageContainer>
       <View style={styles.screen}>
-        {renderHeader()}
         {renderFilters()}
 
         <FlatList
@@ -184,24 +170,17 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
+    flex: 0,
     backgroundColor: "#000",
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 5,
   },
-  searchInput: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 14,
-  },
+
   iconButton: {
     width: 40,
     height: 40,

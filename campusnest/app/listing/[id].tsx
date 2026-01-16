@@ -105,11 +105,10 @@ export default function ListingDetailScreen() {
           <Pressable onPress={() => router.back()}>
             <Text style={styles.backText}>←</Text>
           </Pressable>
-          <View />
         </View>
 
         <ListingImageGallery photos={listing.photo_urls ?? []} />
-        
+
         {/* Content */}
         <Text style={styles.title}>{listing.title}</Text>
 
@@ -186,9 +185,9 @@ export default function ListingDetailScreen() {
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingTop: 24,
-    paddingBottom: 40,
-    paddingHorizontal: 16,
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingHorizontal: 5,
   },
   centered: {
     flex: 1,
@@ -202,7 +201,6 @@ const styles = StyleSheet.create({
   },
   topBar: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
   },
