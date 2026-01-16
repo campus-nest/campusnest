@@ -1,40 +1,83 @@
-import React, { useState, useEffect } from "react";
+import Screen from "@/components/ui/Screen";
+import { authService, listingService } from "@/src/services";
+import { Listing } from "@/src/types/listing";
+import { useRouter } from "expo-router";
+import { Home, MapPin } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import {
-  StyleSheet,
-  View,
   ActivityIndicator,
   Alert,
+  Linking,
+  Platform,
   Pressable,
+  StyleSheet,
   Text,
+  View,
 } from "react-native";
-import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
-import { useRouter } from "expo-router";
-import Screen from "@/components/ui/Screen";
-import { listingService } from "@/src/services";
-import { Listing } from "@/src/types/listing";
-import { Home, MapPin } from "lucide-react-native";
+
+// Dynamic imports for platform-specific map components
+let MapView: any;
+let Marker: any;
+let UrlTile: any;
+
+if (Platform.OS !== "web") {
+  const maps = require("react-native-maps");
+  MapView = maps.default;
+  Marker = maps.Marker;
+  UrlTile = maps.UrlTile;
+}
+
+interface Region {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+}
 
 export default function ExploreScreen() {
   const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showMap, setShowMap] = useState(true);
+  const [userRole, setUserRole] = useState<"student" | "landlord" | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
-  // Default to Edmonton (you can change this to your campus location)
+  // Default to Edmonton (University of Alberta)
   const [region, setRegion] = useState<Region>({
-    latitude: 53.5232, // University of Alberta
+    latitude: 53.5232,
     longitude: -113.5263,
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
 
   useEffect(() => {
-    fetchListings();
+    checkUserRoleAndFetchListings();
   }, []);
+
+  const checkUserRoleAndFetchListings = async () => {
+    try {
+      setLoading(true);
+
+      // Check user role first
+      const role = await authService.getUserRole();
+      setUserRole(role);
+
+      // If landlord, don't fetch listings (they shouldn't see this page)
+      if (role === "landlord") {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch listings for students
+      await fetchListings();
+    } catch (error) {
+      console.error("Error in explore screen:", error);
+      Alert.alert("Error", "Failed to load explore page");
+      setLoading(false);
+    }
+  };
 
   const fetchListings = async () => {
     try {
-      setLoading(true);
       const data = await listingService.getListings({
         status: "active",
         visibility: "public",
@@ -82,6 +125,32 @@ export default function ExploreScreen() {
     router.push(`/listing/${listingId}`);
   };
 
+  const openOSMAttribution = () => {
+    Linking.openURL("https://www.openstreetmap.org/copyright");
+  };
+
+  // If landlord, show message that this page is for students only
+  if (!loading && userRole === "landlord") {
+    return (
+      <Screen>
+        <View style={styles.messageContainer}>
+          <Home size={48} color="#666" />
+          <Text style={styles.messageTitle}>Explore is for Students</Text>
+          <Text style={styles.messageText}>
+            This map view is only available for student accounts. Use the home
+            tab to manage your listings.
+          </Text>
+          <Pressable
+            style={styles.goHomeButton}
+            onPress={() => router.push("/(tabs)/")}
+          >
+            <Text style={styles.goHomeButtonText}>Go to Home</Text>
+          </Pressable>
+        </View>
+      </Screen>
+    );
+  }
+
   if (loading) {
     return (
       <Screen>
@@ -93,40 +162,106 @@ export default function ExploreScreen() {
     );
   }
 
+  // Web fallback - show list view instead
+  if (Platform.OS === "web") {
+    return (
+      <Screen>
+        <View style={styles.container}>
+          <View style={styles.webHeader}>
+            <Text style={styles.webTitle}>Nearby Listings</Text>
+            <View style={styles.countBadge}>
+              <MapPin size={14} color="#fff" />
+              <Text style={styles.countText}>
+                {listings.length} listing{listings.length !== 1 ? "s" : ""}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.webListContainer}>
+            {listings.map((listing) => (
+              <Pressable
+                key={listing.id}
+                style={styles.listingCard}
+                onPress={() => handleMarkerPress(listing.id)}
+              >
+                <View style={styles.cardIcon}>
+                  <Home size={24} color="#0066CC" />
+                </View>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>{listing.title}</Text>
+                  <Text style={styles.cardAddress}>{listing.address}</Text>
+                  <Text style={styles.cardRent}>${listing.rent}/month</Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+
+          <Pressable style={styles.refreshButton} onPress={fetchListings}>
+            <Text style={styles.refreshText}>↻</Text>
+          </Pressable>
+        </View>
+      </Screen>
+    );
+  }
+
+  // Native mobile map view
   return (
     <Screen>
       <View style={styles.container}>
-        {/* Map View */}
-        <MapView
-          provider={PROVIDER_DEFAULT}
-          style={styles.map}
-          initialRegion={region}
-          showsUserLocation
-          showsMyLocationButton
-          showsCompass
-          toolbarEnabled={false}
-        >
-          {listings.map((listing) => (
-            <Marker
-              key={listing.id}
-              coordinate={{
-                latitude: listing.latitude!,
-                longitude: listing.longitude!,
-              }}
-              title={listing.title}
-              description={`$${listing.rent}/month`}
-              onPress={() => handleMarkerPress(listing.id)}
-            >
-              {/* Custom marker */}
-              <View style={styles.customMarker}>
-                <View style={styles.markerContent}>
-                  <Home size={16} color="#000" />
-                </View>
-                <View style={styles.markerArrow} />
-              </View>
-            </Marker>
-          ))}
-        </MapView>
+        {MapView && (
+          <MapView
+            style={styles.map}
+            initialRegion={region}
+            showsUserLocation
+            showsMyLocationButton
+            showsCompass
+            toolbarEnabled={false}
+            onMapReady={() => setMapReady(true)}
+          >
+            {/* Use Stadia Maps (free tier, no User-Agent required) */}
+            {/* Alternative: CartoDB tiles - no registration needed */}
+            {UrlTile && (
+              <UrlTile
+                urlTemplate="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+                maximumZ={19}
+                flipY={false}
+                tileSize={256}
+                subdomains={['a', 'b', 'c', 'd']}
+              />
+            )}
+
+            {/* Listing markers */}
+            {mapReady &&
+              Marker &&
+              listings.map((listing) => (
+                <Marker
+                  key={listing.id}
+                  coordinate={{
+                    latitude: listing.latitude!,
+                    longitude: listing.longitude!,
+                  }}
+                  title={listing.title}
+                  description={`$${listing.rent}/month`}
+                  onPress={() => handleMarkerPress(listing.id)}
+                >
+                  {/* Custom marker */}
+                  <View style={styles.customMarker}>
+                    <View style={styles.markerContent}>
+                      <Home size={16} color="#000" />
+                    </View>
+                    <View style={styles.markerArrow} />
+                  </View>
+                </Marker>
+              ))}
+          </MapView>
+        )}
+
+        {/* Attribution for CartoDB */}
+        <Pressable style={styles.attribution} onPress={openOSMAttribution}>
+          <Text style={styles.attributionText}>
+            © OpenStreetMap | © CARTO
+          </Text>
+        </Pressable>
 
         {/* Listing count badge */}
         {listings.length > 0 && (
@@ -135,19 +270,6 @@ export default function ExploreScreen() {
             <Text style={styles.countText}>
               {listings.length} listing{listings.length !== 1 ? "s" : ""}
             </Text>
-          </View>
-        )}
-
-        {/* No listings message */}
-        {listings.length === 0 && (
-          <View style={styles.noListingsOverlay}>
-            <View style={styles.noListingsCard}>
-              <Home size={32} color="#999" />
-              <Text style={styles.noListingsTitle}>No listings available</Text>
-              <Text style={styles.noListingsText}>
-                Check back later for new rental opportunities
-              </Text>
-            </View>
           </View>
         )}
 
@@ -174,6 +296,37 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginTop: 12,
     fontSize: 14,
+  },
+  messageContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
+  },
+  messageTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  messageText: {
+    color: "#999",
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  goHomeButton: {
+    marginTop: 24,
+    backgroundColor: "#fff",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 999,
+  },
+  goHomeButtonText: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "600",
   },
   map: {
     flex: 1,
@@ -211,6 +364,20 @@ const styles = StyleSheet.create({
     borderTopColor: "#0066CC",
     marginTop: -1,
   },
+  // OSM Attribution (REQUIRED by OSM policy)
+  attribution: {
+    position: "absolute",
+    bottom: 8,
+    left: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  attributionText: {
+    fontSize: 10,
+    color: "#000",
+  },
   countBadge: {
     position: "absolute",
     top: 16,
@@ -230,7 +397,7 @@ const styles = StyleSheet.create({
   },
   refreshButton: {
     position: "absolute",
-    bottom: 24,
+    bottom: 80,
     right: 16,
     backgroundColor: "#fff",
     width: 48,
@@ -248,30 +415,57 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#000",
   },
-  noListingsOverlay: {
-    ...StyleSheet.absoluteFillObject,
+  // Web-specific styles
+  webHeader: {
+    padding: 16,
+    backgroundColor: "#1a1a1a",
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+  },
+  webTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  webListContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  listingCard: {
+    flexDirection: "row",
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: "center",
+  },
+  cardIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    pointerEvents: "none",
+    marginRight: 16,
   },
-  noListingsCard: {
-    backgroundColor: "#1a1a1a",
-    padding: 24,
-    borderRadius: 16,
-    alignItems: "center",
-    maxWidth: 280,
+  cardContent: {
+    flex: 1,
   },
-  noListingsTitle: {
+  cardTitle: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
-    marginTop: 12,
+    marginBottom: 4,
   },
-  noListingsText: {
+  cardAddress: {
     color: "#999",
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  cardRent: {
+    color: "#0066CC",
     fontSize: 14,
-    textAlign: "center",
-    marginTop: 8,
+    fontWeight: "600",
   },
 });
