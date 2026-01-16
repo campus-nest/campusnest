@@ -10,8 +10,7 @@ import {
   View,
 } from "react-native";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
-  Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface Props {
   photos: string[];
@@ -68,9 +67,7 @@ export function ListingImageGallery({ photos }: Props) {
                 setVisible(true);
               }}
             >
-              <Text style={styles.moreText}>
-                +{photos.length - 3} more
-              </Text>
+              <Text style={styles.moreText}>+{photos.length - 3} more</Text>
             </Pressable>
           )}
         </View>

@@ -15,7 +15,6 @@ import * as ImagePicker from "expo-image-picker";
 import { PageContainer } from "@/components/page-container";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { authService, listingService, postService } from "@/src/services";
-import { ListingImageGallery } from "@/components/listings/ListingImageGallery";
 import { ImagePickerPreview } from "@/components/listings/ImagePickerPreview";
 
 type Role = "student" | "landlord";
@@ -210,7 +209,7 @@ export default function NewPostScreen() {
 
       if (!result.canceled) {
         const newUris = result.assets.map((a) => a.uri);
-      
+
         setPhotoUris((prev) => {
           const merged = [...prev, ...newUris];
           return Array.from(new Set(merged)); // dedupe

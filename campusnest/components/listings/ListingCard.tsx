@@ -29,13 +29,9 @@ export function ListingCard({ listing }: Props) {
       <View style={styles.content}>
         <Text style={styles.title}>{listing.title}</Text>
 
-        <Text style={styles.meta}>
-          Lease: {listing.lease_term}
-        </Text>
+        <Text style={styles.meta}>Lease: {listing.lease_term}</Text>
 
-        <Text style={styles.meta}>
-          Rent: ${listing.rent}
-        </Text>
+        <Text style={styles.meta}>Rent: ${listing.rent}</Text>
 
         <Text style={styles.address} numberOfLines={2}>
           {listing.address}

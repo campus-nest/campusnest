@@ -5,16 +5,12 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
-import { Image } from "react-native";
 import { ListingCard } from "@/components/listings/ListingCard";
-
 
 type Role = "student" | "landlord";
 
@@ -23,8 +19,6 @@ type LandlordFilter = "yourListings" | "recent";
 type FilterKey = StudentFilter | LandlordFilter;
 
 export default function HomeScreen() {
-  const router = useRouter();
-
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
   const [listingsLoading, setListingsLoading] = useState(true);
@@ -121,7 +115,6 @@ export default function HomeScreen() {
       </View>
     );
   };
-
 
   if (roleLoading) {
     return (
