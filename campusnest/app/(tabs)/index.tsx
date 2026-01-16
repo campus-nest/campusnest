@@ -8,9 +8,9 @@ import {
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
+import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
-import { ListingCard } from "@/components/listings/ListingCard";
 
 type Role = "student" | "landlord";
 
@@ -24,6 +24,7 @@ export default function HomeScreen() {
   const [listingsLoading, setListingsLoading] = useState(true);
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
+  const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
@@ -49,31 +50,46 @@ export default function HomeScreen() {
       setListingsLoading(true);
       const session = await authService.getSession();
 
-      let data: Listing[] = [];
+      // Fetch listings based on role and filter
+      let fetchedListings: Listing[] = [];
 
       if (role === "student") {
-        data = await listingService.getListings({
+        // Students see public active listings
+        fetchedListings = await listingService.getListings({
           status: "active",
           visibility: "public",
         });
       } else {
-        data =
-          activeFilter === "yourListings"
-            ? await listingService.getListings({
-                landlord_id: session?.user?.id,
-              })
-            : await listingService.getListings({
-                status: "active",
-                visibility: "public",
-              });
+        // Landlord
+        if (activeFilter === "yourListings") {
+          fetchedListings = await listingService.getListings({
+            landlord_id: session?.user?.id,
+          });
+        } else {
+          // "recent" shows public listings from everyone
+          fetchedListings = await listingService.getListings({
+            status: "active",
+            visibility: "public",
+          });
+        }
       }
 
-      setListings(data);
+      setListings(fetchedListings);
       setListingsLoading(false);
     };
 
     fetchListings();
   }, [role, activeFilter]);
+
+  // const renderHeader = () => (
+  //   <View style={styles.header}>
+  //     <TextInput
+  //       style={styles.searchInput}
+  //       placeholder="Search listings"
+  //       placeholderTextColor="#999"
+  //     />
+  //   </View>
+  // );
 
   const renderFilters = () => {
     if (!role) return null;
@@ -116,6 +132,29 @@ export default function HomeScreen() {
     );
   };
 
+  const renderListingCard = (listing: Listing) => (
+    <Pressable
+      style={styles.card}
+      onPress={() => router.push(`/listing/${listing.id}`)}
+    >
+      <View style={styles.cardImagePlaceholder}>
+        <Text style={styles.cardImageEmoji}>🏠</Text>
+      </View>
+
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{listing.title}</Text>
+        <Text style={styles.cardSubtitle}>
+          Lease Term: {listing.lease_term}
+        </Text>
+        <Text style={styles.cardSubtitle}>Rent: ${listing.rent}</Text>
+        <Text style={styles.cardAddress} numberOfLines={2}>
+          {listing.address}
+        </Text>
+      </View>
+    </Pressable>
+  );
+
+  // Loading States
   if (roleLoading) {
     return (
       <View style={styles.centered}>
@@ -151,10 +190,10 @@ export default function HomeScreen() {
 
         <FlatList
           data={listings}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ListingCard listing={item} />}
-          showsVerticalScrollIndicator={false}
+          keyExtractor={(listing) => listing.id}
+          renderItem={({ item }) => renderListingCard(item)}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
         />
       </View>
     </PageContainer>
@@ -173,17 +212,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 5,
   },
-
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 999,
+  searchInput: {
+    flex: 1,
     backgroundColor: "#f2f2f2",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconText: {
-    fontSize: 18,
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 14,
   },
   filtersRow: {
     flexDirection: "row",

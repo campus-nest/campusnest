@@ -17,6 +17,7 @@ export default function TabLayout() {
         <Tabs.Screen name="explore" />
         <Tabs.Screen name="new_post" />
         <Tabs.Screen name="users" />
+        <Tabs.Screen name="saved" />
         <Tabs.Screen name="profile" />
       </Tabs>
       {Platform.OS !== "web" && <NavigationBar />}
