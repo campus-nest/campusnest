@@ -18,7 +18,6 @@ import { authService, listingService, postService } from "@/src/services";
 
 // UI Components
 import { ImagePickerPreview } from "@/components/listings/ImagePickerPreview";
-import { PageContainer } from "@/components/page-container";
 import AddressInput, { LocationData } from "@/components/ui/AddressInput";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -26,6 +25,7 @@ import { ChipGroup, ToggleChipGroup } from "@/components/ui/Chip";
 import { CycleDropdown } from "@/components/ui/Dropdown";
 import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
+import Screen from "@/components/ui/Screen";
 import Section, { Divider } from "@/components/ui/Section";
 import TabSelector from "@/components/ui/TabSelector";
 
@@ -519,14 +519,14 @@ export default function NewPostScreen() {
   }
 
   return (
-    <PageContainer>
+    <Screen>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
       </ScrollView>
-    </PageContainer>
+    </Screen>
   );
 }
 
