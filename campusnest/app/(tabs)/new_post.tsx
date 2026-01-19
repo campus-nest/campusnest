@@ -1,34 +1,33 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
-  Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 // Services
 import { authService, listingService, postService } from "@/src/services";
-import { geocodingService, GeocodingResult } from "@/src/services/geocoding.service";
 
 // UI Components
-import { PageContainer } from "@/components/page-container";
-import { H1, H4 } from "@/components/ui/Headings";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
-import Card from "@/components/ui/Card";
-import TabSelector from "@/components/ui/Tabselector";
-import Chip, { ChipGroup, ToggleChipGroup } from "@/components/ui/Chip";
-import { CycleDropdown } from "@/components/ui/Dropdown";
-import AddressInput from "@/components/ui/AddressInput";
-import Section, { Divider } from "@/components/ui/Section";
 import { ImagePickerPreview } from "@/components/listings/ImagePickerPreview";
+import { PageContainer } from "@/components/page-container";
+import AddressInput, { LocationData } from "@/components/ui/AddressInput";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import { ChipGroup, ToggleChipGroup } from "@/components/ui/Chip";
+import { CycleDropdown } from "@/components/ui/Dropdown";
+import { H1, H4 } from "@/components/ui/Headings";
+import Input from "@/components/ui/Input";
+import Section, { Divider } from "@/components/ui/Section";
+import TabSelector from "@/components/ui/TabSelector";
 
 type Role = "student" | "landlord";
 
@@ -67,8 +66,8 @@ export default function NewPostScreen() {
   const [photoUris, setPhotoUris] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("rent");
 
-  // Geocoding state
-  const [verifiedLocation, setVerifiedLocation] = useState<GeocodingResult | null>(null);
+  // Location state (from map picker)
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
 
   // Student post form state
   const [postTitle, setPostTitle] = useState("");
@@ -132,18 +131,39 @@ export default function NewPostScreen() {
     setLocationArea("");
     setPhotoUris([]);
     setActiveTab("rent");
-    setVerifiedLocation(null);
+    setSelectedLocation(null);
   };
 
   // Create listing handler
   const handleCreateListing = async () => {
-    if (
-      !listingTitle ||
-      !listingAddress ||
-      !listingRent ||
-      (!leaseTermOption && !listingLeaseTerm)
-    ) {
-      Alert.alert("Missing info", "Please fill in all required fields.");
+    // Validate required fields
+    if (!listingTitle) {
+      Alert.alert("Missing info", "Please enter a listing title.");
+      return;
+    }
+
+    if (!listingAddress && !selectedLocation) {
+      Alert.alert("Missing info", "Please enter an address or select a location on the map.");
+      return;
+    }
+
+    if (!listingRent) {
+      Alert.alert("Missing info", "Please enter the rent amount.");
+      return;
+    }
+
+    if (!leaseTermOption && !listingLeaseTerm) {
+      Alert.alert("Missing info", "Please select or enter a lease term.");
+      return;
+    }
+
+    // Validate location is selected on map
+    if (!selectedLocation) {
+      Alert.alert(
+        "Location Required",
+        "Please select your listing location on the map so students can find it easily.",
+        [{ text: "OK" }]
+      );
       return;
     }
 
@@ -168,29 +188,12 @@ export default function NewPostScreen() {
         photoUris
       );
 
-      // Get coordinates - use verified location or geocode now
-      let latitude: number | null = null;
-      let longitude: number | null = null;
-
-      if (verifiedLocation) {
-        latitude = verifiedLocation.latitude;
-        longitude = verifiedLocation.longitude;
-      } else {
-        const geocodeResult = await geocodingService.geocodeAddress(listingAddress);
-        if (geocodeResult) {
-          latitude = geocodeResult.latitude;
-          longitude = geocodeResult.longitude;
-        } else {
-          console.warn("Could not geocode address:", listingAddress);
-        }
-      }
-
       const result = await listingService.createListing({
         landlord_id: user.id,
         title: listingTitle,
-        address: listingAddress,
-        latitude,
-        longitude,
+        address: listingAddress || selectedLocation.address || "Location selected on map",
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
         rent: rentNumber,
         lease_term: leaseTermOption || listingLeaseTerm,
         status: "active",
@@ -211,7 +214,7 @@ export default function NewPostScreen() {
       }
 
       resetLandlordForm();
-      Alert.alert("Success", "Listing created.");
+      Alert.alert("Success", "Listing created! It will now appear on the map for students.");
       router.push("/(tabs)");
     } finally {
       setSubmitting(false);
@@ -254,6 +257,11 @@ export default function NewPostScreen() {
     }
   };
 
+  // Handle location selection from map
+  const handleLocationSelected = (location: LocationData | null) => {
+    setSelectedLocation(location);
+  };
+
   // Landlord Form
   const renderLandlordForm = () => (
     <>
@@ -284,12 +292,14 @@ export default function NewPostScreen() {
           containerStyle={styles.field}
         />
 
+        {/* Address with Map Picker */}
         <AddressInput
           label="Address"
           placeholder="123 University Ave, Edmonton, AB"
           value={listingAddress}
           onChangeText={setListingAddress}
-          onLocationVerified={setVerifiedLocation}
+          selectedLocation={selectedLocation}
+          onLocationSelected={handleLocationSelected}
           variant="light"
           containerStyle={styles.field}
         />
@@ -418,8 +428,8 @@ export default function NewPostScreen() {
 
         {/* Location Area */}
         <Input
-          label="Location"
-          placeholder="Neighborhood / Area"
+          label="Neighborhood / Area"
+          placeholder="e.g. Downtown, Whyte Ave"
           value={locationArea}
           onChangeText={setLocationArea}
           style={styles.inputLight}

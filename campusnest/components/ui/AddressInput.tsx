@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { MapPin, Navigation } from "lucide-react-native";
+import { useCallback, useEffect } from "react";
 import {
-  ActivityIndicator,
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -9,82 +9,67 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { geocodingService, GeocodingResult } from "@/src/services/geocoding.service";
+
+export interface LocationData {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
 
 interface AddressInputProps {
   label?: string;
   value: string;
   onChangeText: (text: string) => void;
-  onLocationVerified?: (location: GeocodingResult | null) => void;
+  onLocationSelected?: (location: LocationData | null) => void;
+  selectedLocation?: LocationData | null;
   placeholder?: string;
   variant?: "dark" | "light";
   containerStyle?: ViewStyle;
-  showVerifyButton?: boolean;
 }
 
 export default function AddressInput({
   label,
   value,
   onChangeText,
-  onLocationVerified,
+  onLocationSelected,
+  selectedLocation,
   placeholder = "Enter address",
   variant = "dark",
   containerStyle,
-  showVerifyButton = true,
 }: AddressInputProps) {
-  const [isGeocoding, setIsGeocoding] = useState(false);
-  const [verifiedLocation, setVerifiedLocation] = useState<GeocodingResult | null>(null);
-
+  const router = useRouter();
   const isLight = variant === "light";
 
-  // Clear verified location when address changes
+  // Set up the global callback for receiving location from map screen
   useEffect(() => {
-    setVerifiedLocation(null);
-    onLocationVerified?.(null);
-  }, [value]);
-
-  const handleVerifyAddress = async () => {
-    if (!value.trim()) {
-      Alert.alert("Missing Address", "Please enter an address first.");
-      return;
-    }
-
-    setIsGeocoding(true);
-
-    try {
-      const result = await geocodingService.geocodeAddress(value);
-
-      if (result) {
-        setVerifiedLocation(result);
-        onLocationVerified?.(result);
-        Alert.alert(
-          "Address Found",
-          `We found: ${result.displayName}\n\nLatitude: ${result.latitude.toFixed(6)}\nLongitude: ${result.longitude.toFixed(6)}`,
-          [
-            {
-              text: "Use Different Address",
-              style: "cancel",
-              onPress: () => {
-                setVerifiedLocation(null);
-                onLocationVerified?.(null);
-              },
-            },
-            { text: "Looks Good!", onPress: () => {} },
-          ]
-        );
-      } else {
-        Alert.alert(
-          "Address Not Found",
-          "We couldn't find that address. Please check the address and try again, or enter a more specific address (e.g., include city and province)."
-        );
+    global.onLocationSelected = (location: LocationData) => {
+      onLocationSelected?.(location);
+      if (location.address) {
+        onChangeText(location.address);
       }
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      Alert.alert("Error", "Something went wrong while verifying the address.");
-    } finally {
-      setIsGeocoding(false);
-    }
-  };
+    };
+
+    return () => {
+      global.onLocationSelected = undefined;
+    };
+  }, [onLocationSelected, onChangeText]);
+
+  // Open map picker screen
+  const handleOpenMapPicker = useCallback(() => {
+    router.push({
+      pathname: "/select-location",
+      params: {
+        initialLat: selectedLocation?.latitude?.toString() || "",
+        initialLng: selectedLocation?.longitude?.toString() || "",
+        initialAddress: value || "",
+      },
+    });
+  }, [router, selectedLocation, value]);
+
+  // Clear location
+  const handleClearLocation = useCallback(() => {
+    onLocationSelected?.(null);
+  }, [onLocationSelected]);
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -94,72 +79,70 @@ export default function AddressInput({
         </Text>
       )}
 
+      {/* Address text input (for display/manual entry) */}
       <TextInput
         style={[styles.input, isLight && styles.inputLight]}
         placeholder={placeholder}
         placeholderTextColor={isLight ? "#777" : "#666"}
         value={value}
-        onChangeText={onChangeText}
+        onChangeText={(text) => {
+          onChangeText(text);
+          // Clear the coordinates if user manually edits the address
+          if (selectedLocation) {
+            onLocationSelected?.(null);
+          }
+        }}
       />
 
-      {showVerifyButton && (
-        <Pressable
+      {/* Select on Map Button */}
+      <Pressable
+        style={[
+          styles.mapButton,
+          selectedLocation && styles.mapButtonSelected,
+        ]}
+        onPress={handleOpenMapPicker}
+      >
+        <MapPin size={18} color={selectedLocation ? "#fff" : "#007AFF"} />
+        <Text
           style={[
-            styles.verifyButton,
-            isGeocoding && styles.verifyButtonDisabled,
-            verifiedLocation && styles.verifyButtonVerified,
+            styles.mapButtonText,
+            selectedLocation && styles.mapButtonTextSelected,
           ]}
-          onPress={handleVerifyAddress}
-          disabled={isGeocoding}
         >
-          {isGeocoding ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <Text style={styles.verifyButtonText}>
-              {verifiedLocation ? "✓ Address Verified" : "📍 Verify Address"}
-            </Text>
-          )}
-        </Pressable>
+          {selectedLocation ? "Change Location on Map" : "📍 Select on Map"}
+        </Text>
+      </Pressable>
+
+      {/* Show selected location info */}
+      {selectedLocation && (
+        <View style={styles.locationInfo}>
+          <View style={styles.locationHeader}>
+            <Navigation size={16} color="#4CAF50" />
+            <Text style={styles.locationTitle}>Location Selected</Text>
+          </View>
+          <Text style={styles.locationCoords}>
+            Lat: {selectedLocation.latitude.toFixed(6)}, Lng:{" "}
+            {selectedLocation.longitude.toFixed(6)}
+          </Text>
+          <Pressable onPress={handleClearLocation} style={styles.clearButton}>
+            <Text style={styles.clearButtonText}>Clear</Text>
+          </Pressable>
+        </View>
       )}
 
-      {verifiedLocation && (
-        <View style={styles.verifiedBox}>
-          <Text style={styles.verifiedText}>
-            📍 {verifiedLocation.displayName}
-          </Text>
-          <Text style={styles.verifiedCoords}>
-            Lat: {verifiedLocation.latitude.toFixed(4)}, Lng:{" "}
-            {verifiedLocation.longitude.toFixed(4)}
-          </Text>
-        </View>
+      {/* Helper text */}
+      {!selectedLocation && (
+        <Text style={[styles.helperText, isLight && styles.helperTextLight]}>
+          Tap "Select on Map" to pin your exact location
+        </Text>
       )}
     </View>
   );
 }
 
-// Export a hook for using geocoding in forms
-export function useAddressGeocoding() {
-  const [verifiedLocation, setVerifiedLocation] = useState<GeocodingResult | null>(null);
-
-  const geocodeAddress = async (address: string): Promise<GeocodingResult | null> => {
-    if (verifiedLocation) {
-      return verifiedLocation;
-    }
-
-    try {
-      const result = await geocodingService.geocodeAddress(address);
-      return result;
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      return null;
-    }
-  };
-
-  return {
-    verifiedLocation,
-    setVerifiedLocation,
-    geocodeAddress,
-  };
+// Declare global callback type
+declare global {
+  var onLocationSelected: ((location: LocationData) => void) | undefined;
 }
 
 const styles = StyleSheet.create({
@@ -189,39 +172,67 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     color: "#000",
   },
-  verifyButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+  mapButton: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#e3f2fd",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#007AFF",
   },
-  verifyButtonDisabled: {
-    opacity: 0.6,
-  },
-  verifyButtonVerified: {
+  mapButtonSelected: {
     backgroundColor: "#4CAF50",
+    borderColor: "#4CAF50",
   },
-  verifyButtonText: {
-    color: "#fff",
+  mapButtonText: {
+    color: "#007AFF",
     fontSize: 14,
     fontWeight: "600",
   },
-  verifiedBox: {
+  mapButtonTextSelected: {
+    color: "#fff",
+  },
+  locationInfo: {
     backgroundColor: "#e8f5e9",
-    borderRadius: 8,
-    padding: 10,
+    borderRadius: 10,
+    padding: 12,
     borderWidth: 1,
     borderColor: "#4CAF50",
   },
-  verifiedText: {
-    fontSize: 12,
-    color: "#2e7d32",
+  locationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     marginBottom: 4,
   },
-  verifiedCoords: {
-    fontSize: 11,
+  locationTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#2e7d32",
+  },
+  locationCoords: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 8,
+  },
+  clearButton: {
+    alignSelf: "flex-start",
+  },
+  clearButtonText: {
+    color: "#d32f2f",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  helperText: {
+    fontSize: 12,
+    color: "#999",
+    fontStyle: "italic",
+  },
+  helperTextLight: {
     color: "#666",
   },
 });
