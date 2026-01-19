@@ -67,7 +67,9 @@ export default function NewPostScreen() {
   const [activeTab, setActiveTab] = useState("rent");
 
   // Location state (from map picker)
-  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
+    null,
+  );
 
   // Student post form state
   const [postTitle, setPostTitle] = useState("");
@@ -92,7 +94,7 @@ export default function NewPostScreen() {
     setSelectedUtilities((prev) =>
       prev.includes(utility)
         ? prev.filter((u) => u !== utility)
-        : [...prev, utility]
+        : [...prev, utility],
     );
   };
 
@@ -143,7 +145,10 @@ export default function NewPostScreen() {
     }
 
     if (!listingAddress && !selectedLocation) {
-      Alert.alert("Missing info", "Please enter an address or select a location on the map.");
+      Alert.alert(
+        "Missing info",
+        "Please enter an address or select a location on the map.",
+      );
       return;
     }
 
@@ -162,7 +167,7 @@ export default function NewPostScreen() {
       Alert.alert(
         "Location Required",
         "Please select your listing location on the map so students can find it easily.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
       return;
     }
@@ -185,24 +190,33 @@ export default function NewPostScreen() {
       // Upload photos
       const uploadedUrls = await listingService.uploadListingPhotos(
         user.id,
-        photoUris
+        photoUris,
       );
 
       const result = await listingService.createListing({
         landlord_id: user.id,
         title: listingTitle,
-        address: listingAddress || selectedLocation.address || "Location selected on map",
+        address:
+          listingAddress ||
+          selectedLocation.address ||
+          "Location selected on map",
         latitude: selectedLocation.latitude,
         longitude: selectedLocation.longitude,
         rent: rentNumber,
         lease_term: leaseTermOption || listingLeaseTerm,
         status: "active",
         visibility: "public",
-        utilities: selectedUtilities.length > 0 ? selectedUtilities.join(", ") : null,
+        utilities:
+          selectedUtilities.length > 0 ? selectedUtilities.join(", ") : null,
         nearby_university: nearbyUniversity || null,
         description: description || null,
         tenant_preferences: tenantPreferences || null,
-        is_furnished: furnishedStatus === "furnished" ? true : furnishedStatus === "unfurnished" ? false : null,
+        is_furnished:
+          furnishedStatus === "furnished"
+            ? true
+            : furnishedStatus === "unfurnished"
+              ? false
+              : null,
         move_in_date: moveInDate ? moveInDate.toISOString() : null,
         location_area: locationArea || null,
         photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
@@ -214,7 +228,10 @@ export default function NewPostScreen() {
       }
 
       resetLandlordForm();
-      Alert.alert("Success", "Listing created! It will now appear on the map for students.");
+      Alert.alert(
+        "Success",
+        "Listing created! It will now appear on the map for students.",
+      );
       router.push("/(tabs)");
     } finally {
       setSubmitting(false);
@@ -387,7 +404,9 @@ export default function NewPostScreen() {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.dateDropdownText}>
-              {moveInDate ? moveInDate.toLocaleDateString() : "Select move in date"}
+              {moveInDate
+                ? moveInDate.toLocaleDateString()
+                : "Select move in date"}
             </Text>
             <Text style={styles.dateIcon}>📅</Text>
           </Pressable>
@@ -440,7 +459,9 @@ export default function NewPostScreen() {
         {photoUris.length > 0 && (
           <ImagePickerPreview
             photos={photoUris}
-            onRemove={(uri) => setPhotoUris((prev) => prev.filter((p) => p !== uri))}
+            onRemove={(uri) =>
+              setPhotoUris((prev) => prev.filter((p) => p !== uri))
+            }
           />
         )}
 
@@ -453,11 +474,7 @@ export default function NewPostScreen() {
       </Card>
 
       {/* Submit Button */}
-      <Button
-        fullWidth
-        onPress={handleCreateListing}
-        disabled={submitting}
-      >
+      <Button fullWidth onPress={handleCreateListing} disabled={submitting}>
         {submitting ? "Publishing..." : "Publish listing"}
       </Button>
     </>
@@ -467,7 +484,7 @@ export default function NewPostScreen() {
   const renderStudentForm = () => (
     <>
       <H1 style={styles.title}>Create Post</H1>
-      <H4 style={styles.subtitle}>Tell others what you're looking for</H4>
+      <H4 style={styles.subtitle}>Tell others what you&apos;re looking for</H4>
 
       <Input
         label="Title"
@@ -487,11 +504,7 @@ export default function NewPostScreen() {
         containerStyle={styles.field}
       />
 
-      <Button
-        fullWidth
-        onPress={handleCreatePost}
-        disabled={submitting}
-      >
+      <Button fullWidth onPress={handleCreatePost} disabled={submitting}>
         {submitting ? "Posting..." : "Post"}
       </Button>
     </>

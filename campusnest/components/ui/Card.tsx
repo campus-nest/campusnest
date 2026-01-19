@@ -7,11 +7,7 @@ interface CardProps {
   style?: ViewStyle;
 }
 
-export default function Card({
-  children,
-  variant = "dark",
-  style,
-}: CardProps) {
+export default function Card({ children, variant = "dark", style }: CardProps) {
   return (
     <View
       style={[

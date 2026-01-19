@@ -96,10 +96,7 @@ export default function AddressInput({
 
       {/* Select on Map Button */}
       <Pressable
-        style={[
-          styles.mapButton,
-          selectedLocation && styles.mapButtonSelected,
-        ]}
+        style={[styles.mapButton, selectedLocation && styles.mapButtonSelected]}
         onPress={handleOpenMapPicker}
       >
         <MapPin size={18} color={selectedLocation ? "#fff" : "#007AFF"} />
@@ -133,7 +130,7 @@ export default function AddressInput({
       {/* Helper text */}
       {!selectedLocation && (
         <Text style={[styles.helperText, isLight && styles.helperTextLight]}>
-          Tap "Select on Map" to pin your exact location
+          Tap &quot;Select on Map&quot; to pin your exact location
         </Text>
       )}
     </View>

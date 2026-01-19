@@ -55,11 +55,16 @@ export default function SelectLocationScreen() {
   const initialLat = params.initialLat ? parseFloat(params.initialLat) : null;
   const initialLng = params.initialLng ? parseFloat(params.initialLng) : null;
 
-  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(
-    initialLat && initialLng
-      ? { latitude: initialLat, longitude: initialLng, address: params.initialAddress }
-      : null
-  );
+  const [selectedLocation, setSelectedLocation] =
+    useState<SelectedLocation | null>(
+      initialLat && initialLng
+        ? {
+            latitude: initialLat,
+            longitude: initialLng,
+            address: params.initialAddress,
+          }
+        : null,
+    );
 
   const [region, setRegion] = useState<Region>({
     latitude: initialLat || 53.5232, // Default to Edmonton
@@ -110,8 +115,15 @@ export default function SelectLocationScreen() {
 
     // Reverse geocode to get address
     try {
-      const address = await geocodingService.reverseGeocode(latitude, longitude);
-      setSelectedLocation({ latitude, longitude, address: address || undefined });
+      const address = await geocodingService.reverseGeocode(
+        latitude,
+        longitude,
+      );
+      setSelectedLocation({
+        latitude,
+        longitude,
+        address: address || undefined,
+      });
       if (address) {
         setSearchQuery(address);
       }
@@ -152,7 +164,10 @@ export default function SelectLocationScreen() {
           mapRef.current.animateToRegion(newRegion, 500);
         }
       } else {
-        Alert.alert("Not Found", "Could not find that address. Try a different search.");
+        Alert.alert(
+          "Not Found",
+          "Could not find that address. Try a different search.",
+        );
       }
     } catch (error) {
       console.error("Search error:", error);
@@ -167,7 +182,10 @@ export default function SelectLocationScreen() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission Denied", "Location permission is required to use this feature.");
+        Alert.alert(
+          "Permission Denied",
+          "Location permission is required to use this feature.",
+        );
         return;
       }
 
@@ -234,7 +252,8 @@ export default function SelectLocationScreen() {
               Map selection is only available on mobile devices.
             </Text>
             <Text style={styles.webSubtext}>
-              Please use the address search instead, or use the mobile app for map selection.
+              Please use the address search instead, or use the mobile app for
+              map selection.
             </Text>
 
             <View style={styles.searchContainer}>
@@ -267,7 +286,8 @@ export default function SelectLocationScreen() {
                     {selectedLocation.address || "Location selected"}
                   </Text>
                   <Text style={styles.selectedCoords}>
-                    {selectedLocation.latitude.toFixed(6)}, {selectedLocation.longitude.toFixed(6)}
+                    {selectedLocation.latitude.toFixed(6)},{" "}
+                    {selectedLocation.longitude.toFixed(6)}
                   </Text>
                 </View>
               </View>
@@ -278,7 +298,10 @@ export default function SelectLocationScreen() {
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </Pressable>
               <Pressable
-                style={[styles.confirmButton, !selectedLocation && styles.confirmButtonDisabled]}
+                style={[
+                  styles.confirmButton,
+                  !selectedLocation && styles.confirmButtonDisabled,
+                ]}
                 onPress={handleConfirm}
                 disabled={!selectedLocation}
               >
@@ -302,7 +325,10 @@ export default function SelectLocationScreen() {
         <Text style={styles.headerTitle}>Select Location</Text>
         <Pressable
           onPress={handleConfirm}
-          style={[styles.headerButton, !selectedLocation && styles.headerButtonDisabled]}
+          style={[
+            styles.headerButton,
+            !selectedLocation && styles.headerButtonDisabled,
+          ]}
           disabled={!selectedLocation}
         >
           <Check size={24} color={selectedLocation ? "#4CAF50" : "#666"} />
@@ -374,7 +400,10 @@ export default function SelectLocationScreen() {
         )}
 
         {/* Current Location Button */}
-        <Pressable style={styles.currentLocationButton} onPress={handleGoToCurrentLocation}>
+        <Pressable
+          style={styles.currentLocationButton}
+          onPress={handleGoToCurrentLocation}
+        >
           <Navigation size={20} color="#007AFF" />
         </Pressable>
 
@@ -400,7 +429,8 @@ export default function SelectLocationScreen() {
                     {selectedLocation.address || "Address not available"}
                   </Text>
                   <Text style={styles.selectedCoords}>
-                    {selectedLocation.latitude.toFixed(6)}, {selectedLocation.longitude.toFixed(6)}
+                    {selectedLocation.latitude.toFixed(6)},{" "}
+                    {selectedLocation.longitude.toFixed(6)}
                   </Text>
                 </>
               )}
