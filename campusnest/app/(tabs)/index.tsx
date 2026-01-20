@@ -2,23 +2,21 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
 import FilterPills from "@/components/ui/FilterPills";
-
+import LoadingState from "@/components/ui/LoadingState";
 
 type Role = "student" | "landlord";
 
 type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
-type LandlordFilter = "yourListings" | "recent";
+type LandlordFilter = "recent"| "yourListings";
 type FilterKey = StudentFilter | LandlordFilter;
 
 export default function HomeScreen() {
@@ -27,7 +25,6 @@ export default function HomeScreen() {
   const [listingsLoading, setListingsLoading] = useState(true);
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
-  const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
@@ -36,7 +33,7 @@ export default function HomeScreen() {
         const userRole = await authService.getUserRole();
         if (userRole) {
           setRole(userRole);
-          setActiveFilter(userRole === "student" ? "new" : "yourListings");
+          setActiveFilter(userRole === "student" ? "new" : "recent");
         }
       } finally {
         setRoleLoading(false);
@@ -84,17 +81,7 @@ export default function HomeScreen() {
     fetchListings();
   }, [role, activeFilter]);
 
-  // const renderHeader = () => (
-  //   <View style={styles.header}>
-  //     <TextInput
-  //       style={styles.searchInput}
-  //       placeholder="Search listings"
-  //       placeholderTextColor="#999"
-  //     />
-  //   </View>
-  // );
-
-  const filterOptions =
+  const filterOptions: { label: string; value: FilterKey }[] =
   role === "student"
     ? [
         { label: "New", value: "new" },
@@ -109,40 +96,24 @@ export default function HomeScreen() {
 
   // Loading States
   if (roleLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Checking your role...</Text>
-      </View>
-    );
+    return <LoadingState label="Checking your role..." />;
   }
 
   if (!role) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.centeredText}>
-          No role found — please re-login.
-        </Text>
-      </View>
-    );
+    return <LoadingState label="No role found — please re-login." showSpinner={false} />;
   }
 
   if (listingsLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading listings...</Text>
-      </View>
-    );
+    return <LoadingState label="Loading listings..." />;
   }
-
+  
   return (
     <PageContainer>
       <View style={styles.screen}>
       <FilterPills
         options={filterOptions}
         value={activeFilter}
-        onChange={(value: string) => setActiveFilter(value as FilterKey)}
+        onChange={setActiveFilter}
       />
 
       <FlatList
@@ -165,30 +136,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     paddingTop: 0,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  searchInput: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 14,
-  },
   listContent: {
     paddingBottom: 60,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-  },
-  centeredText: {
-    color: "#fff",
-    marginTop: 10,
   },
 });
