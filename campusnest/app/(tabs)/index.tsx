@@ -11,6 +11,7 @@ import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
+import { ListingCard } from "@/components/listings/ListingCard";
 
 type Role = "student" | "landlord";
 
@@ -132,27 +133,7 @@ export default function HomeScreen() {
     );
   };
 
-  const renderListingCard = (listing: Listing) => (
-    <Pressable
-      style={styles.card}
-      onPress={() => router.push(`/listing/${listing.id}`)}
-    >
-      <View style={styles.cardImagePlaceholder}>
-        <Text style={styles.cardImageEmoji}>🏠</Text>
-      </View>
-
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{listing.title}</Text>
-        <Text style={styles.cardSubtitle}>
-          Lease Term: {listing.lease_term}
-        </Text>
-        <Text style={styles.cardSubtitle}>Rent: ${listing.rent}</Text>
-        <Text style={styles.cardAddress} numberOfLines={2}>
-          {listing.address}
-        </Text>
-      </View>
-    </Pressable>
-  );
+  
 
   // Loading States
   if (roleLoading) {
@@ -188,13 +169,14 @@ export default function HomeScreen() {
       <View style={styles.screen}>
         {renderFilters()}
 
-        <FlatList
-          data={listings}
-          keyExtractor={(listing) => listing.id}
-          renderItem={({ item }) => renderListingCard(item)}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+      <FlatList
+        data={listings}
+        keyExtractor={(listing) => listing.id}
+        renderItem={({ item }) => <ListingCard listing={item} />}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+
       </View>
     </PageContainer>
   );
@@ -248,52 +230,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 60,
   },
-  card: {
-    flexDirection: "row",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 12,
-  },
-  cardImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 12,
-    backgroundColor: "#333",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  cardImagePlaceholder: {
-    width: 72,
-    height: 72,
-    borderRadius: 12,
-    backgroundColor: "#333",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  cardImageEmoji: {
-    fontSize: 28,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    color: "#ddd",
-    fontSize: 12,
-  },
-  cardAddress: {
-    color: "#aaa",
-    fontSize: 11,
-    marginTop: 4,
-  },
+
   centered: {
     flex: 1,
     justifyContent: "center",
