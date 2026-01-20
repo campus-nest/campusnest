@@ -12,6 +12,8 @@ import { useRouter } from "expo-router";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
+import FilterPills from "@/components/ui/FilterPills";
+
 
 type Role = "student" | "landlord";
 
@@ -92,48 +94,18 @@ export default function HomeScreen() {
   //   </View>
   // );
 
-  const renderFilters = () => {
-    if (!role) return null;
-
-    const filters =
-      role === "student"
-        ? [
-            { key: "new", label: "New" },
-            { key: "closest", label: "Closest" },
-            { key: "cheapest", label: "Cheapest" },
-            { key: "moveIn", label: "Move-In" },
-          ]
-        : [
-            { key: "yourListings", label: "Your Listings" },
-            { key: "recent", label: "Recent" },
-          ];
-
-    return (
-      <View style={styles.filtersRow}>
-        {filters.map((f) => {
-          const active = activeFilter === f.key;
-          return (
-            <Pressable
-              key={f.key}
-              onPress={() => setActiveFilter(f.key as FilterKey)}
-              style={[styles.filterChip, active && styles.filterChipActive]}
-            >
-              <Text
-                style={[
-                  styles.filterChipText,
-                  active && styles.filterChipTextActive,
-                ]}
-              >
-                {f.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    );
-  };
-
-  
+  const filterOptions =
+  role === "student"
+    ? [
+        { label: "New", value: "new" },
+        { label: "Closest", value: "closest" },
+        { label: "Cheapest", value: "cheapest" },
+        { label: "Move-In", value: "moveIn" },
+      ]
+    : [
+        { label: "Your Listings", value: "yourListings" },
+        { label: "Recent", value: "recent" },
+      ];
 
   // Loading States
   if (roleLoading) {
@@ -167,7 +139,11 @@ export default function HomeScreen() {
   return (
     <PageContainer>
       <View style={styles.screen}>
-        {renderFilters()}
+      <FilterPills
+        options={filterOptions}
+        value={activeFilter}
+        onChange={(value: string) => setActiveFilter(value as FilterKey)}
+      />
 
       <FlatList
         data={listings}
@@ -202,35 +178,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 14,
   },
-  filtersRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginVertical: 14,
-  },
-  filterChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  filterChipActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
-  },
-  filterChipText: {
-    fontSize: 13,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  filterChipTextActive: {
-    color: "#000",
-  },
   listContent: {
     paddingBottom: 60,
   },
-
   centered: {
     flex: 1,
     justifyContent: "center",
