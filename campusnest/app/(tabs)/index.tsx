@@ -229,18 +229,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
+    borderWidth: 1,
+    borderColor: "#333",
   },
   filterChipActive: {
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
+    borderColor: "#fff",
   },
   filterChipText: {
     fontSize: 13,
-    color: "#333",
+    color: "#fff",
     fontWeight: "500",
   },
   filterChipTextActive: {
-    color: "#fff",
+    color: "#000",
   },
   listContent: {
     paddingBottom: 60,
@@ -253,6 +256,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 12,
+    backgroundColor: "#333",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  cardImagePlaceholder: {
     width: 72,
     height: 72,
     borderRadius: 12,
