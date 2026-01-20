@@ -27,9 +27,7 @@ export default function FilterPills<T extends string>({
             onPress={() => onChange(option.value)}
             style={[styles.pill, active && styles.pillActive]}
           >
-            <Text
-              style={[styles.text, active && styles.textActive]}
-            >
+            <Text style={[styles.text, active && styles.textActive]}>
               {option.label}
             </Text>
           </Pressable>

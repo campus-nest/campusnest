@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
@@ -16,7 +10,7 @@ import LoadingState from "@/components/ui/LoadingState";
 type Role = "student" | "landlord";
 
 type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
-type LandlordFilter = "recent"| "yourListings";
+type LandlordFilter = "recent" | "yourListings";
 type FilterKey = StudentFilter | LandlordFilter;
 
 export default function HomeScreen() {
@@ -82,17 +76,17 @@ export default function HomeScreen() {
   }, [role, activeFilter]);
 
   const filterOptions: { label: string; value: FilterKey }[] =
-  role === "student"
-    ? [
-        { label: "New", value: "new" },
-        { label: "Closest", value: "closest" },
-        { label: "Cheapest", value: "cheapest" },
-        { label: "Move-In", value: "moveIn" },
-      ]
-    : [
-        { label: "Your Listings", value: "yourListings" },
-        { label: "Recent", value: "recent" },
-      ];
+    role === "student"
+      ? [
+          { label: "New", value: "new" },
+          { label: "Closest", value: "closest" },
+          { label: "Cheapest", value: "cheapest" },
+          { label: "Move-In", value: "moveIn" },
+        ]
+      : [
+          { label: "Your Listings", value: "yourListings" },
+          { label: "Recent", value: "recent" },
+        ];
 
   // Loading States
   if (roleLoading) {
@@ -100,30 +94,34 @@ export default function HomeScreen() {
   }
 
   if (!role) {
-    return <LoadingState label="No role found — please re-login." showSpinner={false} />;
+    return (
+      <LoadingState
+        label="No role found — please re-login."
+        showSpinner={false}
+      />
+    );
   }
 
   if (listingsLoading) {
     return <LoadingState label="Loading listings..." />;
   }
-  
+
   return (
     <PageContainer>
       <View style={styles.screen}>
-      <FilterPills
-        options={filterOptions}
-        value={activeFilter}
-        onChange={setActiveFilter}
-      />
+        <FilterPills
+          options={filterOptions}
+          value={activeFilter}
+          onChange={setActiveFilter}
+        />
 
-      <FlatList
-        data={listings}
-        keyExtractor={(listing) => listing.id}
-        renderItem={({ item }) => <ListingCard listing={item} />}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
-
+        <FlatList
+          data={listings}
+          keyExtractor={(listing) => listing.id}
+          renderItem={({ item }) => <ListingCard listing={item} />}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
       </View>
     </PageContainer>
   );
