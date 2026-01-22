@@ -73,7 +73,40 @@ export default function HomeScreen() {
     };
 
     fetchListings();
-  }, [role, activeFilter]);
+  }, [role]);
+
+  const displayedListings = React.useMemo(() => {
+    if (!listings) return [];
+
+    switch (activeFilter) {
+      case "new":
+        return [...listings].sort(
+          (a,b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
+      
+        case "cheapest":
+          return [...listings].sort(
+            (a,b) => (a.rent ?? Infinity) - (b.rent ?? Infinity),
+          )
+        
+        case "moveIn":
+          return [...listings].sort((a, b) => {
+            if (!a.move_in_date) return 1;
+            if (!b.move_in_date) return -1;
+            return new Date(a.move_in_date).getTime() - new Date(b.move_in_date).getTime();
+          });
+        
+          case "closest":
+            return [...listings].sort(
+              (a,b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
+
+          default:
+            return listings;
+    }
+  }, [listings, activeFilter]);
 
   const filterOptions: { label: string; value: FilterKey }[] =
     role === "student"
@@ -116,7 +149,7 @@ export default function HomeScreen() {
         />
 
         <FlatList
-          data={listings}
+          data={displayedListings}
           keyExtractor={(listing) => listing.id}
           renderItem={({ item }) => <ListingCard listing={item} />}
           contentContainerStyle={styles.listContent}
