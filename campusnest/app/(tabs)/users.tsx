@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -11,8 +9,18 @@ import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
 import { authService, postService, savedPostService } from "@/src/services";
 import { Post } from "@/src/types/post";
+import Screen from "@/components/ui/Screen";
+import FilterPills from "@/components/ui/FilterPills";
+import { H1 } from "@/components/ui/Headings";
+import LoadingState from "@/components/ui/LoadingState";
+import PostCard from "@/components/posts/PostCard";
 
 type PostFilter = "yourPost" | "recent";
+
+const FILTER_OPTIONS = [
+  { label: "Your Post", value: "yourPost" },
+  { label: "Recent", value: "recent" },
+]as const;
 
 export default function UsersScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -23,40 +31,30 @@ export default function UsersScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const session = await authService.getSession();
-      setCurrentUserId(session?.user?.id || null);
+    if (!currentUserId) return;
+  
+    const fetchSaved = async () => {
+      const savedPosts = await savedPostService.getSavedPosts(currentUserId);
+      setSavedPostIds(new Set(savedPosts.map((p) => p.id)));
     };
-
-    fetchCurrentUser();
-  }, []);
+  
+    fetchSaved();
+  }, [currentUserId]);
 
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
-
       const allPosts = await postService.getPosts();
-
-      // Filter posts based on active filter
-      let filteredPosts = allPosts;
-      if (activeFilter === "yourPost" && currentUserId) {
-        filteredPosts = allPosts.filter(
-          (post) => post.user_id === currentUserId,
-        );
-      }
-
-      setPosts(filteredPosts);
-
-      // Fetch saved posts for current user
-      if (currentUserId) {
-        const savedPosts = await savedPostService.getSavedPosts(currentUserId);
-        const savedIds = new Set(savedPosts.map((p) => p.id));
-        setSavedPostIds(savedIds);
-      }
-
+  
+      const filtered =
+        activeFilter === "yourPost" && currentUserId
+          ? allPosts.filter((p) => p.user_id === currentUserId)
+          : allPosts;
+  
+      setPosts(filtered);
       setLoading(false);
     };
-
+  
     fetchPosts();
   }, [activeFilter, currentUserId]);
 
@@ -82,223 +80,58 @@ export default function UsersScreen() {
     }
   };
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>Student Posts</Text>
-      <Pressable
-        style={styles.savedButton}
-        onPress={() => router.push("/(tabs)/saved")}
-      >
-        <Text style={styles.savedIcon}>❤️</Text>
-      </Pressable>
-    </View>
-  );
-
-  const renderFilters = () => {
-    const filters: { key: PostFilter; label: string }[] = [
-      { key: "yourPost", label: "Your Post" },
-      { key: "recent", label: "Recent" },
-    ];
-
-    return (
-      <View style={styles.filtersRow}>
-        {filters.map((f) => {
-          const isActive = activeFilter === f.key;
-          return (
-            <Pressable
-              key={f.key}
-              onPress={() => setActiveFilter(f.key)}
-              style={[styles.filterChip, isActive && styles.filterChipActive]}
-            >
-              {isActive && <Text style={styles.checkmark}>✓ </Text>}
-              <Text
-                style={[
-                  styles.filterChipText,
-                  isActive && styles.filterChipTextActive,
-                ]}
-              >
-                {f.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    );
-  };
-
-  const renderPostCard = (post: Post) => {
-    const isSaved = savedPostIds.has(post.id);
-
-    return (
-      <Pressable
-        style={styles.card}
-        onPress={() => router.push(`/post/${post.id}`)}
-      >
-        <View style={styles.cardContent}>
-          <Text style={styles.cardTitle}>{post.title}</Text>
-          <Text style={styles.cardBody} numberOfLines={4}>
-            {post.body}
-          </Text>
-        </View>
-
-        <View style={styles.cardActions}>
-          <Pressable
-            style={styles.actionButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              handleToggleSave(post.id);
-            }}
-          >
-            <Text style={styles.actionIcon}>{isSaved ? "❤️" : "🤍"}</Text>
-          </Pressable>
-        </View>
-      </Pressable>
-    );
-  };
-
   if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading posts...</Text>
-      </View>
-    );
+    return <LoadingState label="Loading posts..." />;
   }
 
   return (
     <PageContainer>
-      <View style={styles.screen}>
-        {renderHeader()}
-        {renderFilters()}
+      <Screen>
+      {/* Header */}
+      <H1 bold style={{ textAlign: "left" }}>
+        Student Posts
+      </H1>
 
-        {posts.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>
-              {activeFilter === "yourPost"
-                ? "You haven't created any posts yet"
-                : "No posts available"}
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={posts}
-            keyExtractor={(post) => post.id}
-            renderItem={({ item }) => renderPostCard(item)}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
-      </View>
+      {/* Filters */}
+      <FilterPills
+        options={[...FILTER_OPTIONS]}
+        value={activeFilter}
+        onChange={(value: string) => setActiveFilter(value as PostFilter)}
+      />
+
+      {/* Content */}
+      {posts.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>
+            {activeFilter === "yourPost"
+              ? "You haven't created any posts yet"
+              : "No posts available"}
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={posts}
+          keyExtractor={(post) => post.id}
+          renderItem={({ item }) => (
+            <PostCard
+              post={item}
+              saved={savedPostIds.has(item.id)}
+              onPress={() => router.push(`/post/${item.id}`)}
+              onToggleSave={() => handleToggleSave(item.id)}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+      </Screen>
     </PageContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "#000",
-    paddingHorizontal: 16,
-    paddingTop: 10,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 12,
-    paddingBottom: 16,
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "700",
-  },
-  savedButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#2a2a2a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  savedIcon: {
-    fontSize: 20,
-  },
-  filtersRow: {
-    flexDirection: "row",
-    gap: 12,
-    paddingBottom: 20,
-  },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: "#f2f2f2",
-  },
-  filterChipActive: {
-    backgroundColor: "#333",
-  },
-  filterChipText: {
-    fontSize: 14,
-    color: "#000",
-    fontWeight: "500",
-  },
-  filterChipTextActive: {
-    color: "#fff",
-  },
-  checkmark: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
   listContent: {
-    paddingBottom: 50,
-  },
-  card: {
-    backgroundColor: "#2a2a2a",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  cardContent: {
-    marginBottom: 12,
-  },
-  cardTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  cardBody: {
-    color: "#ddd",
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  cardActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  actionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#1a1a1a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionIcon: {
-    fontSize: 20,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-  },
-  centeredText: {
-    color: "#fff",
-    marginTop: 10,
+    paddingBottom: 60,
   },
   emptyState: {
     flex: 1,
