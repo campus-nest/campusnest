@@ -73,7 +73,7 @@ export default function HomeScreen() {
     };
 
     fetchListings();
-  }, [role]);
+  }, [role, activeFilter]);
 
   const displayedListings = React.useMemo(() => {
     if (!listings) return [];
