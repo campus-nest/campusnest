@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { authService, listingService } from "@/src/services";
@@ -13,115 +13,159 @@ type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
 type LandlordFilter = "recent" | "yourListings";
 type FilterKey = StudentFilter | LandlordFilter;
 
+const STUDENT_FILTERS: { label: string; value: StudentFilter }[] = [
+  { label: "New", value: "new" },
+  { label: "Closest", value: "closest" },
+  { label: "Cheapest", value: "cheapest" },
+  { label: "Move-In", value: "moveIn" },
+];
+
+const LANDLORD_FILTERS: { label: string; value: LandlordFilter }[] = [
+  { label: "Your Listings", value: "yourListings" },
+  { label: "Recent", value: "recent" },
+];
+
+// Stable helpers
+const sortByCreatedAtDesc = (a: Listing, b: Listing) =>
+  new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+
+const sortByRentAsc = (a: Listing, b: Listing) =>
+  (a.rent ?? Number.POSITIVE_INFINITY) - (b.rent ?? Number.POSITIVE_INFINITY);
+
+const sortByMoveInAsc = (a: Listing, b: Listing) => {
+  if (!a.move_in_date) return 1;
+  if (!b.move_in_date) return -1;
+  return (
+    new Date(a.move_in_date).getTime() - new Date(b.move_in_date).getTime()
+  );
+};
+
 export default function HomeScreen() {
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
-  const [listingsLoading, setListingsLoading] = useState(true);
 
+  const [listingsLoading, setListingsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("new");
   const [listings, setListings] = useState<Listing[]>([]);
 
+  // Resolve role once
   useEffect(() => {
+    let cancelled = false;
+
     const fetchRole = async () => {
       try {
         const userRole = await authService.getUserRole();
+        if (cancelled) return;
+
         if (userRole) {
           setRole(userRole);
           setActiveFilter(userRole === "student" ? "new" : "recent");
+        } else {
+          setRole(null);
         }
       } finally {
-        setRoleLoading(false);
+        if (!cancelled) setRoleLoading(false);
       }
     };
 
     fetchRole();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  // Fetch listings whenever role or filter changes
   useEffect(() => {
     if (!role) return;
 
+    let cancelled = false;
+
     const fetchListings = async () => {
       setListingsLoading(true);
-      const session = await authService.getSession();
 
-      // Fetch listings based on role and filter
-      let fetchedListings: Listing[] = [];
+      try {
+        const session = await authService.getSession();
+        if (cancelled) return;
 
-      if (role === "student") {
-        // Students see public active listings
-        fetchedListings = await listingService.getListings({
-          status: "active",
-          visibility: "public",
-        });
-      } else {
-        // Landlord
-        if (activeFilter === "yourListings") {
-          fetchedListings = await listingService.getListings({
-            landlord_id: session?.user?.id,
-          });
-        } else {
-          // "recent" shows public listings from everyone
+        let fetchedListings: Listing[] = [];
+
+        if (role === "student") {
+          // Students see public active listings
           fetchedListings = await listingService.getListings({
             status: "active",
             visibility: "public",
           });
-        }
-      }
+        } else {
+          // Landlord
+          if (activeFilter === "yourListings") {
+            const landlordId = session?.user?.id;
 
-      setListings(fetchedListings);
-      setListingsLoading(false);
+            // Critical guard: do NOT fall back to an unfiltered query
+            if (!landlordId) {
+              fetchedListings = [];
+            } else {
+              fetchedListings = await listingService.getListings({
+                landlord_id: landlordId,
+              });
+            }
+          } else {
+            // "Recent" for landlords currently maps to public active listings
+            fetchedListings = await listingService.getListings({
+              status: "active",
+              visibility: "public",
+            });
+          }
+        }
+
+        if (!cancelled) setListings(fetchedListings);
+      } catch (e) {
+        // Fail closed: do not show stale/incorrect listings
+        if (!cancelled) setListings([]);
+        console.error("Failed to fetch listings:", e);
+      } finally {
+        if (!cancelled) setListingsLoading(false);
+      }
     };
 
     fetchListings();
+
+    return () => {
+      cancelled = true;
+    };
   }, [role, activeFilter]);
 
-  const displayedListings = React.useMemo(() => {
-    if (!listings) return [];
+  // Filter options derived from role
+  const filterOptions = useMemo((): { label: string; value: FilterKey }[] => {
+    if (role === "student") return STUDENT_FILTERS;
+    return LANDLORD_FILTERS;
+  }, [role]);
+
+  // Presentation-level sorting (client-side)
+  const displayedListings = useMemo(() => {
+    const base = listings ?? [];
 
     switch (activeFilter) {
       case "new":
-        return [...listings].sort(
-          (a,b) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-        );
-      
-        case "cheapest":
-          return [...listings].sort(
-            (a,b) => (a.rent ?? Infinity) - (b.rent ?? Infinity),
-          )
-        
-        case "moveIn":
-          return [...listings].sort((a, b) => {
-            if (!a.move_in_date) return 1;
-            if (!b.move_in_date) return -1;
-            return new Date(a.move_in_date).getTime() - new Date(b.move_in_date).getTime();
-          });
-        
-          case "closest":
-            return [...listings].sort(
-              (a,b) =>
-                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-            );
+        return [...base].sort(sortByCreatedAtDesc);
 
-          default:
-            return listings;
+      case "cheapest":
+        return [...base].sort(sortByRentAsc);
+
+      case "moveIn":
+        return [...base].sort(sortByMoveInAsc);
+
+      case "closest":
+        // Not implemented (needs user location + listing coordinates).
+        // Keep deterministic ordering for now.
+        return [...base].sort(sortByCreatedAtDesc);
+
+      default:
+        return base;
     }
   }, [listings, activeFilter]);
 
-  const filterOptions: { label: string; value: FilterKey }[] =
-    role === "student"
-      ? [
-          { label: "New", value: "new" },
-          { label: "Closest", value: "closest" },
-          { label: "Cheapest", value: "cheapest" },
-          { label: "Move-In", value: "moveIn" },
-        ]
-      : [
-          { label: "Your Listings", value: "yourListings" },
-          { label: "Recent", value: "recent" },
-        ];
-
-  // Loading States
+  // Loading states
   if (roleLoading) {
     return <LoadingState label="Checking your role..." />;
   }
