@@ -1,54 +1,24 @@
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputProps,
-  View,
-  ViewStyle,
-} from "react-native";
+import { Platform, Text, TextInput, TextInputProps, View } from "react-native";
 
 interface InputProps extends TextInputProps {
   label?: string;
-  containerStyle?: ViewStyle;
 }
 
-export default function Input({
-  label,
-  containerStyle,
-  style,
-  ...props
-}: InputProps) {
+export default function Input({ label, style, ...props }: InputProps) {
   return (
-    <View style={[styles.inputContainer, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View className="gap-2">
+      {label && (
+        <Text className="text-cn-text-primary text-sm font-medium">{label}</Text>
+      )}
       <TextInput
-        style={[styles.input, style]}
+        className="bg-cn-card rounded-xl p-4 text-cn-text-primary text-base border border-cn-border"
         placeholderTextColor="#666"
+        style={[
+          { fontFamily: Platform.OS === "ios" ? "System" : "sans-serif" },
+          style,
+        ]}
         {...props}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    color: "#fff",
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#333",
-    letterSpacing: 0,
-    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
-  },
-});

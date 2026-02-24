@@ -1,8 +1,5 @@
-import { colors } from "@/src/theme/colors";
-import { spacing } from "@/src/theme/spacing";
-import { typography } from "@/src/theme/typography";
 import { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 interface FormFieldProps {
     label: string;
@@ -10,25 +7,13 @@ interface FormFieldProps {
 }
 
 /**
- * Consistent label + input wrapper used throughout forms.
- * Keeps label style, spacing, and marginBottom uniform.
+ * Consistent label + input wrapper used throughout all forms.
  */
 export default function FormField({ label, children }: FormFieldProps) {
     return (
-        <View style={styles.field}>
-            <Text style={styles.label}>{label}</Text>
+        <View className="mb-3">
+            <Text className="text-cn-text-label text-[13px] mb-1">{label}</Text>
             {children}
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    field: {
-        marginBottom: spacing.md,
-    },
-    label: {
-        color: colors.textLabel,
-        fontSize: typography.fontSizes.base,
-        marginBottom: spacing.xs,
-    },
-});

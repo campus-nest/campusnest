@@ -1,7 +1,4 @@
-import { colors } from "@/src/theme/colors";
-import { spacing } from "@/src/theme/spacing";
-import { typography } from "@/src/theme/typography";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, Text } from "react-native";
 
 interface ToggleChipProps {
     label: string;
@@ -17,33 +14,21 @@ export default function ToggleChip({ label, selected, onPress }: ToggleChipProps
     return (
         <Pressable
             onPress={onPress}
-            style={[styles.chip, selected && styles.chipSelected]}
+            className={[
+                "px-3 py-1.5 rounded-full border",
+                selected
+                    ? "bg-cn-text-dark border-cn-text-dark"
+                    : "bg-cn-white border-cn-border-muted",
+            ].join(" ")}
         >
-            <Text style={[styles.text, selected && styles.textSelected]}>
+            <Text
+                className={[
+                    "text-xs",
+                    selected ? "text-cn-text-primary" : "text-cn-text-subtle",
+                ].join(" ")}
+            >
                 {label}
             </Text>
         </Pressable>
     );
 }
-
-const styles = StyleSheet.create({
-    chip: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm - 2,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: colors.chipBorder,
-        backgroundColor: colors.chipBackground,
-    },
-    chipSelected: {
-        backgroundColor: colors.chipSelected,
-        borderColor: colors.chipSelectedBorder,
-    },
-    text: {
-        fontSize: typography.fontSizes.sm,
-        color: colors.textSubtle,
-    },
-    textSelected: {
-        color: colors.textPrimary,
-    },
-});

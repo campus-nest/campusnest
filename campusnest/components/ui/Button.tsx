@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, Text } from "react-native";
 
 interface ButtonProps {
   onPress: () => void;
@@ -8,6 +8,24 @@ interface ButtonProps {
   fullWidth?: boolean;
   disabled?: boolean;
 }
+
+const sizeClasses: Record<NonNullable<ButtonProps["size"]>, string> = {
+  small: "w-[120px] h-10",
+  medium: "w-[152px] h-12",
+  large: "w-[200px] h-14",
+};
+
+const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
+  primary: "bg-cn-white",
+  secondary: "bg-[#333]",
+  outline: "bg-transparent border border-cn-text-primary",
+};
+
+const textVariantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
+  primary: "text-cn-text-dark",
+  secondary: "text-cn-text-primary",
+  outline: "text-cn-text-primary",
+};
 
 export default function Button({
   onPress,
@@ -19,80 +37,24 @@ export default function Button({
 }: ButtonProps) {
   return (
     <Pressable
-      style={[
-        styles.base,
-        styles[variant],
-        styles[`${size}Size`],
-        fullWidth && styles.fullWidth,
-        disabled && styles.disabled,
-      ]}
+      className={[
+        "rounded-full items-center justify-center",
+        variantClasses[variant],
+        fullWidth ? "w-full" : sizeClasses[size],
+        disabled ? "opacity-50" : "",
+      ].join(" ")}
       onPress={onPress}
       disabled={disabled}
     >
       <Text
-        style={[
-          styles.baseText,
-          styles[`${variant}Text`],
-          disabled && styles.disabledText,
-        ]}
+        className={[
+          "text-sm font-medium tracking-tight",
+          textVariantClasses[variant],
+          disabled ? "text-cn-text-muted" : "",
+        ].join(" ")}
       >
         {children}
       </Text>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  primary: {
-    backgroundColor: "#fff",
-  },
-  secondary: {
-    backgroundColor: "#333",
-  },
-  outline: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#fff",
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  smallSize: {
-    width: 120,
-    height: 40,
-  },
-  mediumSize: {
-    width: 152,
-    height: 48,
-  },
-  largeSize: {
-    width: 200,
-    height: 56,
-  },
-  fullWidth: {
-    width: "100%",
-  },
-  baseText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "500",
-    letterSpacing: 0.1,
-  },
-  primaryText: {
-    color: "#000",
-  },
-  secondaryText: {
-    color: "#fff",
-  },
-  outlineText: {
-    color: "#fff",
-  },
-  disabledText: {
-    color: "#999",
-  },
-});

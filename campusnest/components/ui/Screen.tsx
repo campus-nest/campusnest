@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ScreenProps {
@@ -16,20 +16,12 @@ export default function Screen({
   const Container = useSafeArea ? SafeAreaView : View;
 
   return (
-    <Container style={[styles.container, style]}>
+    <Container
+      className="flex-1 bg-cn-bg justify-center items-center gap-[15px] p-[50px]"
+      style={style}
+    >
       <StatusBar style="light" />
       {children}
     </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-    justifyContent: "center",
-    alignContent: "center",
-    gap: 15,
-    padding: 50,
-  },
-});

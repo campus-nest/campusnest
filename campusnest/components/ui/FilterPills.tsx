@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 export interface FilterOption<T extends string> {
   label: string;
@@ -17,17 +17,26 @@ export default function FilterPills<T extends string>({
   onChange,
 }: FilterPillsProps<T>) {
   return (
-    <View style={styles.row}>
+    <View className="flex-row gap-2 my-3">
       {options.map((option) => {
         const active = option.value === value;
-
         return (
           <Pressable
             key={option.value}
             onPress={() => onChange(option.value)}
-            style={[styles.pill, active && styles.pillActive]}
+            className={[
+              "px-4 py-2 rounded-full border",
+              active
+                ? "bg-cn-white border-cn-white"
+                : "bg-cn-bg border-cn-border",
+            ].join(" ")}
           >
-            <Text style={[styles.text, active && styles.textActive]}>
+            <Text
+              className={[
+                "text-[13px] font-medium",
+                active ? "text-cn-text-dark" : "text-cn-text-primary",
+              ].join(" ")}
+            >
               {option.label}
             </Text>
           </Pressable>
@@ -36,31 +45,3 @@ export default function FilterPills<T extends string>({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    gap: 8,
-    marginVertical: 14,
-  },
-  pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  pillActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
-  },
-  text: {
-    fontSize: 13,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  textActive: {
-    color: "#000",
-  },
-});

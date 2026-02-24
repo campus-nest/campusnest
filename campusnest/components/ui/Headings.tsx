@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextStyle } from "react-native";
+import { Text, TextStyle } from "react-native";
 
 interface HeadingProps {
   children: React.ReactNode;
@@ -8,16 +8,21 @@ interface HeadingProps {
   underline?: boolean;
 }
 
+function buildModifiers(bold?: boolean, italic?: boolean, underline?: boolean) {
+  return [
+    bold ? "font-bold" : "",
+    italic ? "italic" : "",
+    underline ? "underline" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
 export function H1({ children, style, bold, italic, underline }: HeadingProps) {
   return (
     <Text
-      style={[
-        styles.h1,
-        bold && styles.bold,
-        italic && styles.italic,
-        underline && styles.underline,
-        style,
-      ]}
+      className={`text-cn-text-primary text-[32px] font-medium text-center tracking-tight ${buildModifiers(bold, italic, underline)}`}
+      style={style}
     >
       {children}
     </Text>
@@ -27,13 +32,8 @@ export function H1({ children, style, bold, italic, underline }: HeadingProps) {
 export function H2({ children, style, bold, italic, underline }: HeadingProps) {
   return (
     <Text
-      style={[
-        styles.h2,
-        bold && styles.bold,
-        italic && styles.italic,
-        underline && styles.underline,
-        style,
-      ]}
+      className={`text-cn-text-primary text-2xl font-medium text-center tracking-tight ${buildModifiers(bold, italic, underline)}`}
+      style={style}
     >
       {children}
     </Text>
@@ -43,13 +43,8 @@ export function H2({ children, style, bold, italic, underline }: HeadingProps) {
 export function H3({ children, style, bold, italic, underline }: HeadingProps) {
   return (
     <Text
-      style={[
-        styles.h3,
-        bold && styles.bold,
-        italic && styles.italic,
-        underline && styles.underline,
-        style,
-      ]}
+      className={`text-cn-text-primary text-sm font-medium text-center tracking-tight ${buildModifiers(bold, italic, underline)}`}
+      style={style}
     >
       {children}
     </Text>
@@ -59,55 +54,10 @@ export function H3({ children, style, bold, italic, underline }: HeadingProps) {
 export function H4({ children, style, bold, italic, underline }: HeadingProps) {
   return (
     <Text
-      style={[
-        styles.h4,
-        bold && styles.bold,
-        italic && styles.italic,
-        underline && styles.underline,
-        style,
-      ]}
+      className={`text-cn-text-primary text-xs font-normal text-center tracking-tight ${buildModifiers(bold, italic, underline)}`}
+      style={style}
     >
       {children}
     </Text>
   );
 }
-
-const styles = StyleSheet.create({
-  h1: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "500",
-    textAlign: "center",
-    letterSpacing: 0.1,
-  },
-  h2: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "500",
-    textAlign: "center",
-    letterSpacing: 0.1,
-  },
-  h3: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-    textAlign: "center",
-    letterSpacing: 0.1,
-  },
-  h4: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "400",
-    textAlign: "center",
-    letterSpacing: 0.1,
-  },
-  bold: {
-    fontWeight: "700",
-  },
-  italic: {
-    fontStyle: "italic",
-  },
-  underline: {
-    textDecorationLine: "underline",
-  },
-});
