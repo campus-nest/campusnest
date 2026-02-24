@@ -2,7 +2,6 @@ import Button from "@/components/ui/Button";
 import { H1, H3 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
-import { getSupabase } from "@/src/lib/supabaseClient";
 import { authService, profileService } from "@/src/services";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -29,16 +28,11 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      const supabase = getSupabase();
+      // Sign in via service method (no raw supabase calls in screens)
+      const signInResult = await authService.signIn(email.trim(), password);
 
-      const { error: loginError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      if (loginError) {
-        Alert.alert("Login Failed", loginError.message);
-        setLoading(false);
+      if (!signInResult.success) {
+        Alert.alert("Login Failed", signInResult.error ?? "Unknown error");
         return;
       }
 
@@ -46,13 +40,12 @@ export default function LoginScreen() {
 
       if (!session?.user) {
         Alert.alert("Error", "No user session found.");
-        setLoading(false);
         return;
       }
 
       const userId = session.user.id;
 
-      // Check if profile exists
+      // Ensure a profile row exists
       let profile = await profileService.getProfileById(userId);
 
       if (!profile) {
@@ -64,20 +57,18 @@ export default function LoginScreen() {
             "Error",
             "Missing required profile information. Please complete signup again.",
           );
-          setLoading(false);
           return;
         }
 
-        // Create profile using direct Supabase call (since service doesn't have insert method yet)
-        const { error: insertError } = await supabase.from("profiles").insert({
-          id: userId,
+        // Create profile via service (no raw supabase in screen)
+        const createResult = await profileService.createProfile(userId, {
           full_name: fullName,
-          role: role,
+          role,
+          email: session.user.email ?? "",
         });
 
-        if (insertError) {
+        if (!createResult.success) {
           Alert.alert("Error", "Failed to create user profile.");
-          setLoading(false);
           return;
         }
 
@@ -86,7 +77,6 @@ export default function LoginScreen() {
 
       if (!profile) {
         Alert.alert("Error", "Failed to fetch user profile.");
-        setLoading(false);
         return;
       }
 
@@ -94,8 +84,6 @@ export default function LoginScreen() {
         router.replace("/(tabs)");
       } else {
         Alert.alert("Error", "Unknown user role.");
-        setLoading(false);
-        return;
       }
     } catch (error) {
       console.error("Login error:", error);

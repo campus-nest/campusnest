@@ -1,5 +1,5 @@
-import { User, Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/src/lib/supabaseClient";
+import { Session, User } from "@supabase/supabase-js";
 
 interface SignUpInput {
   email: string;
@@ -107,6 +107,33 @@ export class AuthService {
     return (
       (session?.user?.user_metadata?.role as "student" | "landlord") ?? null
     );
+  }
+
+  /**
+   * Sign in with email and password.
+   * Returns success + the resolved session, or an error string.
+   */
+  async signIn(
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { error } = await this.supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
   }
 }
 

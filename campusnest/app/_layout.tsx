@@ -8,8 +8,8 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
 
-import { useColorScheme } from "../hooks/use-color-scheme";
 import { authService } from "@/src/services";
+import { useColorScheme } from "../hooks/use-color-scheme";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -48,8 +48,7 @@ export default function RootLayout() {
       segments[0] === "forgot-password" ||
       segments[0] === "reset-password" ||
       segments[0] === "enter-code" ||
-      segments[0] === "verify-email" ||
-      segments[0] === "index";
+      segments[0] === "verify-email";
 
     if (isAuthenticated && inAuthGroup) {
       // User is authenticated but trying to access auth pages - redirect to home

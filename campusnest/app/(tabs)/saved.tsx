@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { useRouter } from "expo-router";
+import EmptyState from "@/components/ui/EmptyState";
+import LoadingState from "@/components/ui/LoadingState";
 import { authService, savedPostService } from "@/src/services";
+import { colors } from "@/src/theme/colors";
+import { spacing } from "@/src/theme/spacing";
+import { typography } from "@/src/theme/typography";
 import { Post } from "@/src/types/post";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function SavedPostsScreen() {
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
@@ -35,27 +33,8 @@ export default function SavedPostsScreen() {
     fetchSavedPosts();
   }, []);
 
-  const renderPostCard = (post: Post) => (
-    <Pressable
-      style={styles.card}
-      onPress={() => router.push(`/post/${post.id}`)}
-    >
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{post.title}</Text>
-        <Text style={styles.cardBody} numberOfLines={4}>
-          {post.body}
-        </Text>
-      </View>
-    </Pressable>
-  );
-
   if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading saved posts...</Text>
-      </View>
-    );
+    return <LoadingState label="Loading saved posts..." />;
   }
 
   return (
@@ -66,18 +45,28 @@ export default function SavedPostsScreen() {
         </View>
 
         {savedPosts.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>💭</Text>
-            <Text style={styles.emptyText}>Nothing to see here</Text>
-            <Text style={styles.emptySubtext}>
-              Posts you save will appear here
-            </Text>
-          </View>
+          <EmptyState
+            icon="💭"
+            title="Nothing to see here"
+            subtitle="Posts you save will appear here"
+          />
         ) : (
           <FlatList
             data={savedPosts}
             keyExtractor={(post) => post.id}
-            renderItem={({ item }) => renderPostCard(item)}
+            renderItem={({ item }) => (
+              <Pressable
+                style={styles.card}
+                onPress={() => router.push(`/post/${item.id}`)}
+              >
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>{item.title}</Text>
+                  <Text style={styles.cardBody} numberOfLines={4}>
+                    {item.body}
+                  </Text>
+                </View>
+              </Pressable>
+            )}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />
@@ -90,70 +79,39 @@ export default function SavedPostsScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#000",
-    paddingHorizontal: 16,
+    backgroundColor: colors.background,
+    paddingHorizontal: spacing.base,
     paddingTop: 10,
   },
   header: {
-    paddingTop: 12,
-    paddingBottom: 20,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
   },
   headerTitle: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "700",
+    color: colors.textPrimary,
+    fontSize: typography.fontSizes.h2,
+    fontWeight: typography.fontWeights.bold,
   },
   listContent: {
     paddingBottom: 50,
   },
   card: {
-    backgroundColor: "#2a2a2a",
+    backgroundColor: colors.backgroundCardAlt,
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    padding: spacing.base,
+    marginBottom: spacing.base,
   },
   cardContent: {
-    gap: 8,
+    gap: spacing.sm,
   },
   cardTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
+    color: colors.textPrimary,
+    fontSize: typography.fontSizes.lg,
+    fontWeight: typography.fontWeights.bold,
   },
   cardBody: {
-    color: "#ddd",
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-  },
-  centeredText: {
-    color: "#fff",
-    marginTop: 10,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    color: "#999",
-    fontSize: 14,
-    textAlign: "center",
+    color: colors.textLabel,
+    fontSize: typography.fontSizes.base,
+    lineHeight: typography.lineHeights.base,
   },
 });

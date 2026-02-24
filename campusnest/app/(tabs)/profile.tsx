@@ -1,6 +1,13 @@
+import LoadingState from "@/components/ui/LoadingState";
+import { useProfile } from "@/src/hooks/useProfile";
+import { authService } from "@/src/services";
+import { colors } from "@/src/theme/colors";
+import { spacing } from "@/src/theme/spacing";
+import { typography } from "@/src/theme/typography";
+import { useRouter } from "expo-router";
+import { Bell, ChevronLeft } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -8,52 +15,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
-import { Profile } from "@/src/types/profile";
-import { Bell, ChevronLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { authService, profileService } from "@/src/services";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { profile, loading } = useProfile();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const fetchProfile = useCallback(async () => {
-    // Don't fetch if we're in the process of logging out
-    if (isLoggingOut) return;
-
-    try {
-      setLoading(true);
-
-      const profileData = await profileService.getCurrentUserProfile();
-
-      if (!profileData) {
-        console.log("No profile found");
-        return;
-      }
-
-      setProfile(profileData);
-    } catch (error) {
-      console.error("Unexpected error:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [isLoggingOut]);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchProfile();
-    }, [fetchProfile]),
-  );
 
   const handleSignOut = useCallback(async () => {
     try {
       setIsLoggingOut(true);
       const result = await authService.signOut();
       if (result.success) {
-        // Navigate first, then the screen will unmount
         router.replace("/landing");
       }
     } catch (error) {
@@ -63,20 +36,11 @@ export default function ProfileScreen() {
   }, [router]);
 
   if (loading && !profile) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    );
+    return <LoadingState label="" />;
   }
 
   if (isLoggingOut) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-        <Text style={styles.loadingText}>Logging out...</Text>
-      </View>
-    );
+    return <LoadingState label="Logging out..." />;
   }
 
   return (
@@ -108,7 +72,7 @@ export default function ProfileScreen() {
                 ) : (
                   <View style={styles.avatarPlaceholder}>
                     <View style={styles.avatarDashedBox} />
-                    <Text style={styles.avatarLabel}>Label</Text>
+                    <Text style={styles.avatarLabel}>Photo</Text>
                   </View>
                 )}
               </View>
@@ -142,22 +106,21 @@ export default function ProfileScreen() {
 
           <View style={styles.detailRow}>
             <Text style={styles.detailText}>
-              University: {profile?.university || "NULL"}
+              University: {profile?.university || "—"}
             </Text>
-            <Text style={styles.detailText}>
-              Year: {profile?.year || "NULL"}
-            </Text>
+            <Text style={styles.detailText}>Year: {profile?.year || "—"}</Text>
           </View>
-
           <Text style={styles.detailText}>
-            Email: {profile?.email || "NULL"}
+            Email: {profile?.email || "—"}
           </Text>
           <Text style={styles.detailText}>
-            Current Address: {profile?.current_address || "NULL"}
+            Current Address: {profile?.current_address || "—"}
           </Text>
-          <Text style={styles.detailText}>City: {profile?.city || "NULL"}</Text>
           <Text style={styles.detailText}>
-            Province: {profile?.province || "NULL"}
+            City: {profile?.city || "—"}
+          </Text>
+          <Text style={styles.detailText}>
+            Province: {profile?.province || "—"}
           </Text>
         </View>
 
@@ -167,8 +130,7 @@ export default function ProfileScreen() {
             <View style={styles.sectionIndicator} />
             <Text style={styles.sectionTitle}>Saved Posts</Text>
           </View>
-
-          {/* TODO: Add saved posts from database service */}
+          {/* TODO: render saved posts from database service */}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -176,50 +138,39 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "black",
-  },
-  loadingText: {
-    color: "#ffffff",
-    marginTop: 12,
-    fontSize: 14,
-  },
   safeArea: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingHorizontal: spacing.base,
+    paddingBottom: spacing.lg,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 16,
-    backgroundColor: "white",
+    paddingVertical: spacing.base,
+    backgroundColor: colors.backgroundWhite,
     borderRadius: 9999,
-    paddingHorizontal: 24,
-    marginBottom: 24,
-    marginTop: 8,
+    paddingHorizontal: spacing.xl,
+    marginBottom: spacing.xl,
+    marginTop: spacing.sm,
   },
   profileCard: {
-    backgroundColor: "#27272a",
+    backgroundColor: colors.backgroundDark,
     borderRadius: 24,
-    padding: 24,
-    marginBottom: 24,
+    padding: spacing.xl,
+    marginBottom: spacing.xl,
   },
   profileHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 16,
+    marginBottom: spacing.base,
   },
   profileInfo: {
     flexDirection: "row",
@@ -229,11 +180,12 @@ const styles = StyleSheet.create({
   avatarContainer: {
     width: 64,
     height: 64,
-    backgroundColor: "#52525b",
+    backgroundColor: colors.backgroundSurface,
     borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
+    marginRight: spacing.base,
+    overflow: "hidden",
   },
   avatar: {
     width: 64,
@@ -245,70 +197,70 @@ const styles = StyleSheet.create({
   },
   avatarDashedBox: {
     borderWidth: 1,
-    borderColor: "white",
+    borderColor: colors.textPrimary,
     borderStyle: "dashed",
     width: 24,
     height: 24,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   avatarLabel: {
-    color: "white",
-    fontSize: 12,
+    color: colors.textPrimary,
+    fontSize: typography.fontSizes.sm,
   },
   nameContainer: {
     flex: 1,
   },
   nameText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
+    color: colors.textPrimary,
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.bold,
   },
   roleText: {
     color: "#a1a1aa",
     fontStyle: "italic",
   },
   actionButtons: {
-    gap: 8,
+    gap: spacing.sm,
   },
   actionButton: {
-    backgroundColor: "#3f3f46",
-    paddingHorizontal: 16,
+    backgroundColor: colors.backgroundSurface,
+    paddingHorizontal: spacing.base,
     paddingVertical: 6,
     borderRadius: 8,
   },
   actionButtonText: {
-    color: "white",
+    color: colors.textPrimary,
     textAlign: "center",
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   detailText: {
-    color: "white",
-    fontWeight: "bold",
+    color: colors.textPrimary,
+    fontWeight: typography.fontWeights.bold,
   },
   sectionContainer: {
-    backgroundColor: "#27272a",
+    backgroundColor: colors.backgroundDark,
     borderRadius: 24,
-    padding: 16,
+    padding: spacing.base,
     marginBottom: 80,
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: spacing.base,
   },
   sectionIndicator: {
     width: 4,
     height: 24,
-    backgroundColor: "#52525b",
-    marginRight: 8,
+    backgroundColor: colors.backgroundSurface,
+    marginRight: spacing.sm,
   },
   sectionTitle: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
+    color: colors.textPrimary,
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.bold,
   },
 });
