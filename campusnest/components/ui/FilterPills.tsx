@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, ScrollView } from "react-native";
 
 export interface FilterOption<T extends string> {
   label: string;
@@ -17,7 +17,11 @@ export default function FilterPills<T extends string>({
   onChange,
 }: FilterPillsProps<T>) {
   return (
-    <View style={styles.row}>
+    <ScrollView 
+      horizontal 
+      showsHorizontalScrollIndicator={false} 
+      contentContainerStyle={styles.row}
+    >
       {options.map((option) => {
         const active = option.value === value;
 
@@ -33,7 +37,7 @@ export default function FilterPills<T extends string>({
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -42,6 +46,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     marginVertical: 14,
+    paddingHorizontal: 16,
   },
   pill: {
     paddingHorizontal: 14,

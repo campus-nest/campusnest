@@ -234,7 +234,7 @@ export default function ExploreScreen() {
 
   // Native mobile map view
   return (
-    <Screen>
+    <Screen style={{ padding: 0 }}>
       <View style={styles.container}>
         {MapView && (
           <MapView
@@ -261,26 +261,30 @@ export default function ExploreScreen() {
             {/* Listing markers */}
             {mapReady &&
               Marker &&
-              listings.map((listing) => (
-                <Marker
-                  key={listing.id}
-                  coordinate={{
-                    latitude: listing.latitude!,
-                    longitude: listing.longitude!,
-                  }}
-                  title={listing.title}
-                  description={`$${listing.rent}/month`}
-                  onPress={() => handleMarkerPress(listing.id)}
-                >
-                  {/* Custom marker */}
-                  <View style={styles.customMarker}>
-                    <View style={styles.markerContent}>
-                      <Home size={16} color="#000" />
+              listings.map((listing, index) => {
+                const isTopMatch = index === 0;
+                return (
+                  <Marker
+                    key={listing.id}
+                    coordinate={{
+                      latitude: listing.latitude!,
+                      longitude: listing.longitude!,
+                    }}
+                    title={listing.title}
+                    description={`$${listing.rent}/month`}
+                    onPress={() => handleMarkerPress(listing.id)}
+                    zIndex={isTopMatch ? 999 : 1}
+                  >
+                    {/* Custom marker */}
+                    <View style={styles.customMarker}>
+                      <View style={[styles.markerContent, isTopMatch && styles.highlightedMarkerContent]}>
+                        <Home size={16} color={isTopMatch ? "#fff" : "#000"} />
+                      </View>
+                      <View style={[styles.markerArrow, isTopMatch && styles.highlightedMarkerArrow]} />
                     </View>
-                    <View style={styles.markerArrow} />
-                  </View>
-                </Marker>
-              ))}
+                  </Marker>
+                );
+              })}
           </MapView>
         )}
 
@@ -328,12 +332,10 @@ const styles = StyleSheet.create({
   },
   filterOverlay: {
     position: "absolute",
-    top: 50,
+    top: 60,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
     zIndex: 10,
-    alignItems: "center",
   },
   loadingContainer: {
     flex: 1,
@@ -411,6 +413,18 @@ const styles = StyleSheet.create({
     borderRightColor: "transparent",
     borderTopColor: "#0066CC",
     marginTop: -1,
+  },
+  highlightedMarkerContent: {
+    backgroundColor: "#0066CC",
+    borderColor: "#003366",
+    transform: [{ scale: 1.2 }],
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+  },
+  highlightedMarkerArrow: {
+    borderTopColor: "#0066CC",
+    transform: [{ scale: 1.2 }],
+    marginTop: -2,
   },
   // OSM Attribution (REQUIRED by OSM policy)
   attribution: {
