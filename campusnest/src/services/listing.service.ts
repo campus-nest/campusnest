@@ -30,6 +30,12 @@ export class ListingService {
       query = query.eq("landlord_id", filters.landlord_id);
     }
 
+    if (filters?.searchQuery) {
+      query = query.or(
+        `title.ilike.%${filters.searchQuery}%,address.ilike.%${filters.searchQuery}%`,
+      );
+    }
+
     const { data, error } = await query;
 
     if (error) {

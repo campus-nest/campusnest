@@ -53,4 +53,5 @@ export interface ListingFilters {
   status?: ListingStatus;
   visibility?: ListingVisibility;
   landlord_id?: string;
+  searchQuery?: string;
 }

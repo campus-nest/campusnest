@@ -3,7 +3,8 @@ import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
 import { useRouter } from "expo-router";
 import { Home, MapPin } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import FilterPills from "@/components/ui/FilterPills";
 import {
   ActivityIndicator,
   Alert,
@@ -35,12 +36,15 @@ interface Region {
   longitudeDelta: number;
 }
 
+type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
+
 export default function ExploreScreen() {
   const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<"student" | "landlord" | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<StudentFilter>("new");
 
   // Default to Edmonton (University of Alberta)
   const [region, setRegion] = useState<Region>({
@@ -50,7 +54,7 @@ export default function ExploreScreen() {
     longitudeDelta: 0.05,
   });
 
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     try {
       const data = await listingService.getListings({
         status: "active",
@@ -65,6 +69,25 @@ export default function ExploreScreen() {
           !isNaN(listing.latitude) &&
           !isNaN(listing.longitude),
       );
+
+      // Local sorting
+      if (activeFilter === "cheapest") {
+        listingsWithCoords.sort((a, b) => a.rent - b.rent);
+      } else if (activeFilter === "new") {
+        listingsWithCoords.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
+      } else if (activeFilter === "moveIn") {
+        listingsWithCoords.sort((a, b) => {
+          if (!a.move_in_date) return 1;
+          if (!b.move_in_date) return -1;
+          return (
+            new Date(a.move_in_date).getTime() -
+            new Date(b.move_in_date).getTime()
+          );
+        });
+      }
 
       setListings(listingsWithCoords);
 
@@ -93,7 +116,7 @@ export default function ExploreScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeFilter]);
 
   useEffect(() => {
     const initializeScreen = async () => {
@@ -120,7 +143,7 @@ export default function ExploreScreen() {
     };
 
     initializeScreen();
-  }, []);
+  }, [fetchListings]);
 
   const handleMarkerPress = (listingId: string) => {
     router.push(`/listing/${listingId}`);
@@ -170,12 +193,16 @@ export default function ExploreScreen() {
         <View style={styles.container}>
           <View style={styles.webHeader}>
             <Text style={styles.webTitle}>Nearby Listings</Text>
-            <View style={styles.countBadge}>
-              <MapPin size={14} color="#fff" />
-              <Text style={styles.countText}>
-                {listings.length} listing{listings.length !== 1 ? "s" : ""}
-              </Text>
-            </View>
+            <FilterPills
+              options={[
+                { label: "New", value: "new" },
+                { label: "Closest", value: "closest" },
+                { label: "Cheapest", value: "cheapest" },
+                { label: "Move-In", value: "moveIn" },
+              ]}
+              value={activeFilter}
+              onChange={setActiveFilter}
+            />
           </View>
 
           <View style={styles.webListContainer}>
@@ -257,6 +284,19 @@ export default function ExploreScreen() {
           </MapView>
         )}
 
+        <View style={styles.filterOverlay}>
+          <FilterPills
+            options={[
+              { label: "New", value: "new" },
+              { label: "Closest", value: "closest" },
+              { label: "Cheapest", value: "cheapest" },
+              { label: "Move-In", value: "moveIn" },
+            ]}
+            value={activeFilter}
+            onChange={setActiveFilter}
+          />
+        </View>
+
         {/* Attribution for CartoDB */}
         <Pressable style={styles.attribution} onPress={openOSMAttribution}>
           <Text style={styles.attributionText}>© OpenStreetMap | © CARTO</Text>
@@ -285,6 +325,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
+  },
+  filterOverlay: {
+    position: "absolute",
+    top: 50,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    zIndex: 10,
+    alignItems: "center",
   },
   loadingContainer: {
     flex: 1,
