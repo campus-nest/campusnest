@@ -16,6 +16,7 @@
     "@expo/vector-icons": "^15.0.3",
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "@hookform/resolvers": "^5.2.2",
+    "@ptomasroos/react-native-multi-slider": "2.2.2",
     "@react-native-community/datetimepicker": "8.4.4",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.9.4",

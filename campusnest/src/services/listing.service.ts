@@ -36,6 +36,14 @@ export class ListingService {
       );
     }
 
+    if (filters?.minRent !== undefined) {
+      query = query.gte("rent", filters.minRent);
+    }
+
+    if (filters?.maxRent !== undefined) {
+      query = query.lte("rent", filters.maxRent);
+    }
+
     const { data, error } = await query;
 
     if (error) {

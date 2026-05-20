@@ -5,6 +5,9 @@ import { useRouter } from "expo-router";
 import { Home, MapPin } from "lucide-react-native";
 import { useEffect, useState, useCallback } from "react";
 import FilterPills from "@/components/ui/FilterPills";
+import PriceRangeModal from "@/components/ui/PriceRangeModal";
+import * as Location from "expo-location";
+import { getDistanceFromLatLonInKm } from "@/src/utils/distance";
 import {
   ActivityIndicator,
   Alert,
@@ -45,6 +48,44 @@ export default function ExploreScreen() {
   const [userRole, setUserRole] = useState<"student" | "landlord" | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [activeFilter, setActiveFilter] = useState<StudentFilter>("new");
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(5000);
+  const [debouncedMin, setDebouncedMin] = useState<number>(0);
+  const [debouncedMax, setDebouncedMax] = useState<number>(5000);
+  const [isPriceModalVisible, setPriceModalVisible] = useState(false);
+
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        // Fallback to Edmonton
+        setUserLocation({ latitude: 53.5461, longitude: -113.4938 });
+        return;
+      }
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        setUserLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      } catch (error) {
+        setUserLocation({ latitude: 53.5461, longitude: -113.4938 });
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedMin(minPrice);
+      setDebouncedMax(maxPrice);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [minPrice, maxPrice]);
 
   // Default to Edmonton (University of Alberta)
   const [region, setRegion] = useState<Region>({
@@ -59,6 +100,8 @@ export default function ExploreScreen() {
       const data = await listingService.getListings({
         status: "active",
         visibility: "public",
+        minRent: debouncedMin > 0 ? debouncedMin : undefined,
+        maxRent: debouncedMax < 5000 ? debouncedMax : undefined,
       });
 
       // Filter listings that have valid coordinates
@@ -86,6 +129,22 @@ export default function ExploreScreen() {
             new Date(a.move_in_date).getTime() -
             new Date(b.move_in_date).getTime()
           );
+        });
+      } else if (activeFilter === "closest" && userLocation) {
+        listingsWithCoords.sort((a, b) => {
+          const distA = getDistanceFromLatLonInKm(
+            userLocation.latitude,
+            userLocation.longitude,
+            a.latitude || 0,
+            a.longitude || 0,
+          );
+          const distB = getDistanceFromLatLonInKm(
+            userLocation.latitude,
+            userLocation.longitude,
+            b.latitude || 0,
+            b.longitude || 0,
+          );
+          return distA - distB;
         });
       }
 
@@ -116,7 +175,7 @@ export default function ExploreScreen() {
     } finally {
       setLoading(false);
     }
-  }, [activeFilter]);
+  }, [activeFilter, userLocation, debouncedMin, debouncedMax]);
 
   useEffect(() => {
     const initializeScreen = async () => {
@@ -290,6 +349,25 @@ export default function ExploreScreen() {
 
         <View style={styles.filterOverlay}>
           <FilterPills
+            customPrependPill={
+              <Pressable
+                onPress={() => setPriceModalVisible(true)}
+                style={[
+                  styles.pill,
+                  (minPrice > 0 || maxPrice < 5000) && styles.pillActive,
+                  { marginRight: 8 }
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.text,
+                    (minPrice > 0 || maxPrice < 5000) && styles.textActive,
+                  ]}
+                >
+                  Price
+                </Text>
+              </Pressable>
+            }
             options={[
               { label: "New", value: "new" },
               { label: "Closest", value: "closest" },
@@ -300,6 +378,17 @@ export default function ExploreScreen() {
             onChange={setActiveFilter}
           />
         </View>
+
+        <PriceRangeModal
+          visible={isPriceModalVisible}
+          initialMin={minPrice}
+          initialMax={maxPrice}
+          onClose={() => setPriceModalVisible(false)}
+          onApply={(min, max) => {
+            setMinPrice(min);
+            setMaxPrice(max);
+          }}
+        />
 
         {/* Attribution for CartoDB */}
         <Pressable style={styles.attribution} onPress={openOSMAttribution}>
@@ -529,5 +618,25 @@ const styles = StyleSheet.create({
     color: "#0066CC",
     fontSize: 14,
     fontWeight: "600",
+  },
+  pill: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "#000",
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  pillActive: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
+  },
+  text: {
+    fontSize: 13,
+    color: "#fff",
+    fontWeight: "500",
+  },
+  textActive: {
+    color: "#000",
   },
 });

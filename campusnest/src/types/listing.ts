@@ -54,4 +54,6 @@ export interface ListingFilters {
   visibility?: ListingVisibility;
   landlord_id?: string;
   searchQuery?: string;
+  minRent?: number;
+  maxRent?: number;
 }

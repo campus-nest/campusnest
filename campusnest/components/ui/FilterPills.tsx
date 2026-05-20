@@ -9,12 +9,14 @@ interface FilterPillsProps<T extends string> {
   options: FilterOption<T>[];
   value: T;
   onChange: (value: T) => void;
+  customPrependPill?: React.ReactNode;
 }
 
 export default function FilterPills<T extends string>({
   options,
   value,
   onChange,
+  customPrependPill,
 }: FilterPillsProps<T>) {
   return (
     <ScrollView 
@@ -22,6 +24,7 @@ export default function FilterPills<T extends string>({
       showsHorizontalScrollIndicator={false} 
       contentContainerStyle={styles.row}
     >
+      {customPrependPill}
       {options.map((option) => {
         const active = option.value === value;
 
