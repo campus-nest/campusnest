@@ -30,6 +30,20 @@ export class ListingService {
       query = query.eq("landlord_id", filters.landlord_id);
     }
 
+    if (filters?.searchQuery) {
+      query = query.or(
+        `title.ilike.%${filters.searchQuery}%,address.ilike.%${filters.searchQuery}%`,
+      );
+    }
+
+    if (filters?.minRent !== undefined) {
+      query = query.gte("rent", filters.minRent);
+    }
+
+    if (filters?.maxRent !== undefined) {
+      query = query.lte("rent", filters.maxRent);
+    }
+
     const { data, error } = await query;
 
     if (error) {

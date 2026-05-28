@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, ScrollView } from "react-native";
 
 export interface FilterOption<T extends string> {
   label: string;
@@ -9,15 +9,22 @@ interface FilterPillsProps<T extends string> {
   options: FilterOption<T>[];
   value: T;
   onChange: (value: T) => void;
+  customPrependPill?: React.ReactNode;
 }
 
 export default function FilterPills<T extends string>({
   options,
   value,
   onChange,
+  customPrependPill,
 }: FilterPillsProps<T>) {
   return (
-    <View style={styles.row}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.row}
+    >
+      {customPrependPill}
       {options.map((option) => {
         const active = option.value === value;
 
@@ -33,7 +40,7 @@ export default function FilterPills<T extends string>({
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -42,6 +49,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     marginVertical: 14,
+    paddingHorizontal: 16,
   },
   pill: {
     paddingHorizontal: 14,

@@ -6,6 +6,8 @@ export interface Listing {
   landlord_id: string;
   title: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   rent: number;
   lease_term: string;
   utilities?: string | null;
@@ -28,6 +30,8 @@ export interface CreateListingInput {
   landlord_id: string;
   title: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   rent: number;
   lease_term: string;
   status: ListingStatus;
@@ -49,4 +53,7 @@ export interface ListingFilters {
   status?: ListingStatus;
   visibility?: ListingVisibility;
   landlord_id?: string;
+  searchQuery?: string;
+  minRent?: number;
+  maxRent?: number;
 }

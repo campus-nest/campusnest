@@ -68,6 +68,10 @@ export default function RootLayout() {
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
+          name="select-location"
+          options={{ headerShown: false, gestureEnabled: true }}
+        />
+        <Stack.Screen
           name="landing"
           options={{ headerShown: false, gestureEnabled: false }}
         />

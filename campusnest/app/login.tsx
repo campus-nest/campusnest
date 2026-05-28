@@ -91,7 +91,9 @@ export default function LoginScreen() {
       }
 
       if (profile.role === "student" || profile.role === "landlord") {
-        router.replace("/(tabs)");
+        setTimeout(() => {
+          router.replace("/(tabs)");
+        }, 100);
       } else {
         Alert.alert("Error", "Unknown user role.");
         setLoading(false);
