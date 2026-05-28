@@ -33,7 +33,7 @@ export function ListingCard({ listing }: Props) {
 
         <Text style={styles.meta}>Rent: ${listing.rent}</Text>
 
-        <Text style={styles.address} numberOfLines={2}>
+        <Text style={styles.address} numberOfLines={3} ellipsizeMode="tail">
           {listing.address}
         </Text>
       </View>
@@ -46,12 +46,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#1a1a1a",
     borderRadius: 16,
-    padding: 12,
+    padding: 10,
     marginBottom: 12,
   },
   imageWrapper: {
-    width: 72,
-    height: 72,
+    width: 80,
+    height: 80,
     borderRadius: 12,
     backgroundColor: "#333",
     alignItems: "center",
@@ -62,12 +62,16 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+    borderRadius: 12,
   },
   imageFallback: {
     fontSize: 28,
   },
   content: {
     flex: 1,
+    flexDirection: "column",
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
   title: {
     color: "#fff",
@@ -78,10 +82,13 @@ const styles = StyleSheet.create({
   meta: {
     color: "#ddd",
     fontSize: 12,
+    marginBottom: 2,
   },
   address: {
     color: "#aaa",
     fontSize: 11,
     marginTop: 4,
+    flexWrap: "wrap",
+    lineHeight: 16,
   },
 });

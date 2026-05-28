@@ -272,8 +272,9 @@ const styles = StyleSheet.create({
   mobileContainer: {
     position: "absolute",
     bottom: 20,
-    left: 20,
-    right: 20,
+    alignSelf: "center",
+    width: "90%",
+    maxWidth: 480,
     height: 70,
     backgroundColor: "#fff",
     flexDirection: "row",

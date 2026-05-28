@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { StyleSheet, View, ViewProps } from "react-native";
+import { Platform, StyleSheet, View, ViewProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface PageContainerProps extends ViewProps {
@@ -28,7 +28,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: "100%", // full width
-    paddingHorizontal: 20, // consistent mobile padding
-    paddingTop: 10,
+    paddingHorizontal: 1,
+    paddingTop: 0,
+    paddingBottom: Platform.OS === "web" ? 0 : 6,
   },
 });

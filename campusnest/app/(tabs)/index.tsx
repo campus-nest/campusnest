@@ -203,32 +203,34 @@ export default function HomeScreen() {
         <View style={styles.searchContainer}>
           <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
         </View>
-        <FilterPills
-          customPrependPill={
-            role === "student" ? (
-              <Pressable
-                onPress={() => setPriceModalVisible(true)}
-                style={[
-                  styles.pill,
-                  (minPrice > 0 || maxPrice < 5000) && styles.pillActive,
-                  { marginRight: 8 },
-                ]}
-              >
-                <Text
+        <View style={styles.filterWrapper}>
+          <FilterPills
+            customPrependPill={
+              role === "student" ? (
+                <Pressable
+                  onPress={() => setPriceModalVisible(true)}
                   style={[
-                    styles.text,
-                    (minPrice > 0 || maxPrice < 5000) && styles.textActive,
+                    styles.pill,
+                    (minPrice > 0 || maxPrice < 5000) && styles.pillActive,
+                    { marginRight: 8 },
                   ]}
                 >
-                  Price
-                </Text>
-              </Pressable>
-            ) : null
-          }
-          options={filterOptions}
-          value={activeFilter}
-          onChange={setActiveFilter}
-        />
+                  <Text
+                    style={[
+                      styles.text,
+                      (minPrice > 0 || maxPrice < 5000) && styles.textActive,
+                    ]}
+                  >
+                    Price
+                  </Text>
+                </Pressable>
+              ) : null
+            }
+            options={filterOptions}
+            value={activeFilter}
+            onChange={setActiveFilter}
+          />
+        </View>
 
         <PriceRangeModal
           visible={isPriceModalVisible}
@@ -261,8 +263,11 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   searchContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: 3,
+    paddingTop: 3,
+  },
+  filterWrapper: {
+    paddingHorizontal: 4,
   },
   listContent: {
     paddingBottom: 60,
