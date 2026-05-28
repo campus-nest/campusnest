@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   labelLight: {
-    color: "#333",
+    color: "#1a1a1a",
   },
   dropdown: {
     flexDirection: "row",

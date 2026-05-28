@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   TextInputProps,
+  TextStyle,
   View,
   ViewStyle,
 } from "react-native";
@@ -11,17 +12,19 @@ import {
 interface InputProps extends TextInputProps {
   label?: string;
   containerStyle?: ViewStyle;
+  labelStyle?: TextStyle;
 }
 
 export default function Input({
   label,
   containerStyle,
   style,
+  labelStyle,
   ...props
 }: InputProps) {
   return (
     <View style={[styles.inputContainer, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
       <TextInput
         style={[styles.input, style]}
         placeholderTextColor="#666"

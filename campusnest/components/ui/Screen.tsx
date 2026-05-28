@@ -27,9 +27,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
-    justifyContent: "center",
-    alignContent: "center",
-    gap: 15,
-    padding: 50,
   },
 });
