@@ -51,7 +51,7 @@ export default function PriceRangeModal({
     >
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={onClose} />
-        
+
         <View style={styles.modalContent}>
           <View style={styles.header}>
             <Text style={styles.title}>Price Range</Text>
@@ -62,9 +62,10 @@ export default function PriceRangeModal({
 
           <View style={styles.sliderContainer}>
             <Text style={styles.valueText}>
-              ${values[0]} - ${values[1]}{values[1] === 5000 ? "+" : ""}
+              ${values[0]} - ${values[1]}
+              {values[1] === 5000 ? "+" : ""}
             </Text>
-            
+
             <MultiSlider
               values={[values[0], values[1]]}
               sliderLength={300}

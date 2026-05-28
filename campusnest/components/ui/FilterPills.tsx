@@ -19,9 +19,9 @@ export default function FilterPills<T extends string>({
   customPrependPill,
 }: FilterPillsProps<T>) {
   return (
-    <ScrollView 
-      horizontal 
-      showsHorizontalScrollIndicator={false} 
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
     >
       {customPrependPill}

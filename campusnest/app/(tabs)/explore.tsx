@@ -73,7 +73,7 @@ export default function ExploreScreen() {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
-      } catch (error) {
+      } catch {
         setUserLocation({ latitude: 53.5461, longitude: -113.4938 });
       }
     })();
@@ -336,10 +336,20 @@ export default function ExploreScreen() {
                   >
                     {/* Custom marker */}
                     <View style={styles.customMarker}>
-                      <View style={[styles.markerContent, isTopMatch && styles.highlightedMarkerContent]}>
+                      <View
+                        style={[
+                          styles.markerContent,
+                          isTopMatch && styles.highlightedMarkerContent,
+                        ]}
+                      >
                         <Home size={16} color={isTopMatch ? "#fff" : "#000"} />
                       </View>
-                      <View style={[styles.markerArrow, isTopMatch && styles.highlightedMarkerArrow]} />
+                      <View
+                        style={[
+                          styles.markerArrow,
+                          isTopMatch && styles.highlightedMarkerArrow,
+                        ]}
+                      />
                     </View>
                   </Marker>
                 );
@@ -355,7 +365,7 @@ export default function ExploreScreen() {
                 style={[
                   styles.pill,
                   (minPrice > 0 || maxPrice < 5000) && styles.pillActive,
-                  { marginRight: 8 }
+                  { marginRight: 8 },
                 ]}
               >
                 <Text

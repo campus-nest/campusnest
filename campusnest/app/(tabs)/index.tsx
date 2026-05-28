@@ -50,7 +50,7 @@ export default function HomeScreen() {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
-      } catch (error) {
+      } catch {
         setUserLocation({ latitude: 53.5461, longitude: -113.4938 });
       }
     })();
@@ -157,7 +157,14 @@ export default function HomeScreen() {
     };
 
     fetchListings();
-  }, [role, activeFilter, debouncedQuery, debouncedMin, debouncedMax, userLocation]);
+  }, [
+    role,
+    activeFilter,
+    debouncedQuery,
+    debouncedMin,
+    debouncedMax,
+    userLocation,
+  ]);
 
   const filterOptions: { label: string; value: FilterKey }[] =
     role === "student"
@@ -204,7 +211,7 @@ export default function HomeScreen() {
                 style={[
                   styles.pill,
                   (minPrice > 0 || maxPrice < 5000) && styles.pillActive,
-                  { marginRight: 8 }
+                  { marginRight: 8 },
                 ]}
               >
                 <Text
