@@ -1,7 +1,6 @@
-import { PageContainer } from "@/components/page-container";
+import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
   Alert,
@@ -61,64 +60,62 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <PageContainer style={styles.container}>
-      <StatusBar style="light" />
-
-      <View style={styles.content}>
+    <Screen scrollable contentContainerStyle={styles.content}>
+      <View style={styles.header}>
         <Text style={styles.title}>New Password</Text>
         <Text style={styles.subtitle}>
           Create a new password for your account
         </Text>
-
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>New Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter new password"
-              placeholderTextColor="#666"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirm Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm new password"
-              placeholderTextColor="#666"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
-          </View>
-
-          <Pressable
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleUpdatePassword}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? "Updating..." : "Update Password"}
-            </Text>
-          </Pressable>
-        </View>
       </View>
-    </PageContainer>
+
+      <View style={styles.form}>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>New Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter new password"
+            placeholderTextColor="#666"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Confirm Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm new password"
+            placeholderTextColor="#666"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+          />
+        </View>
+
+        <Pressable
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleUpdatePassword}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Updating..." : "Update Password"}
+          </Text>
+        </Pressable>
+      </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
   content: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 30,
+    paddingTop: 32,
+    paddingBottom: 40,
+  },
+  header: {
+    marginBottom: 40,
   },
   title: {
     color: "#fff",
@@ -131,7 +128,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "400",
-    marginBottom: 40,
     textAlign: "center",
     opacity: 0.8,
   },

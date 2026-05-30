@@ -147,7 +147,7 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <Screen>
+    <Screen scrollable contentContainerStyle={styles.content}>
       {/* Header */}
       <H1>Edit Profile</H1>
       {/* Avatar */}
@@ -251,9 +251,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  content: {
+    gap: 16,
+    paddingTop: 16,
+    paddingBottom: 40,
+  },
   avatarSection: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 16,
   },
   avatar: {
     width: 100,

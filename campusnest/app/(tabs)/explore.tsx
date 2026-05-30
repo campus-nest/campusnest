@@ -293,7 +293,7 @@ export default function ExploreScreen() {
 
   // Native mobile map view
   return (
-    <Screen style={{ padding: 0 }}>
+    <Screen noPadding>
       <View style={styles.container}>
         {MapView && (
           <MapView
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   },
   filterOverlay: {
     position: "absolute",
-    top: 60,
+    top: 12,
     left: 0,
     right: 0,
     zIndex: 10,

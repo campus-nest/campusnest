@@ -257,17 +257,15 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 0,
+    flex: 1,
     backgroundColor: "#000",
-    paddingHorizontal: 0,
-    paddingTop: 0,
   },
   searchContainer: {
-    paddingHorizontal: 3,
-    paddingTop: 3,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   filterWrapper: {
-    paddingHorizontal: 4,
+    marginBottom: 4,
   },
   listContent: {
     paddingBottom: 60,

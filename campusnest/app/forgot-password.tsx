@@ -5,7 +5,7 @@ import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, StyleSheet } from "react-native";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -57,7 +57,7 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <Screen>
+    <Screen scrollable contentContainerStyle={styles.content}>
       <H1>Forgot Password</H1>
       <H4>Enter your email to receive a reset code</H4>
 
@@ -76,3 +76,10 @@ export default function ForgotPasswordScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingTop: 16,
+  },
+});

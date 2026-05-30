@@ -24,7 +24,7 @@ export default function PreSignUpScreen() {
   };
 
   return (
-    <Screen>
+    <Screen scrollable contentContainerStyle={styles.content}>
       <Logo />
       <H1>Select a Role</H1>
       <H4 italic>Choose how you want to continue</H4>
@@ -52,9 +52,12 @@ export default function PreSignUpScreen() {
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingTop: 16,
+  },
   bottomHouseContainer: {
-    position: "absolute",
-    bottom: 20,
     alignSelf: "center",
+    marginTop: 16,
   },
 });

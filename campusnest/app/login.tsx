@@ -108,7 +108,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <Screen>
+    <Screen scrollable contentContainerStyle={styles.content}>
       <H1 bold>Welcome Back</H1>
       <H3>Login to CampusNest</H3>
 
@@ -148,11 +148,14 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingTop: 16,
+  },
   backText: {
     color: "#fff",
     fontSize: 14,
     textAlign: "center",
-    marginTop: 10,
     opacity: 0.7,
   },
   forgotPasswordButton: {

@@ -7,7 +7,6 @@ import {
   Alert,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -541,20 +540,15 @@ export default function NewPostScreen() {
   }
 
   return (
-    <Screen>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
-      </ScrollView>
+    <Screen scrollable contentContainerStyle={styles.scrollContent}>
+      {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingTop: 50,
+    paddingTop: 16,
     paddingBottom: 100,
     paddingHorizontal: 0,
     alignItems: "center",

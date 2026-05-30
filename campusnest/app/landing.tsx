@@ -10,7 +10,7 @@ export default function LandingScreen() {
   const router = useRouter();
 
   return (
-    <Screen>
+    <Screen style={styles.screen}>
       <Logo />
 
       <H1>Campus Nest</H1>
@@ -31,6 +31,9 @@ export default function LandingScreen() {
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    paddingTop: 16,
+  },
   houseImageContainer: {
     position: "absolute",
     bottom: 25,

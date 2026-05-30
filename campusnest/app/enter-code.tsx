@@ -5,7 +5,7 @@ import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Keyboard } from "react-native";
+import { Alert, Keyboard, StyleSheet } from "react-native";
 
 export default function EnterCodeScreen() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function EnterCodeScreen() {
   };
 
   return (
-    <Screen>
+    <Screen scrollable contentContainerStyle={styles.content}>
       <H1 bold>Enter Code</H1>
       <H4>Enter the 6-digit code sent to {email}</H4>
 
@@ -78,3 +78,10 @@ export default function EnterCodeScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingTop: 16,
+  },
+});

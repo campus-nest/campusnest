@@ -42,8 +42,8 @@ export default function VerifyEmailScreen() {
   };
 
   return (
-    <Screen>
-      <View style={styles.container}>
+    <Screen scrollable contentContainerStyle={styles.content}>
+      <View style={styles.innerContainer}>
         {/* Icon */}
         <Text style={styles.icon}>📧</Text>
 
@@ -86,11 +86,15 @@ export default function VerifyEmailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
+    paddingTop: 32,
+  },
+  innerContainer: {
     alignItems: "center",
     maxWidth: 400,
     alignSelf: "center",
     gap: 20,
+    width: "100%",
   },
   icon: {
     fontSize: 80,

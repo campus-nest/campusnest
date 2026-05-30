@@ -1,25 +1,50 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { ScrollView, StyleSheet, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ScreenProps {
   children: React.ReactNode;
   style?: ViewStyle;
-  useSafeArea?: boolean;
+  /** When true, wraps children in a ScrollView */
+  scrollable?: boolean;
+  /** Additional style applied to the inner ScrollView's contentContainer */
+  contentContainerStyle?: ViewStyle;
+  /** Pass to suppress the default horizontal padding (e.g. for full-bleed map/image screens) */
+  noPadding?: boolean;
 }
 
 export default function Screen({
   children,
   style,
-  useSafeArea = false,
+  scrollable = false,
+  contentContainerStyle,
+  noPadding = false,
 }: ScreenProps) {
-  const Container = useSafeArea ? SafeAreaView : View;
+  const paddingStyle: ViewStyle = noPadding ? {} : { paddingHorizontal: 20 };
+
+  if (scrollable) {
+    return (
+      <SafeAreaView style={[styles.container, style]}>
+        <StatusBar style="light" />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            paddingStyle,
+            { paddingBottom: 40 },
+            contentContainerStyle,
+          ]}
+        >
+          {children}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <Container style={[styles.container, style]}>
+    <SafeAreaView style={[styles.container, paddingStyle, style]}>
       <StatusBar style="light" />
       {children}
-    </Container>
+    </SafeAreaView>
   );
 }
 

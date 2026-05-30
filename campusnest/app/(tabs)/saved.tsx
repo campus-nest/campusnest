@@ -91,8 +91,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 8,
   },
   header: {
     paddingTop: 12,
