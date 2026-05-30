@@ -14,6 +14,7 @@ export function ListingCard({ listing }: Props) {
       style={styles.card}
       onPress={() => router.push(`/listing/${listing.id}`)}
     >
+      {/* Thumbnail */}
       <View style={styles.imageWrapper}>
         {listing.photo_urls?.length ? (
           <Image
@@ -26,14 +27,31 @@ export function ListingCard({ listing }: Props) {
         )}
       </View>
 
+      {/* Text content */}
       <View style={styles.content}>
-        <Text style={styles.title}>{listing.title}</Text>
+        <Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
 
-        <Text style={styles.meta}>Lease: {listing.lease_term}</Text>
+        {/* Rent — most important, show prominently */}
+        <Text style={styles.rent}>
+          <Text style={styles.rentAmount}>${listing.rent}</Text>
+          <Text style={styles.rentSuffix}> /mo</Text>
+        </Text>
 
-        <Text style={styles.meta}>Rent: ${listing.rent}</Text>
+        {/* Secondary info row */}
+        <View style={styles.metaRow}>
+          {listing.lease_term ? (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{listing.lease_term}</Text>
+            </View>
+          ) : null}
+          {listing.bedrooms != null ? (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{listing.bedrooms}bd</Text>
+            </View>
+          ) : null}
+        </View>
 
-        <Text style={styles.address} numberOfLines={3} ellipsizeMode="tail">
+        <Text style={styles.address} numberOfLines={2} ellipsizeMode="tail">
           {listing.address}
         </Text>
       </View>
@@ -44,51 +62,77 @@ export function ListingCard({ listing }: Props) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 10,
-    marginBottom: 12,
+    backgroundColor: "#111",
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
+    alignItems: "center",
   },
   imageWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
-    backgroundColor: "#333",
+    width: 86,
+    height: 86,
+    borderRadius: 10,
+    backgroundColor: "#1e1e1e",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+    marginRight: 14,
     overflow: "hidden",
+    flexShrink: 0,
   },
   image: {
     width: "100%",
     height: "100%",
-    borderRadius: 12,
   },
   imageFallback: {
     fontSize: 28,
   },
   content: {
     flex: 1,
-    flexDirection: "column",
-    alignItems: "flex-start",
-    justifyContent: "center",
+    gap: 4,
   },
   title: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "700",
-    marginBottom: 4,
+    lineHeight: 18,
   },
-  meta: {
-    color: "#ddd",
-    fontSize: 12,
-    marginBottom: 2,
+  rent: {
+    marginTop: 1,
   },
-  address: {
+  rentAmount: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  rentSuffix: {
+    color: "#777",
+    fontSize: 13,
+    fontWeight: "400",
+  },
+  metaRow: {
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 2,
+  },
+  tag: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  tagText: {
     color: "#aaa",
     fontSize: 11,
-    marginTop: 4,
-    flexWrap: "wrap",
+    fontWeight: "500",
+  },
+  address: {
+    color: "#555",
+    fontSize: 12,
     lineHeight: 16,
+    marginTop: 2,
   },
 });

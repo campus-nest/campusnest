@@ -10,54 +10,69 @@ import PreSignUpBottomHouse from "../assets/images/pre_sign_up_bottom_house.svg"
 
 export default function PreSignUpScreen() {
   const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<
-    "student" | "landlord" | null
-  >(null);
+  const [selectedRole, setSelectedRole] = useState<"student" | "landlord" | null>(null);
 
   const handleCreateAccount = () => {
     if (!selectedRole) return;
-
-    router.push({
-      pathname: "/signup",
-      params: { role: selectedRole },
-    });
+    router.push({ pathname: "/signup", params: { role: selectedRole } });
   };
 
   return (
-    <Screen scrollable contentContainerStyle={styles.content}>
-      <Logo />
-      <H1>Select a Role</H1>
-      <H4 italic>Choose how you want to continue</H4>
+    <Screen style={styles.screen}>
+      {/* Top content */}
+      <View style={styles.top}>
+        <Logo style={styles.logoGap} />
+        <H1 bold>Select a Role</H1>
+        <H4 italic style={styles.subtitle}>Choose how you want to continue</H4>
 
-      <Select
-        label="Enter Role"
-        value={selectedRole}
-        placeholder="Choose role"
-        options={[
-          { label: "Student", value: "student" },
-          { label: "Landlord", value: "landlord" },
-        ]}
-        onChange={setSelectedRole}
-      />
+        <View style={styles.selectWrapper}>
+          <Select
+            label="Enter Role"
+            value={selectedRole}
+            placeholder="Choose role"
+            options={[
+              { label: "Student", value: "student" },
+              { label: "Landlord", value: "landlord" },
+            ]}
+            onChange={setSelectedRole}
+          />
+        </View>
 
-      <Button fullWidth onPress={handleCreateAccount} disabled={!selectedRole}>
-        Create Account
-      </Button>
+        <Button fullWidth onPress={handleCreateAccount} disabled={!selectedRole}>
+          Create Account
+        </Button>
+      </View>
 
-      <View style={styles.bottomHouseContainer}>
-        <PreSignUpBottomHouse fill="none" />
+      {/* Bottom illustration */}
+      <View style={styles.illustration} pointerEvents="none">
+        <PreSignUpBottomHouse fill="none" width="100%" height="100%" />
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    gap: 16,
-    paddingTop: 16,
+  screen: {
+    paddingHorizontal: 24,
   },
-  bottomHouseContainer: {
-    alignSelf: "center",
-    marginTop: 16,
+  top: {
+    flex: 1,
+    alignItems: "center",
+    paddingTop: 48,
+    gap: 16,
+  },
+  logoGap: {
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: "#888",
+    marginBottom: 8,
+  },
+  selectWrapper: {
+    width: "100%",
+  },
+  illustration: {
+    height: 200,
+    width: "100%",
   },
 });

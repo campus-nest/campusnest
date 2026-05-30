@@ -11,19 +11,25 @@ export default function LandingScreen() {
 
   return (
     <Screen style={styles.screen}>
-      <Logo />
+      {/* Top: logo + headlines + buttons */}
+      <View style={styles.top}>
+        <Logo style={styles.logoGap} />
+        <H1 bold>Campus Nest</H1>
+        <H3 italic style={styles.tagline}>Let&apos;s get Started!</H3>
 
-      <H1>Campus Nest</H1>
-      <H3 italic>Let&apos;s get Started!</H3>
+        <View style={styles.buttons}>
+          <Button fullWidth onPress={() => router.push("/login")}>
+            Login
+          </Button>
+          <H3 italic>Don&apos;t have an account?</H3>
+          <Button fullWidth onPress={() => router.push("/pre-signup")}>
+            Sign Up
+          </Button>
+        </View>
+      </View>
 
-      <View style={{ alignSelf: "center" }}>
-        <Button onPress={() => router.push("/login")}>Login</Button>
-      </View>
-      <H3 italic>Don&apos;t have an account?</H3>
-      <View style={{ alignSelf: "center" }}>
-        <Button onPress={() => router.push("/pre-signup")}>Sign Up</Button>
-      </View>
-      <View style={styles.houseImageContainer}>
+      {/* Bottom: illustration pinned to the bottom */}
+      <View style={styles.illustration} pointerEvents="none">
         <LandingPageLogo width="100%" height="100%" />
       </View>
     </Screen>
@@ -32,14 +38,29 @@ export default function LandingScreen() {
 
 const styles = StyleSheet.create({
   screen: {
-    paddingTop: 16,
+    paddingHorizontal: 24,
   },
-  houseImageContainer: {
-    position: "absolute",
-    bottom: 25,
-    alignSelf: "center",
-    height: 150,
-    width: "92%",
-    maxWidth: 700,
+  top: {
+    flex: 1,
+    alignItems: "center",
+    paddingTop: 48,
+    gap: 12,
+  },
+  logoGap: {
+    marginBottom: 4,
+  },
+  tagline: {
+    marginBottom: 8,
+  },
+  buttons: {
+    width: "100%",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 8,
+  },
+  illustration: {
+    height: 180,
+    width: "100%",
+    marginBottom: 0,
   },
 });
