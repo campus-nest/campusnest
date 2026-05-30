@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,19 @@ import { ChevronLeft } from "lucide-react-native";
 import { authService, listingService, profileService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
 import { ListingImageGallery } from "@/components/listings/ListingImageGallery";
+
+// Dynamic imports for platform-specific map components
+let MapView: any;
+let Marker: any;
+let UrlTile: any;
+
+if (Platform.OS !== "web") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const maps = require("react-native-maps");
+  MapView = maps.default;
+  Marker = maps.Marker;
+  UrlTile = maps.UrlTile;
+}
 
 export default function ListingDetailScreen() {
   const router = useRouter();
@@ -77,6 +91,9 @@ export default function ListingDetailScreen() {
       </SafeAreaView>
     );
   }
+
+  const hasCoordinates =
+    listing.latitude != null && listing.longitude != null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -161,10 +178,46 @@ export default function ListingDetailScreen() {
             <Text style={styles.cardValue}>{landlordName || "Landlord"}</Text>
           </View>
 
-          {/* Map placeholder */}
-          <View style={styles.mapPlaceholder}>
-            <Text style={styles.mapText}>📍 Map coming soon</Text>
-          </View>
+          {/* Map */}
+          {hasCoordinates && MapView ? (
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: listing.latitude!,
+                  longitude: listing.longitude!,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }}
+                scrollEnabled={false}
+                zoomEnabled={false}
+                pitchEnabled={false}
+                rotateEnabled={false}
+              >
+                {UrlTile && (
+                  <UrlTile
+                    urlTemplate="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+                    maximumZ={19}
+                    flipY={false}
+                    tileSize={256}
+                    subdomains={["a", "b", "c", "d"]}
+                  />
+                )}
+                {Marker && (
+                  <Marker
+                    coordinate={{
+                      latitude: listing.latitude!,
+                      longitude: listing.longitude!,
+                    }}
+                  />
+                )}
+              </MapView>
+            </View>
+          ) : (
+            <View style={styles.mapPlaceholder}>
+              <Text style={styles.mapText}>📍 No location available</Text>
+            </View>
+          )}
 
           {/* CTA button */}
           <Pressable
@@ -339,6 +392,16 @@ const styles = StyleSheet.create({
     color: "#999",
     fontSize: 14,
     lineHeight: 22,
+  },
+  mapContainer: {
+    height: 160,
+    borderRadius: 14,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
+  },
+  map: {
+    flex: 1,
   },
   mapPlaceholder: {
     height: 160,
