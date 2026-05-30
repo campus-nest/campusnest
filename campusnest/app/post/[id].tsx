@@ -1,29 +1,31 @@
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import { PageContainer } from "@/components/page-container";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ChevronLeft } from "lucide-react-native";
 import {
+  authService,
+  commentService,
   postService,
   profileService,
-  commentService,
-  authService,
 } from "@/src/services";
 import { Post } from "@/src/types/post";
 import { Profile } from "@/src/types/profile";
 import { CommentWithProfile } from "@/src/types/comment";
 
 export default function PostDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [post, setPost] = useState<Post | null>(null);
@@ -34,51 +36,39 @@ export default function PostDetailScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   const fetchComments = async (postId: string) => {
-    const fetchedComments = await commentService.getCommentsByPostId(postId);
-    setComments(fetchedComments);
+    const fetched = await commentService.getCommentsByPostId(postId);
+    setComments(fetched);
   };
 
   useEffect(() => {
     if (!id) return;
 
-    const fetchPostAndCreator = async () => {
+    const load = async () => {
       setLoading(true);
-
       const postData = await postService.getPostById(id);
-
       if (!postData) {
-        console.error("Post not found");
         setLoading(false);
         return;
       }
-
       setPost(postData);
-
-      // Fetch creator profile
-      const creatorProfile = await profileService.getProfileById(
-        postData.user_id,
-      );
+      const creatorProfile = await profileService.getProfileById(postData.user_id);
       setCreator(creatorProfile);
-
       await fetchComments(id);
-
       setLoading(false);
     };
 
-    fetchPostAndCreator();
+    load();
   }, [id]);
 
   const handleSubmitComment = async () => {
     if (!commentText.trim() || !id) return;
-
     const session = await authService.getSession();
     if (!session?.user?.id) {
-      Alert.alert("Error", "You must be logged in to comment");
+      Alert.alert("Error", "You must be logged in to comment.");
       return;
     }
 
     setSubmitting(true);
-
     const result = await commentService.createComment({
       post_id: id,
       user_id: session.user.id,
@@ -89,267 +79,304 @@ export default function PostDetailScreen() {
       setCommentText("");
       await fetchComments(id);
     } else {
-      Alert.alert("Error", result.error || "Failed to post comment");
+      Alert.alert("Error", result.error || "Failed to post comment.");
     }
-
     setSubmitting(false);
   };
 
   if (loading || !post) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading post...</Text>
-      </View>
+      <SafeAreaView style={styles.loadingScreen}>
+        <ActivityIndicator color="#fff" size="large" />
+        <Text style={styles.loadingText}>Loading post…</Text>
+      </SafeAreaView>
     );
   }
 
   return (
-    <PageContainer>
+    <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <ChevronLeft color="#fff" size={22} />
+        </Pressable>
+        <Text style={styles.headerTitle} numberOfLines={1}>Post</Text>
+        <View style={styles.backBtn} />
+      </View>
+
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
       >
-        <ScrollView style={styles.scrollView}>
-          <View style={styles.container}>
-            <View style={styles.postCard}>
-              <Text style={styles.title}>{post.title}</Text>
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Post card */}
+          <View style={styles.postCard}>
+            <Text style={styles.postTitle}>{post.title}</Text>
+            <Text style={styles.postBody}>{post.body}</Text>
+            <View style={styles.postMeta}>
+              <Text style={styles.postAuthor}>
+                {creator?.full_name || "Unknown"}
+              </Text>
+              <Text style={styles.postDate}>
+                {new Date(post.created_at).toLocaleDateString()}
+              </Text>
+            </View>
+          </View>
 
-              <Text style={styles.body}>{post.body}</Text>
+          {/* Comments section */}
+          <View style={styles.commentsSection}>
+            <Text style={styles.commentsSectionTitle}>
+              Comments{comments.length > 0 ? ` (${comments.length})` : ""}
+            </Text>
 
-              <View style={styles.creatorInfo}>
-                <Text style={styles.creatorLabel}>Posted by:</Text>
-                <Text style={styles.creatorName}>
-                  {creator?.full_name || "Unknown User"}
-                </Text>
-                <Text style={styles.date}>
-                  {new Date(post.created_at).toLocaleDateString()}
-                </Text>
-              </View>
+            {/* Comment input */}
+            <View style={styles.commentInputRow}>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="Add a comment…"
+                placeholderTextColor="#555"
+                value={commentText}
+                onChangeText={setCommentText}
+                multiline
+                editable={!submitting}
+              />
+              <Pressable
+                style={[
+                  styles.postBtn,
+                  (!commentText.trim() || submitting) && styles.postBtnDisabled,
+                ]}
+                onPress={handleSubmitComment}
+                disabled={!commentText.trim() || submitting}
+              >
+                {submitting ? (
+                  <ActivityIndicator color="#000" size="small" />
+                ) : (
+                  <Text style={styles.postBtnText}>Post</Text>
+                )}
+              </Pressable>
             </View>
 
-            <View style={styles.commentSection}>
-              <Text style={styles.commentHeader}>
-                Comments ({comments.length})
+            {/* Comments list */}
+            {comments.length === 0 ? (
+              <Text style={styles.noComments}>
+                No comments yet — be the first!
               </Text>
-
-              <View style={styles.commentInputContainer}>
-                <TextInput
-                  style={styles.commentInput}
-                  placeholder="Enter your comment"
-                  placeholderTextColor="#999"
-                  value={commentText}
-                  onChangeText={setCommentText}
-                  multiline
-                  editable={!submitting}
-                />
-                <Pressable
-                  style={[
-                    styles.submitButton,
-                    (!commentText.trim() || submitting) &&
-                      styles.submitButtonDisabled,
-                  ]}
-                  onPress={handleSubmitComment}
-                  disabled={!commentText.trim() || submitting}
-                >
-                  {submitting ? (
-                    <ActivityIndicator color="#000" size="small" />
-                  ) : (
-                    <Text style={styles.submitButtonText}>Post</Text>
-                  )}
-                </Pressable>
-              </View>
-
+            ) : (
               <View style={styles.commentsList}>
-                {comments.length === 0 ? (
-                  <Text style={styles.noComments}>
-                    No comments yet. Be the first to comment!
-                  </Text>
-                ) : (
-                  comments.map((comment) => (
-                    <View key={comment.id} style={styles.commentItem}>
-                      <View style={styles.commentAvatar}>
-                        <Text style={styles.commentAvatarText}>
-                          {comment.profile?.full_name?.[0]?.toUpperCase() ||
-                            "?"}
-                        </Text>
-                      </View>
-                      <View style={styles.commentContent}>
+                {comments.map((comment) => (
+                  <View key={comment.id} style={styles.commentItem}>
+                    <View style={styles.commentAvatar}>
+                      <Text style={styles.commentAvatarText}>
+                        {comment.profile?.full_name?.[0]?.toUpperCase() || "?"}
+                      </Text>
+                    </View>
+                    <View style={styles.commentContent}>
+                      <View style={styles.commentHeader}>
                         <Text style={styles.commentAuthor}>
                           {comment.profile?.full_name || "Anonymous"}
-                        </Text>
-                        <Text style={styles.commentText}>
-                          {comment.content}
                         </Text>
                         <Text style={styles.commentDate}>
                           {new Date(comment.created_at).toLocaleDateString()}
                         </Text>
                       </View>
+                      <Text style={styles.commentText}>{comment.content}</Text>
                     </View>
-                  ))
-                )}
+                  </View>
+                ))}
               </View>
-            </View>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </PageContainer>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: {
+  safeArea: {
     flex: 1,
     backgroundColor: "#000",
-    justifyContent: "center",
+  },
+  loadingScreen: {
+    flex: 1,
+    backgroundColor: "#000",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
   },
-  centeredText: {
-    color: "#fff",
-    marginTop: 10,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  container: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  postCard: {
-    backgroundColor: "#2a2a2a",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
-  body: {
-    color: "#ddd",
+  loadingText: {
+    color: "#aaa",
     fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#444",
   },
-  creatorInfo: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1a1a1a",
   },
-  creatorLabel: {
-    color: "#999",
-    fontSize: 12,
+  headerTitle: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "600",
+    flex: 1,
+    textAlign: "center",
   },
-  creatorName: {
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#1a1a1a",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  flex: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  postCard: {
+    backgroundColor: "#111",
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
+    gap: 12,
+  },
+  postTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 26,
+  },
+  postBody: {
+    color: "#bbb",
+    fontSize: 14,
+    lineHeight: 22,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1e1e1e",
+  },
+  postMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  postAuthor: {
     color: "#fff",
     fontSize: 13,
     fontWeight: "600",
   },
-  date: {
-    color: "#999",
-    fontSize: 11,
-    marginLeft: "auto",
+  postDate: {
+    color: "#555",
+    fontSize: 12,
   },
-  commentSection: {
-    backgroundColor: "#2a2a2a",
-    borderRadius: 12,
-    padding: 16,
+  commentsSection: {
+    gap: 16,
   },
-  commentHeader: {
+  commentsSectionTitle: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
+    fontWeight: "700",
   },
-  commentInputContainer: {
+  commentInputRow: {
     flexDirection: "row",
-    gap: 8,
-    marginBottom: 20,
+    gap: 10,
+    alignItems: "flex-end",
   },
   commentInput: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: "#111",
+    borderRadius: 12,
+    padding: 14,
     color: "#fff",
     fontSize: 14,
-    minHeight: 60,
+    minHeight: 52,
     maxHeight: 120,
     textAlignVertical: "top",
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
   },
-  submitButton: {
+  postBtn: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    justifyContent: "center",
+    borderRadius: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     alignItems: "center",
-    minWidth: 60,
+    justifyContent: "center",
+    minWidth: 64,
   },
-  submitButtonDisabled: {
-    backgroundColor: "#555",
+  postBtnDisabled: {
+    backgroundColor: "#222",
   },
-  submitButtonText: {
+  postBtnText: {
     color: "#000",
     fontSize: 14,
-    fontWeight: "600",
-  },
-  commentsList: {
-    gap: 12,
+    fontWeight: "700",
   },
   noComments: {
-    color: "#999",
-    fontSize: 13,
+    color: "#555",
+    fontSize: 14,
     textAlign: "center",
-    paddingVertical: 20,
+    paddingVertical: 24,
+  },
+  commentsList: {
+    gap: 10,
   },
   commentItem: {
     flexDirection: "row",
     gap: 12,
-    padding: 12,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#111",
     borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
   },
   commentAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#555",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#1e1e1e",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   commentAvatarText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "700",
   },
   commentContent: {
     flex: 1,
+    gap: 4,
+  },
+  commentHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   commentAuthor: {
     color: "#fff",
     fontSize: 13,
     fontWeight: "600",
-    marginBottom: 4,
-  },
-  commentText: {
-    color: "#ddd",
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 4,
   },
   commentDate: {
-    color: "#666",
+    color: "#555",
     fontSize: 11,
+  },
+  commentText: {
+    color: "#ccc",
+    fontSize: 13,
+    lineHeight: 19,
   },
 });
