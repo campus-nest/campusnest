@@ -12,17 +12,21 @@ export class SavedPostService {
   private supabase = getSupabase();
 
   /**
-   * Save/like a post
+   * Save a post.
+   * Uses upsert with ignoreDuplicates so a double-tap or any retry is a no-op
+   * at the DB level rather than a unique-constraint error.
    */
   async savePost(
     postId: string,
     userId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await this.supabase.from("saved_posts").insert({
-        user_id: userId,
-        post_id: postId,
-      });
+      const { error } = await this.supabase
+        .from("saved_posts")
+        .upsert(
+          { user_id: userId, post_id: postId },
+          { onConflict: "user_id,post_id", ignoreDuplicates: true },
+        );
 
       if (error) {
         console.error("Error saving post:", error);
@@ -40,7 +44,9 @@ export class SavedPostService {
   }
 
   /**
-   * Unsave/unlike a post
+   * Unsave a post.
+   * With the unique constraint in place there is always at most one row to
+   * delete, so the DELETE event Realtime fires has an unambiguous post_id.
    */
   async unsavePost(
     postId: string,
@@ -69,7 +75,7 @@ export class SavedPostService {
   }
 
   /**
-   * Check if a post is saved by user
+   * Check if a post is saved by user.
    */
   async isPostSaved(postId: string, userId: string): Promise<boolean> {
     try {
@@ -88,14 +94,7 @@ export class SavedPostService {
 
   /**
    * Get all saved posts for a user with full post details.
-   *
-   * FIX: Previously `{ ...item.posts, saved_at: item.created_at }` spread
-   * item.posts correctly but the outer `item.id` (saved_posts row id) was
-   * never used — however the spread already gives us item.posts.id as `id`.
-   * The real problem was that Supabase returns `item.posts` as null when the
-   * join silently fails (e.g. RLS blocking the posts table read), making every
-   * entry in the array `{ id: undefined, ... }`. We now filter those out and
-   * explicitly pull `posts.id` so the post id is always correct.
+   * Filters out null joins (deleted posts or RLS-blocked reads).
    */
   async getSavedPosts(userId: string): Promise<Post[]> {
     try {
@@ -125,9 +124,8 @@ export class SavedPostService {
 
       return (
         data
-          ?.filter((item: any) => item.posts !== null) // guard against RLS / deleted posts
+          ?.filter((item: any) => item.posts !== null)
           .map((item: any) => ({
-            // Use posts.id (the real post id) — NOT item.id (the saved_posts row id)
             id: item.posts.id,
             user_id: item.posts.user_id,
             title: item.posts.title,
@@ -143,5 +141,4 @@ export class SavedPostService {
   }
 }
 
-// Export singleton instance
 export const savedPostService = new SavedPostService();
