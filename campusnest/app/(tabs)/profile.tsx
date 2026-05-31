@@ -10,13 +10,17 @@ import {
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Profile } from "@/src/types/profile";
-import { ChevronLeft } from "lucide-react-native";
+import { ChevronLeft, Bookmark } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { authService, profileService } from "@/src/services";
+import { authService, profileService, savedListingService, savedPostService } from "@/src/services";
+import { Post } from "@/src/types/post";
+import { Listing } from "@/src/types/listing";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [savedPosts, setSavedPosts] = useState<Post[]>([]);
+  const [savedListings, setSavedListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -24,8 +28,19 @@ export default function ProfileScreen() {
     if (isLoggingOut) return;
     try {
       setLoading(true);
-      const profileData = await profileService.getCurrentUserProfile();
-      if (profileData) setProfile(profileData);
+        const profileData = await profileService.getCurrentUserProfile();
+        if (profileData) {
+          setProfile(profileData);
+          const session = await authService.getSession();
+          if (session?.user?.id) {
+            const [posts, listings] = await Promise.all([
+              savedPostService.getSavedPosts(session.user.id),
+              savedListingService.getSavedListings(session.user.id),
+            ]);
+            setSavedPosts(posts);
+            setSavedListings(listings);
+          }
+        }
     } catch (error) {
       console.error("Unexpected error:", error);
     } finally {
@@ -78,7 +93,7 @@ export default function ProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
-          <ChevronLeft color="#fff" size={22} />
+          <ChevronLeft color="#fff" size={20} strokeWidth={2.5} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={styles.iconBtn} />
@@ -89,7 +104,7 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Avatar + name */}
+        {/* Avatar + name hero */}
         <View style={styles.heroSection}>
           <View style={styles.avatarRing}>
             {profile?.avatar_url ? (
@@ -103,7 +118,9 @@ export default function ProfileScreen() {
           <Text style={styles.heroName}>{profile?.full_name || "—"}</Text>
           <View style={styles.rolePill}>
             <Text style={styles.rolePillText}>
-              {profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : "—"}
+              {profile?.role
+                ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1)
+                : "—"}
             </Text>
           </View>
         </View>
@@ -127,10 +144,9 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Details card */}
+        {/* Account details card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Account Details</Text>
-
           <DetailRow label="Email" value={profile?.email} />
           {profile?.role === "student" && (
             <>
@@ -143,10 +159,96 @@ export default function ProfileScreen() {
           <DetailRow label="Address" value={profile?.current_address} last />
         </View>
 
-        {/* Saved Posts */}
+        {/* Saved Posts card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Saved Posts</Text>
-          <Text style={styles.emptyText}>No saved posts yet.</Text>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Saved Posts</Text>
+            {savedPosts.length > 0 && (
+              <TouchableOpacity
+                style={styles.viewAllBtn}
+                onPress={() => router.push("/(tabs)/saved")}
+              >
+                <Text style={styles.viewAllText}>View all</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {savedPosts.length === 0 ? (
+            <View style={styles.savedEmpty}>
+              <Bookmark size={18} color="#333" strokeWidth={1.5} />
+              <Text style={styles.savedEmptyText}>No saved posts yet</Text>
+            </View>
+          ) : (
+            <View style={styles.savedList}>
+              {savedPosts.slice(0, 3).map((post) => (
+                <TouchableOpacity
+                  key={post.id}
+                  style={styles.savedPostRow}
+                  onPress={() => router.push(`/post/${post.id}`)}
+                >
+                  <View style={styles.savedPostDot} />
+                  <Text style={styles.savedPostTitle} numberOfLines={1}>
+                    {post.title}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+              {savedPosts.length > 3 && (
+                <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}>
+                  <Text style={styles.moreText}>
+                    +{savedPosts.length - 3} more
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </View>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Saved Listings</Text>
+            {savedListings.length > 0 && (
+              <TouchableOpacity
+                style={styles.viewAllBtn}
+                onPress={() => router.push("/(tabs)/saved")}
+              >
+                <Text style={styles.viewAllText}>View all</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {savedListings.length === 0 ? (
+            <View style={styles.savedEmpty}>
+              <Bookmark size={18} color="#333" strokeWidth={1.5} />
+              <Text style={styles.savedEmptyText}>No saved listings yet</Text>
+            </View>
+          ) : (
+            <View style={styles.savedList}>
+              {savedListings.slice(0, 3).map((listing) => (
+                <TouchableOpacity
+                  key={listing.id}
+                  style={styles.savedListingRow}
+                  onPress={() => router.push(`/listing/${listing.id}`)}
+                >
+                  <View>
+                    <Text style={styles.savedListingTitle} numberOfLines={1}>
+                      {listing.title}
+                    </Text>
+                    <Text style={styles.savedListingMeta} numberOfLines={1}>
+                      ${listing.rent.toLocaleString()} /mo — {listing.address}
+                    </Text>
+                  </View>
+                  <View style={styles.savedPostDot} />
+                </TouchableOpacity>
+              ))}
+              {savedListings.length > 3 && (
+                <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}
+                >
+                  <Text style={styles.moreText}>
+                    +{savedListings.length - 3} more
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -165,7 +267,7 @@ function DetailRow({
   return (
     <View style={[styles.detailRow, last && styles.detailRowLast]}>
       <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value || "—"}</Text>
+      <Text style={styles.detailValue} numberOfLines={1}>{value || "—"}</Text>
     </View>
   );
 }
@@ -202,9 +304,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   iconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: "#1a1a1a",
     alignItems: "center",
     justifyContent: "center",
@@ -214,23 +316,22 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 32,
+    paddingTop: 28,
     paddingBottom: 40,
-    gap: 16,
+    gap: 14,
   },
   heroSection: {
     alignItems: "center",
-    marginBottom: 8,
-    gap: 12,
+    gap: 10,
+    marginBottom: 6,
   },
   avatarRing: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     borderWidth: 2,
-    borderColor: "#333",
+    borderColor: "#2a2a2a",
     overflow: "hidden",
-    marginBottom: 4,
   },
   avatar: {
     width: "100%",
@@ -238,49 +339,49 @@ const styles = StyleSheet.create({
   },
   avatarFallback: {
     flex: 1,
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#1a1a1a",
     alignItems: "center",
     justifyContent: "center",
   },
   avatarInitials: {
     color: "#fff",
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "700",
   },
   heroName: {
     color: "#fff",
-    fontSize: 22,
+    fontSize: 21,
     fontWeight: "700",
     letterSpacing: 0.1,
   },
   rolePill: {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#1a1a1a",
     borderWidth: 1,
-    borderColor: "#2e2e2e",
+    borderColor: "#2a2a2a",
     borderRadius: 99,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 4,
   },
   rolePillText: {
-    color: "#aaa",
+    color: "#888",
     fontSize: 12,
     fontWeight: "500",
   },
   actionRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
   },
   actionBtn: {
     flex: 1,
     backgroundColor: "#fff",
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 13,
     alignItems: "center",
   },
   actionBtnOutline: {
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "#2a2a2a",
   },
   actionBtnText: {
     color: "#000",
@@ -291,47 +392,111 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   card: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: "#111",
+    borderRadius: 14,
+    padding: 18,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
-    gap: 2,
+    borderColor: "#1e1e1e",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
   },
   cardTitle: {
-    color: "#fff",
-    fontSize: 15,
+    color: "#888",
+    fontSize: 14,
     fontWeight: "700",
     marginBottom: 14,
     letterSpacing: 0.1,
+    textTransform: "uppercase",
+  },
+  viewAllBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: "#1a1a1a",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  viewAllText: {
+    color: "#aaa",
+    fontSize: 12,
+    fontWeight: "500",
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 11,
     borderBottomWidth: 1,
-    borderBottomColor: "#2a2a2a",
+    borderBottomColor: "#1a1a1a",
   },
   detailRowLast: {
     borderBottomWidth: 0,
     paddingBottom: 0,
   },
   detailLabel: {
-    color: "#666",
-    fontSize: 14,
+    color: "#555",
+    fontSize: 13,
     fontWeight: "500",
   },
   detailValue: {
     color: "#e0e0e0",
     fontSize: 13,
     fontWeight: "500",
-    maxWidth: "60%",
+    maxWidth: "58%",
     textAlign: "right",
   },
-  emptyText: {
-    color: "#555",
+  savedEmpty: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 4,
+  },
+  savedEmptyText: {
+    color: "#444",
     fontSize: 13,
-    paddingVertical: 8,
+  },
+  savedList: {
+    gap: 10,
+  },
+  savedListingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+  },
+  savedListingTitle: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  savedListingMeta: {
+    color: "#777",
+    fontSize: 11,
+  },
+  savedPostRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  savedPostDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: "#333",
+    flexShrink: 0,
+  },
+  savedPostTitle: {
+    color: "#ccc",
+    fontSize: 13,
+    flex: 1,
+  },
+  moreText: {
+    color: "#555",
+    fontSize: 12,
+    paddingTop: 2,
   },
 });

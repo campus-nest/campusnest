@@ -1,4 +1,5 @@
 import { getSupabase } from "@/src/lib/supabaseClient";
+import { Post } from "@/src/types/post";
 
 export interface SavedPost {
   id: string;
@@ -11,17 +12,21 @@ export class SavedPostService {
   private supabase = getSupabase();
 
   /**
-   * Save/like a post
+   * Save a post.
+   * Uses upsert with ignoreDuplicates so a double-tap or any retry is a no-op
+   * at the DB level rather than a unique-constraint error.
    */
   async savePost(
     postId: string,
     userId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await this.supabase.from("saved_posts").insert({
-        user_id: userId,
-        post_id: postId,
-      });
+      const { error } = await this.supabase
+        .from("saved_posts")
+        .upsert(
+          { user_id: userId, post_id: postId },
+          { onConflict: "user_id,post_id", ignoreDuplicates: true },
+        );
 
       if (error) {
         console.error("Error saving post:", error);
@@ -39,7 +44,9 @@ export class SavedPostService {
   }
 
   /**
-   * Unsave/unlike a post
+   * Unsave a post.
+   * With the unique constraint in place there is always at most one row to
+   * delete, so the DELETE event Realtime fires has an unambiguous post_id.
    */
   async unsavePost(
     postId: string,
@@ -68,7 +75,7 @@ export class SavedPostService {
   }
 
   /**
-   * Check if a post is saved by user
+   * Check if a post is saved by user.
    */
   async isPostSaved(postId: string, userId: string): Promise<boolean> {
     try {
@@ -86,16 +93,18 @@ export class SavedPostService {
   }
 
   /**
-   * Get all saved posts for a user with full post details
+   * Get all saved posts for a user with full post details.
+   * Filters out null joins (deleted posts or RLS-blocked reads).
    */
-  async getSavedPosts(userId: string): Promise<any[]> {
+  async getSavedPosts(userId: string): Promise<Post[]> {
     try {
-      const { data, error: _error } = await this.supabase
+      const { data, error } = await this.supabase
         .from("saved_posts")
         .select(
           `
           id,
           created_at,
+          post_id,
           posts (
             id,
             user_id,
@@ -108,17 +117,22 @@ export class SavedPostService {
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
-      if (_error) {
-        console.error("Error fetching saved posts:", _error);
+      if (error) {
+        console.error("Error fetching saved posts:", error);
         return [];
       }
 
-      // Transform the data to return posts with saved info
       return (
-        data?.map((item: any) => ({
-          ...item.posts,
-          saved_at: item.created_at,
-        })) || []
+        data
+          ?.filter((item: any) => item.posts !== null)
+          .map((item: any) => ({
+            id: item.posts.id,
+            user_id: item.posts.user_id,
+            title: item.posts.title,
+            body: item.posts.body,
+            created_at: item.posts.created_at,
+            saved_at: item.created_at,
+          })) || []
       );
     } catch (error) {
       console.error("Unexpected error fetching saved posts:", error);
@@ -127,5 +141,4 @@ export class SavedPostService {
   }
 }
 
-// Export singleton instance
 export const savedPostService = new SavedPostService();

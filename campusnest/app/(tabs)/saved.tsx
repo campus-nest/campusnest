@@ -1,59 +1,79 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { useRouter } from "expo-router";
-import { authService, savedPostService } from "@/src/services";
+import { useFocusEffect, useRouter } from "expo-router";
+import { authService, savedPostService, savedListingService } from "@/src/services";
 import { Post } from "@/src/types/post";
+import { Listing } from "@/src/types/listing";
+import { Bookmark, BookmarkX } from "lucide-react-native";
+import { useSavedPosts } from "@/src/context/SavedPostsContext";
+import { useSavedListings } from "@/src/context/SavedListingsContext";
 
-export default function SavedPostsScreen() {
+type Tab = "listings" | "posts";
+
+export default function SavedScreen() {
+  const [activeTab, setActiveTab] = useState<Tab>("listings");
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [savedListings, setSavedListings] = useState<Listing[]>([]);
+  const [fetchingPosts, setFetchingPosts] = useState(true);
+  const [fetchingListings, setFetchingListings] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  const { savedPostIds, toggleSave, loading: postsContextLoading } = useSavedPosts();
+  const { savedListingIds, toggleSaveListing, loading: listingsContextLoading } = useSavedListings();
   const router = useRouter();
 
   useEffect(() => {
-    const fetchSavedPosts = async () => {
-      setLoading(true);
-
-      const session = await authService.getSession();
-      if (!session?.user?.id) {
-        setLoading(false);
-        return;
-      }
-
-      const posts = await savedPostService.getSavedPosts(session.user.id);
-      setSavedPosts(posts);
-      setLoading(false);
-    };
-
-    fetchSavedPosts();
+    authService.getSession().then((session) => {
+      setCurrentUserId(session?.user?.id ?? null);
+    });
   }, []);
 
-  const renderPostCard = (post: Post) => (
-    <Pressable
-      style={styles.card}
-      onPress={() => router.push(`/post/${post.id}`)}
-    >
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{post.title}</Text>
-        <Text style={styles.cardBody} numberOfLines={4}>
-          {post.body}
-        </Text>
-      </View>
-    </Pressable>
+  useFocusEffect(
+    useCallback(() => {
+      if (!currentUserId) return;
+
+      setFetchingPosts(true);
+      savedPostService.getSavedPosts(currentUserId).then((posts) => {
+        setSavedPosts(posts);
+        setFetchingPosts(false);
+      });
+
+      setFetchingListings(true);
+      savedListingService.getSavedListings(currentUserId).then((listings) => {
+        setSavedListings(listings);
+        setFetchingListings(false);
+      });
+    }, [currentUserId])
   );
+
+  // Prune lists when context changes
+  useEffect(() => {
+    setSavedPosts((prev) => prev.filter((p) => savedPostIds.has(p.id)));
+  }, [savedPostIds]);
+
+  useEffect(() => {
+    setSavedListings((prev) => prev.filter((l) => savedListingIds.has(l.id)));
+  }, [savedListingIds]);
+
+  const loading =
+    activeTab === "listings"
+      ? fetchingListings || listingsContextLoading
+      : fetchingPosts || postsContextLoading;
 
   if (loading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading saved posts...</Text>
+        <Text style={styles.centeredText}>Loading saved…</Text>
       </View>
     );
   }
@@ -61,29 +81,163 @@ export default function SavedPostsScreen() {
   return (
     <PageContainer>
       <View style={styles.screen}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Saved Posts</Text>
-        </View>
-
-        {savedPosts.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>💭</Text>
-            <Text style={styles.emptyText}>Nothing to see here</Text>
-            <Text style={styles.emptySubtext}>
-              Posts you save will appear here
+        {/* Header */}
+        <View style={styles.pageHeader}>
+          <Text style={styles.pageTitle}>Saved</Text>
+          <View style={styles.countPill}>
+            <Text style={styles.countText}>
+              {activeTab === "listings" ? savedListings.length : savedPosts.length}
             </Text>
           </View>
-        ) : (
-          <FlatList
-            data={savedPosts}
-            keyExtractor={(post) => post.id}
-            renderItem={({ item }) => renderPostCard(item)}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
+        </View>
+
+        {/* Tab switcher */}
+        <View style={styles.tabRow}>
+          <Pressable
+            style={[styles.tab, activeTab === "listings" && styles.tabActive]}
+            onPress={() => setActiveTab("listings")}
+          >
+            <Text style={[styles.tabText, activeTab === "listings" && styles.tabTextActive]}>
+              Listings
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.tab, activeTab === "posts" && styles.tabActive]}
+            onPress={() => setActiveTab("posts")}
+          >
+            <Text style={[styles.tabText, activeTab === "posts" && styles.tabTextActive]}>
+              Posts
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Listings tab */}
+        {activeTab === "listings" && (
+          savedListings.length === 0 ? (
+            <EmptyState label="No saved listings yet" subtext="Tap the bookmark on any listing to save it" />
+          ) : (
+            <FlatList
+              data={savedListings}
+              keyExtractor={(l) => l.id}
+              renderItem={({ item }) => (
+                <SavedListingCard
+                  listing={item}
+                  onPress={() => router.push(`/listing/${item.id}`)}
+                  onUnsave={() => toggleSaveListing(item.id)}
+                />
+              )}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+            />
+          )
+        )}
+
+        {/* Posts tab */}
+        {activeTab === "posts" && (
+          savedPosts.length === 0 ? (
+            <EmptyState label="Nothing saved yet" subtext="Posts you save will appear here" />
+          ) : (
+            <FlatList
+              data={savedPosts}
+              keyExtractor={(p) => p.id}
+              renderItem={({ item }) => (
+                <SavedPostCard
+                  post={item}
+                  onPress={() => router.push(`/post/${item.id}`)}
+                  onUnsave={() => toggleSave(item.id)}
+                />
+              )}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+            />
+          )
         )}
       </View>
     </PageContainer>
+  );
+}
+
+function SavedListingCard({
+  listing,
+  onPress,
+  onUnsave,
+}: {
+  listing: Listing;
+  onPress: () => void;
+  onUnsave: () => void;
+}) {
+  return (
+    <Pressable style={styles.listingCard} onPress={onPress}>
+      <View style={styles.listingThumb}>
+        {listing.photo_urls?.length ? (
+          <Image
+            source={{ uri: listing.photo_urls[0] }}
+            style={styles.listingThumbImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <Text style={styles.listingThumbFallback}>🏠</Text>
+        )}
+      </View>
+      <View style={styles.listingBody}>
+        <Text style={styles.listingTitle} numberOfLines={1}>{listing.title}</Text>
+        <Text style={styles.listingRent}>
+          <Text style={styles.listingRentAmount}>${listing.rent}</Text>
+          <Text style={styles.listingRentSuffix}> /mo</Text>
+        </Text>
+        <Text style={styles.listingAddress} numberOfLines={1}>{listing.address}</Text>
+      </View>
+      <Pressable
+        style={styles.unsaveBtn}
+        onPress={(e) => { e.stopPropagation(); onUnsave(); }}
+        hitSlop={8}
+      >
+        <BookmarkX size={16} color="#555" strokeWidth={2} />
+      </Pressable>
+    </Pressable>
+  );
+}
+
+function SavedPostCard({
+  post,
+  onPress,
+  onUnsave,
+}: {
+  post: Post;
+  onPress: () => void;
+  onUnsave: () => void;
+}) {
+  return (
+    <Pressable style={styles.card} onPress={onPress}>
+      <View style={styles.cardLeft}>
+        <View style={styles.cardIconWrap}>
+          <Bookmark size={14} color="#666" strokeWidth={2} />
+        </View>
+      </View>
+      <View style={styles.cardBody}>
+        <Text style={styles.cardTitle}>{post.title}</Text>
+        <Text style={styles.cardText} numberOfLines={2}>{post.body}</Text>
+      </View>
+      <Pressable
+        style={styles.unsaveBtn}
+        onPress={(e) => { e.stopPropagation(); onUnsave(); }}
+        hitSlop={8}
+      >
+        <BookmarkX size={16} color="#555" strokeWidth={2} />
+      </Pressable>
+    </Pressable>
+  );
+}
+
+function EmptyState({ label, subtext }: { label: string; subtext: string }) {
+  return (
+    <View style={styles.emptyState}>
+      <View style={styles.emptyIconWrap}>
+        <Bookmark size={28} color="#444" strokeWidth={1.5} />
+      </View>
+      <Text style={styles.emptyTitle}>{label}</Text>
+      <Text style={styles.emptySubtext}>{subtext}</Text>
+    </View>
   );
 }
 
@@ -91,68 +245,197 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",
-    paddingTop: 8,
-  },
-  header: {
     paddingTop: 12,
-    paddingBottom: 20,
   },
-  headerTitle: {
+  pageHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 16,
+  },
+  pageTitle: {
     color: "#fff",
     fontSize: 24,
     fontWeight: "700",
+    letterSpacing: 0.1,
   },
-  listContent: {
-    paddingBottom: 50,
-  },
-  card: {
+  countPill: {
     backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 99,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  countText: {
+    color: "#666",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  tabRow: {
+    flexDirection: "row",
+    gap: 8,
     marginBottom: 16,
   },
-  cardContent: {
-    gap: 8,
+  tab: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 99,
+    backgroundColor: "#111",
+    borderWidth: 1,
+    borderColor: "#222",
+  },
+  tabActive: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
+  },
+  tabText: {
+    color: "#666",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  tabTextActive: {
+    color: "#000",
+  },
+  listContent: {
+    paddingBottom: 60,
+    gap: 10,
+  },
+  // Listing card
+  listingCard: {
+    backgroundColor: "#111",
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  listingThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 10,
+    backgroundColor: "#2a2a2a",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    flexShrink: 0,
+  },
+  listingThumbImage: {
+    width: "100%",
+    height: "100%",
+  },
+  listingThumbFallback: {
+    fontSize: 24,
+  },
+  listingBody: {
+    flex: 1,
+    gap: 3,
+  },
+  listingTitle: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 18,
+  },
+  listingRent: {},
+  listingRentAmount: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  listingRentSuffix: {
+    color: "#666",
+    fontSize: 12,
+  },
+  listingAddress: {
+    color: "#666",
+    fontSize: 12,
+  },
+  // Post card
+  card: {
+    backgroundColor: "#111",
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  cardLeft: {
+    paddingTop: 2,
+  },
+  cardIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    backgroundColor: "#1a1a1a",
+    borderWidth: 1,
+    borderColor: "#222",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardBody: {
+    flex: 1,
+    gap: 5,
   },
   cardTitle: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
+    lineHeight: 20,
   },
-  cardBody: {
-    color: "#ddd",
-    fontSize: 14,
-    lineHeight: 19,
+  cardText: {
+    color: "#777",
+    fontSize: 13,
+    lineHeight: 18,
   },
+  unsaveBtn: {
+    paddingTop: 2,
+    paddingLeft: 4,
+  },
+  // Shared
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#000",
+    gap: 12,
   },
   centeredText: {
-    color: "#fff",
-    marginTop: 12,
+    color: "#aaa",
+    fontSize: 14,
   },
   emptyState: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    gap: 12,
     paddingHorizontal: 32,
+    paddingBottom: 60,
   },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
+  emptyIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: "#111",
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
   },
-  emptyText: {
+  emptyTitle: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "600",
-    marginBottom: 8,
   },
   emptySubtext: {
-    color: "#999",
+    color: "#555",
     fontSize: 14,
     textAlign: "center",
+    lineHeight: 20,
   },
 });
