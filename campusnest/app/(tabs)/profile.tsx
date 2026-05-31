@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Profile } from "@/src/types/profile";
-import { Bell, ChevronLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authService, profileService } from "@/src/services";
 
@@ -21,20 +21,11 @@ export default function ProfileScreen() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const fetchProfile = useCallback(async () => {
-    // Don't fetch if we're in the process of logging out
     if (isLoggingOut) return;
-
     try {
       setLoading(true);
-
       const profileData = await profileService.getCurrentUserProfile();
-
-      if (!profileData) {
-        console.log("No profile found");
-        return;
-      }
-
-      setProfile(profileData);
+      if (profileData) setProfile(profileData);
     } catch (error) {
       console.error("Unexpected error:", error);
     } finally {
@@ -53,7 +44,6 @@ export default function ProfileScreen() {
       setIsLoggingOut(true);
       const result = await authService.signOut();
       if (result.success) {
-        // Navigate first, then the screen will unmount
         router.replace("/landing");
       }
     } catch (error) {
@@ -64,114 +54,119 @@ export default function ProfileScreen() {
 
   if (loading && !profile) {
     return (
-      <View style={styles.loadingContainer}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#ffffff" />
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (isLoggingOut) {
     return (
-      <View style={styles.loadingContainer}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#ffffff" />
-        <Text style={styles.loadingText}>Logging out...</Text>
-      </View>
+        <Text style={styles.loadingText}>Logging out…</Text>
+      </SafeAreaView>
     );
   }
 
+  const initials = profile?.full_name
+    ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "?";
+
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
+          <ChevronLeft color="#fff" size={22} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Profile</Text>
+        <View style={styles.iconBtn} />
+      </View>
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <ChevronLeft color="black" size={24} />
+        {/* Avatar + name */}
+        <View style={styles.heroSection}>
+          <View style={styles.avatarRing}>
+            {profile?.avatar_url ? (
+              <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarInitials}>{initials}</Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.heroName}>{profile?.full_name || "—"}</Text>
+          <View style={styles.rolePill}>
+            <Text style={styles.rolePillText}>
+              {profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : "—"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Action buttons */}
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => router.push("/edit-profile")}
+          >
+            <Text style={styles.actionBtnText}>Edit Profile</Text>
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Bell color="black" size={24} />
+          <TouchableOpacity
+            style={[styles.actionBtn, styles.actionBtnOutline]}
+            onPress={handleSignOut}
+            disabled={isLoggingOut}
+          >
+            <Text style={[styles.actionBtnText, styles.actionBtnTextOutline]}>
+              Log Out
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.profileHeader}>
-            <View style={styles.profileInfo}>
-              <View style={styles.avatarContainer}>
-                {profile?.avatar_url ? (
-                  <Image
-                    source={{ uri: profile.avatar_url }}
-                    style={styles.avatar}
-                  />
-                ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <View style={styles.avatarDashedBox} />
-                    <Text style={styles.avatarLabel}>Label</Text>
-                  </View>
-                )}
-              </View>
+        {/* Details card */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Account Details</Text>
 
-              <View style={styles.nameContainer}>
-                <Text style={styles.nameText}>
-                  {profile?.full_name || "FirstName LastName"}
-                </Text>
-                <Text style={styles.roleText}>
-                  {profile?.role || "Student"}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => router.push("/edit-profile")}
-              >
-                <Text style={styles.actionButtonText}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={handleSignOut}
-                disabled={isLoggingOut}
-              >
-                <Text style={styles.actionButtonText}>Log Out</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.detailText}>
-              University: {profile?.university || "NULL"}
-            </Text>
-            <Text style={styles.detailText}>
-              Year: {profile?.year || "NULL"}
-            </Text>
-          </View>
-
-          <Text style={styles.detailText}>
-            Email: {profile?.email || "NULL"}
-          </Text>
-          <Text style={styles.detailText}>
-            Current Address: {profile?.current_address || "NULL"}
-          </Text>
-          <Text style={styles.detailText}>City: {profile?.city || "NULL"}</Text>
-          <Text style={styles.detailText}>
-            Province: {profile?.province || "NULL"}
-          </Text>
+          <DetailRow label="Email" value={profile?.email} />
+          {profile?.role === "student" && (
+            <>
+              <DetailRow label="University" value={profile?.university} />
+              <DetailRow label="Year" value={profile?.year} />
+            </>
+          )}
+          <DetailRow label="City" value={profile?.city} />
+          <DetailRow label="Province" value={profile?.province} />
+          <DetailRow label="Address" value={profile?.current_address} last />
         </View>
 
-        {/* Saved Posts Section */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionIndicator} />
-            <Text style={styles.sectionTitle}>Saved Posts</Text>
-          </View>
-
-          {/* TODO: Add saved posts from database service */}
+        {/* Saved Posts */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Saved Posts</Text>
+          <Text style={styles.emptyText}>No saved posts yet.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  last,
+}: {
+  label: string;
+  value?: string | null;
+  last?: boolean;
+}) {
+  return (
+    <View style={[styles.detailRow, last && styles.detailRowLast]}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue}>{value || "—"}</Text>
+    </View>
   );
 }
 
@@ -180,135 +175,163 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "black",
+    backgroundColor: "#000",
+    gap: 12,
   },
   loadingText: {
-    color: "#ffffff",
-    marginTop: 12,
+    color: "#aaa",
     fontSize: 14,
   },
   safeArea: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: "#000",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1a1a1a",
+  },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.2,
+  },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#1a1a1a",
+    alignItems: "center",
+    justifyContent: "center",
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 32,
+    paddingBottom: 40,
+    gap: 16,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  heroSection: {
     alignItems: "center",
-    paddingVertical: 16,
-    backgroundColor: "white",
-    borderRadius: 9999,
-    paddingHorizontal: 24,
-    marginBottom: 24,
-    marginTop: 8,
+    marginBottom: 8,
+    gap: 12,
   },
-  profileCard: {
-    backgroundColor: "#27272a",
-    borderRadius: 24,
-    padding: 24,
-    marginBottom: 24,
-  },
-  profileHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  profileInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  avatarContainer: {
-    width: 64,
-    height: 64,
-    backgroundColor: "#52525b",
-    borderRadius: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-  },
-  avatarPlaceholder: {
-    alignItems: "center",
-  },
-  avatarDashedBox: {
-    borderWidth: 1,
-    borderColor: "white",
-    borderStyle: "dashed",
-    width: 24,
-    height: 24,
+  avatarRing: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    borderWidth: 2,
+    borderColor: "#333",
+    overflow: "hidden",
     marginBottom: 4,
   },
-  avatarLabel: {
-    color: "white",
-    fontSize: 12,
+  avatar: {
+    width: "100%",
+    height: "100%",
   },
-  nameContainer: {
+  avatarFallback: {
     flex: 1,
+    backgroundColor: "#1e1e1e",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  nameText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
+  avatarInitials: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "700",
   },
-  roleText: {
-    color: "#a1a1aa",
-    fontStyle: "italic",
+  heroName: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "700",
+    letterSpacing: 0.1,
   },
-  actionButtons: {
-    gap: 8,
+  rolePill: {
+    backgroundColor: "#1e1e1e",
+    borderWidth: 1,
+    borderColor: "#2e2e2e",
+    borderRadius: 99,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
   },
-  actionButton: {
-    backgroundColor: "#3f3f46",
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 8,
+  rolePillText: {
+    color: "#aaa",
+    fontSize: 12,
+    fontWeight: "500",
   },
-  actionButtonText: {
-    color: "white",
-    textAlign: "center",
+  actionRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  actionBtn: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  actionBtnOutline: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  actionBtnText: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  actionBtnTextOutline: {
+    color: "#fff",
+  },
+  card: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    gap: 2,
+  },
+  cardTitle: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 14,
+    letterSpacing: 0.1,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  detailText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  sectionContainer: {
-    backgroundColor: "#27272a",
-    borderRadius: 24,
-    padding: 16,
-    marginBottom: 80,
-  },
-  sectionHeader: {
-    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#2a2a2a",
   },
-  sectionIndicator: {
-    width: 4,
-    height: 24,
-    backgroundColor: "#52525b",
-    marginRight: 8,
+  detailRowLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 0,
   },
-  sectionTitle: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
+  detailLabel: {
+    color: "#666",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  detailValue: {
+    color: "#e0e0e0",
+    fontSize: 13,
+    fontWeight: "500",
+    maxWidth: "60%",
+    textAlign: "right",
+  },
+  emptyText: {
+    color: "#555",
+    fontSize: 13,
+    paddingVertical: 8,
   },
 });

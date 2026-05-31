@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderColor: "#007AFF",
+    width: "100%",
   },
   mapButtonSelected: {
     backgroundColor: "#4CAF50",
@@ -189,6 +190,7 @@ const styles = StyleSheet.create({
     color: "#007AFF",
     fontSize: 14,
     fontWeight: "600",
+    textAlign: "center",
   },
   mapButtonTextSelected: {
     color: "#fff",

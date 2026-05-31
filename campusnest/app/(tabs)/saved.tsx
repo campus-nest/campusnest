@@ -91,8 +91,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 8,
   },
   header: {
     paddingTop: 12,
@@ -107,7 +106,7 @@ const styles = StyleSheet.create({
     paddingBottom: 50,
   },
   card: {
-    backgroundColor: "#2a2a2a",
+    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -122,7 +121,7 @@ const styles = StyleSheet.create({
   },
   cardBody: {
     color: "#ddd",
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 19,
   },
   centered: {
@@ -133,7 +132,7 @@ const styles = StyleSheet.create({
   },
   centeredText: {
     color: "#fff",
-    marginTop: 10,
+    marginTop: 12,
   },
   emptyState: {
     flex: 1,

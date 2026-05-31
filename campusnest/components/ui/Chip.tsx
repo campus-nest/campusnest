@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   toggleChip: {
     flex: 1,
     borderRadius: 999,
-    paddingVertical: 10,
+    paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#333",
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
   toggleChipText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "500",
     color: "#fff",
   },

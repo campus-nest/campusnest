@@ -27,8 +27,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    width: "100%", // full width
-    paddingHorizontal: 20, // consistent mobile padding
-    paddingTop: 10,
+    width: "100%",
+    paddingHorizontal: 20,
   },
 });

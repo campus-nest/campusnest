@@ -7,7 +7,6 @@ import {
   Alert,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -302,6 +301,7 @@ export default function NewPostScreen() {
         {/* Basic Info */}
         <Input
           label="Listing Title"
+          labelStyle={styles.labelDark}
           placeholder="Cozy 2-bedroom near campus"
           value={listingTitle}
           onChangeText={setListingTitle}
@@ -335,6 +335,7 @@ export default function NewPostScreen() {
         <View style={styles.field}>
           <Input
             label="Nearby University"
+            labelStyle={styles.labelDark}
             placeholder="Select college"
             value={nearbyUniversity}
             onChangeText={setNearbyUniversity}
@@ -353,6 +354,7 @@ export default function NewPostScreen() {
         {/* Description */}
         <Input
           label="Description"
+          labelStyle={styles.labelDark}
           placeholder="Tell people about your place"
           value={description}
           onChangeText={setDescription}
@@ -364,6 +366,7 @@ export default function NewPostScreen() {
         {/* Tenant Preferences */}
         <Input
           label="Tenant Preferences"
+          labelStyle={styles.labelDark}
           placeholder="What do you look for?"
           value={tenantPreferences}
           onChangeText={setTenantPreferences}
@@ -428,6 +431,7 @@ export default function NewPostScreen() {
         <View style={styles.row}>
           <Input
             label="Rent / month"
+            labelStyle={styles.labelDark}
             placeholder="780"
             value={listingRent}
             onChangeText={setListingRent}
@@ -437,6 +441,7 @@ export default function NewPostScreen() {
           />
           <Input
             label="Lease term text"
+            labelStyle={styles.labelDark}
             placeholder="8 months"
             value={listingLeaseTerm}
             onChangeText={setListingLeaseTerm}
@@ -448,6 +453,7 @@ export default function NewPostScreen() {
         {/* Location Area */}
         <Input
           label="Neighborhood / Area"
+          labelStyle={styles.labelDark}
           placeholder="e.g. Downtown, Whyte Ave"
           value={locationArea}
           onChangeText={setLocationArea}
@@ -488,6 +494,7 @@ export default function NewPostScreen() {
 
       <Input
         label="Title"
+        labelStyle={styles.labelDark}
         placeholder="Looking for a roommate for Fall 2025"
         value={postTitle}
         onChangeText={setPostTitle}
@@ -496,6 +503,7 @@ export default function NewPostScreen() {
 
       <Input
         label="Description"
+        labelStyle={styles.labelDark}
         placeholder="Describe yourself, your preferences, and what you're looking for."
         value={postBody}
         onChangeText={setPostBody}
@@ -532,22 +540,18 @@ export default function NewPostScreen() {
   }
 
   return (
-    <Screen>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
-      </ScrollView>
+    <Screen scrollable contentContainerStyle={styles.scrollContent}>
+      {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingTop: 24,
-    paddingBottom: 40,
-    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 100,
+    paddingHorizontal: 20,
+    alignItems: "center",
   },
   title: {
     textAlign: "left",
@@ -559,19 +563,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   formCard: {
-    marginTop: 8,
+    marginTop: 2,
     marginBottom: 16,
+    width: "100%",
+    alignSelf: "stretch",
+    maxWidth: 1000,
   },
   tabSelector: {
     marginBottom: 12,
   },
   field: {
-    marginBottom: 14,
+    width: "100%",
+    marginBottom: 16,
   },
   row: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 14,
+    gap: 12,
+    marginBottom: 16,
+    width: "100%",
   },
   halfField: {
     flex: 1,
@@ -591,9 +600,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginBottom: 4,
   },
+  labelDark: {
+    color: "#1a1a1a",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
   suggestionBox: {
     marginTop: 6,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: "#fff",
     padding: 8,
     shadowColor: "#000",
@@ -602,7 +617,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   suggestionText: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#333",
   },
   dateDropdown: {
@@ -616,6 +631,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     marginTop: 4,
+    width: "100%",
   },
   dateDropdownText: {
     fontSize: 14,
@@ -627,10 +643,11 @@ const styles = StyleSheet.create({
   uploadButton: {
     marginTop: 12,
     borderRadius: 999,
-    paddingVertical: 10,
+    paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#000",
+    width: "100%",
   },
   uploadButtonText: {
     fontSize: 14,
@@ -646,7 +663,7 @@ const styles = StyleSheet.create({
   },
   centeredText: {
     color: "#fff",
-    marginTop: 10,
+    marginTop: 12,
     textAlign: "center",
   },
 });

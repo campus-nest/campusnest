@@ -27,140 +27,56 @@ export default function UsersScreen() {
       const session = await authService.getSession();
       setCurrentUserId(session?.user?.id || null);
     };
-
     fetchCurrentUser();
   }, []);
 
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
-
       const allPosts = await postService.getPosts();
-
-      // Filter posts based on active filter
       let filteredPosts = allPosts;
       if (activeFilter === "yourPost" && currentUserId) {
-        filteredPosts = allPosts.filter(
-          (post) => post.user_id === currentUserId,
-        );
+        filteredPosts = allPosts.filter((post) => post.user_id === currentUserId);
       }
-
       setPosts(filteredPosts);
 
-      // Fetch saved posts for current user
       if (currentUserId) {
         const savedPosts = await savedPostService.getSavedPosts(currentUserId);
-        const savedIds = new Set(savedPosts.map((p) => p.id));
-        setSavedPostIds(savedIds);
+        setSavedPostIds(new Set(savedPosts.map((p) => p.id)));
       }
-
       setLoading(false);
     };
-
     fetchPosts();
   }, [activeFilter, currentUserId]);
 
   const handleToggleSave = async (postId: string) => {
     if (!currentUserId) return;
-
     const isSaved = savedPostIds.has(postId);
-
     if (isSaved) {
       const result = await savedPostService.unsavePost(postId, currentUserId);
       if (result.success) {
         setSavedPostIds((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(postId);
-          return newSet;
+          const next = new Set(prev);
+          next.delete(postId);
+          return next;
         });
       }
     } else {
       const result = await savedPostService.savePost(postId, currentUserId);
-      if (result.success) {
-        setSavedPostIds((prev) => new Set(prev).add(postId));
-      }
+      if (result.success) setSavedPostIds((prev) => new Set(prev).add(postId));
     }
   };
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>Student Posts</Text>
-      <Pressable
-        style={styles.savedButton}
-        onPress={() => router.push("/(tabs)/saved")}
-      >
-        <Text style={styles.savedIcon}>❤️</Text>
-      </Pressable>
-    </View>
-  );
-
-  const renderFilters = () => {
-    const filters: { key: PostFilter; label: string }[] = [
-      { key: "yourPost", label: "Your Post" },
-      { key: "recent", label: "Recent" },
-    ];
-
-    return (
-      <View style={styles.filtersRow}>
-        {filters.map((f) => {
-          const isActive = activeFilter === f.key;
-          return (
-            <Pressable
-              key={f.key}
-              onPress={() => setActiveFilter(f.key)}
-              style={[styles.filterChip, isActive && styles.filterChipActive]}
-            >
-              {isActive && <Text style={styles.checkmark}>✓ </Text>}
-              <Text
-                style={[
-                  styles.filterChipText,
-                  isActive && styles.filterChipTextActive,
-                ]}
-              >
-                {f.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    );
-  };
-
-  const renderPostCard = (post: Post) => {
-    const isSaved = savedPostIds.has(post.id);
-
-    return (
-      <Pressable
-        style={styles.card}
-        onPress={() => router.push(`/post/${post.id}`)}
-      >
-        <View style={styles.cardContent}>
-          <Text style={styles.cardTitle}>{post.title}</Text>
-          <Text style={styles.cardBody} numberOfLines={4}>
-            {post.body}
-          </Text>
-        </View>
-
-        <View style={styles.cardActions}>
-          <Pressable
-            style={styles.actionButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              handleToggleSave(post.id);
-            }}
-          >
-            <Text style={styles.actionIcon}>{isSaved ? "❤️" : "🤍"}</Text>
-          </Pressable>
-        </View>
-      </Pressable>
-    );
-  };
+  const filters: { key: PostFilter; label: string }[] = [
+    { key: "yourPost", label: "Your Posts" },
+    { key: "recent", label: "Recent" },
+  ];
 
   if (loading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading posts...</Text>
+        <Text style={styles.centeredText}>Loading posts…</Text>
       </View>
     );
   }
@@ -168,22 +84,56 @@ export default function UsersScreen() {
   return (
     <PageContainer>
       <View style={styles.screen}>
-        {renderHeader()}
-        {renderFilters()}
+        {/* Page header */}
+        <View style={styles.pageHeader}>
+          <Text style={styles.pageTitle}>Student Posts</Text>
+          <Pressable
+            style={styles.savedBtn}
+            onPress={() => router.push("/(tabs)/saved")}
+          >
+            <Text style={styles.savedBtnIcon}>❤️</Text>
+          </Pressable>
+        </View>
 
+        {/* Filter chips */}
+        <View style={styles.filtersRow}>
+          {filters.map((f) => {
+            const active = activeFilter === f.key;
+            return (
+              <Pressable
+                key={f.key}
+                onPress={() => setActiveFilter(f.key)}
+                style={[styles.chip, active && styles.chipActive]}
+              >
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                  {f.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* List */}
         {posts.length === 0 ? (
-          <View style={styles.emptyState}>
+          <View style={styles.empty}>
             <Text style={styles.emptyText}>
               {activeFilter === "yourPost"
-                ? "You haven't created any posts yet"
-                : "No posts available"}
+                ? "You haven't created any posts yet."
+                : "No posts available."}
             </Text>
           </View>
         ) : (
           <FlatList
             data={posts}
             keyExtractor={(post) => post.id}
-            renderItem={({ item }) => renderPostCard(item)}
+            renderItem={({ item }) => (
+              <PostCard
+                post={item}
+                isSaved={savedPostIds.has(item.id)}
+                onPress={() => router.push(`/post/${item.id}`)}
+                onToggleSave={() => handleToggleSave(item.id)}
+              />
+            )}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />
@@ -193,101 +143,128 @@ export default function UsersScreen() {
   );
 }
 
+function PostCard({
+  post,
+  isSaved,
+  onPress,
+  onToggleSave,
+}: {
+  post: Post;
+  isSaved: boolean;
+  onPress: () => void;
+  onToggleSave: () => void;
+}) {
+  return (
+    <Pressable style={styles.card} onPress={onPress}>
+      <View style={styles.cardBody}>
+        <Text style={styles.cardTitle}>{post.title}</Text>
+        <Text style={styles.cardText} numberOfLines={3}>
+          {post.body}
+        </Text>
+      </View>
+      <Pressable
+        style={styles.saveBtn}
+        onPress={(e) => {
+          e.stopPropagation();
+          onToggleSave();
+        }}
+        hitSlop={8}
+      >
+        <Text style={styles.saveIcon}>{isSaved ? "❤️" : "🤍"}</Text>
+      </Pressable>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 12,
   },
-  header: {
+  pageHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: 12,
-    paddingBottom: 16,
+    marginBottom: 20,
   },
-  headerTitle: {
+  pageTitle: {
     color: "#fff",
     fontSize: 24,
     fontWeight: "700",
+    letterSpacing: 0.1,
   },
-  savedButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#2a2a2a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  savedIcon: {
-    fontSize: 20,
-  },
-  filtersRow: {
-    flexDirection: "row",
-    gap: 12,
-    paddingBottom: 20,
-  },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: "#f2f2f2",
-  },
-  filterChipActive: {
-    backgroundColor: "#333",
-  },
-  filterChipText: {
-    fontSize: 14,
-    color: "#000",
-    fontWeight: "500",
-  },
-  filterChipTextActive: {
-    color: "#fff",
-  },
-  checkmark: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  listContent: {
-    paddingBottom: 50,
-  },
-  card: {
-    backgroundColor: "#2a2a2a",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  cardContent: {
-    marginBottom: 12,
-  },
-  cardTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  cardBody: {
-    color: "#ddd",
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  cardActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  actionButton: {
+  savedBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: "#1a1a1a",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
   },
-  actionIcon: {
+  savedBtnIcon: {
+    fontSize: 18,
+  },
+  filtersRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 20,
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 99,
+    backgroundColor: "#1a1a1a",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  chipActive: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
+  },
+  chipText: {
+    color: "#aaa",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  chipTextActive: {
+    color: "#000",
+  },
+  listContent: {
+    paddingBottom: 60,
+    gap: 12,
+  },
+  card: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  cardBody: {
+    flex: 1,
+    gap: 6,
+  },
+  cardTitle: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    lineHeight: 20,
+  },
+  cardText: {
+    color: "#888",
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  saveBtn: {
+    paddingTop: 2,
+  },
+  saveIcon: {
     fontSize: 20,
   },
   centered: {
@@ -295,20 +272,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#000",
+    gap: 12,
   },
   centeredText: {
-    color: "#fff",
-    marginTop: 10,
+    color: "#aaa",
+    fontSize: 14,
   },
-  emptyState: {
+  empty: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 32,
   },
   emptyText: {
-    color: "#999",
-    fontSize: 16,
+    color: "#555",
+    fontSize: 15,
     textAlign: "center",
+    lineHeight: 22,
   },
 });

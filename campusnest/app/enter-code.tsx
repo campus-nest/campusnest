@@ -5,7 +5,7 @@ import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Keyboard } from "react-native";
+import { Alert, Keyboard, StyleSheet, View } from "react-native";
 
 export default function EnterCodeScreen() {
   const router = useRouter();
@@ -14,9 +14,7 @@ export default function EnterCodeScreen() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (code.length === 6) {
-      Keyboard.dismiss();
-    }
+    if (code.length === 6) Keyboard.dismiss();
   }, [code]);
 
   const handleVerifyCode = async () => {
@@ -24,27 +22,22 @@ export default function EnterCodeScreen() {
       Alert.alert("Error", "Please enter the verification code");
       return;
     }
-
     if (code.trim().length !== 6) {
       Alert.alert("Error", "Verification code must be 6 digits");
       return;
     }
-
     if (!email) {
       Alert.alert("Error", "Email address missing. Please try again.");
       router.back();
       return;
     }
-
     setLoading(true);
-
     try {
       const { error } = await supabase.auth.verifyOtp({
         email,
         token: code.trim(),
         type: "recovery",
       });
-
       if (error) {
         Alert.alert("Error", error.message);
       } else {
@@ -59,22 +52,52 @@ export default function EnterCodeScreen() {
   };
 
   return (
-    <Screen>
-      <H1 bold>Enter Code</H1>
-      <H4>Enter the 6-digit code sent to {email}</H4>
+    <Screen scrollable contentContainerStyle={styles.content}>
+      <View style={styles.heading}>
+        <H1 bold>Enter Code</H1>
+        <H4 style={styles.subtitle}>Enter the 6-digit code sent to {email}</H4>
+      </View>
 
-      <Input
-        label="Verification Code"
-        placeholder="Enter your verfication code here; Ex: 123456"
-        onChangeText={setCode}
-        value={code}
-        keyboardType="number-pad"
-        maxLength={6}
-        textAlign="center"
-      />
+      <View style={styles.form}>
+        <Input
+          label="Verification Code"
+          placeholder="123456"
+          onChangeText={setCode}
+          value={code}
+          keyboardType="number-pad"
+          maxLength={6}
+          textAlign="center"
+          style={styles.codeInput}
+        />
+      </View>
+
       <Button fullWidth onPress={handleVerifyCode} disabled={loading}>
-        {loading ? "Verifying..." : "Verify Code"}
+        {loading ? "Verifying…" : "Verify Code"}
       </Button>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    gap: 32,
+  },
+  heading: {
+    alignItems: "center",
+    gap: 8,
+  },
+  subtitle: {
+    color: "#888",
+    paddingHorizontal: 16,
+    lineHeight: 20,
+  },
+  form: {
+    gap: 16,
+  },
+  codeInput: {
+    fontSize: 28,
+    fontWeight: "700",
+    letterSpacing: 12,
+    textAlign: "center",
+  },
+});

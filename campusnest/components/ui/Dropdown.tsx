@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   labelLight: {
-    color: "#333",
+    color: "#1a1a1a",
   },
   dropdown: {
     flexDirection: "row",
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   optionsList: {
     marginTop: 4,
-    backgroundColor: "#2a2a2a",
+    backgroundColor: "#1e1e1e",
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#333",
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
   option: {
-    padding: 14,
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
   },

@@ -6,7 +6,7 @@ import { getSupabase } from "@/src/lib/supabaseClient";
 import { authService, profileService } from "@/src/services";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, Text } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -19,85 +19,55 @@ export default function LoginScreen() {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       Alert.alert("Error", "Please enter a valid email address");
       return;
     }
-
     setLoading(true);
-
     try {
       const supabase = getSupabase();
-
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
-
       if (loginError) {
         Alert.alert("Login Failed", loginError.message);
-        setLoading(false);
         return;
       }
-
       const session = await authService.getSession();
-
       if (!session?.user) {
         Alert.alert("Error", "No user session found.");
-        setLoading(false);
         return;
       }
-
       const userId = session.user.id;
-
-      // Check if profile exists
       let profile = await profileService.getProfileById(userId);
-
       if (!profile) {
         const fullName = session.user.user_metadata?.full_name;
         const role = session.user.user_metadata?.role;
-
         if (!fullName || !role) {
-          Alert.alert(
-            "Error",
-            "Missing required profile information. Please complete signup again.",
-          );
-          setLoading(false);
+          Alert.alert("Error", "Missing required profile information. Please complete signup again.");
           return;
         }
-
-        // Create profile using direct Supabase call (since service doesn't have insert method yet)
         const { error: insertError } = await supabase.from("profiles").insert({
           id: userId,
           full_name: fullName,
-          role: role,
+          role,
         });
-
         if (insertError) {
           Alert.alert("Error", "Failed to create user profile.");
-          setLoading(false);
           return;
         }
-
         profile = await profileService.getProfileById(userId);
       }
-
       if (!profile) {
         Alert.alert("Error", "Failed to fetch user profile.");
-        setLoading(false);
         return;
       }
-
       if (profile.role === "student" || profile.role === "landlord") {
-        setTimeout(() => {
-          router.replace("/(tabs)");
-        }, 100);
+        setTimeout(() => router.replace("/(tabs)"), 100);
       } else {
         Alert.alert("Error", "Unknown user role.");
-        setLoading(false);
-        return;
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -108,60 +78,82 @@ export default function LoginScreen() {
   };
 
   return (
-    <Screen>
-      <H1 bold>Welcome Back</H1>
-      <H3>Login to CampusNest</H3>
+    <Screen scrollable contentContainerStyle={styles.content}>
+      {/* Heading block */}
+      <View style={styles.heading}>
+        <H1 bold>Welcome Back</H1>
+        <H3 style={styles.subtitle}>Login to CampusNest</H3>
+      </View>
 
-      <Input
-        label="Email"
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+      {/* Form */}
+      <View style={styles.form}>
+        <Input
+          label="Email"
+          placeholder="Enter your email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+        <Input
+          label="Password"
+          placeholder="Enter your password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <Pressable
+          onPress={() => router.push("/forgot-password")}
+          style={styles.forgotRow}
+        >
+          <Text style={styles.forgotText}>Forgot Password?</Text>
+        </Pressable>
+      </View>
 
-      <Input
-        label="Password"
-        placeholder="Enter your password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <Pressable
-        onPress={() => router.push("/forgot-password")}
-        style={styles.forgotPasswordButton}
-      >
-        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-      </Pressable>
-
-      <Button disabled={loading} fullWidth onPress={handleLogin}>
-        {loading ? "Logging in..." : "Login"}
-      </Button>
-
-      <Pressable onPress={() => router.back()}>
-        <Text style={styles.backText}>Back to Landing</Text>
-      </Pressable>
+      {/* Actions */}
+      <View style={styles.actions}>
+        <Button disabled={loading} fullWidth onPress={handleLogin}>
+          {loading ? "Logging in…" : "Login"}
+        </Button>
+        <Pressable onPress={() => router.back()}>
+          <Text style={styles.backText}>Back to Landing</Text>
+        </Pressable>
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: 32,
+  },
+  heading: {
+    alignItems: "center",
+    gap: 6,
+  },
+  subtitle: {
+    color: "#888",
+  },
+  form: {
+    gap: 16,
+  },
+  forgotRow: {
+    alignSelf: "flex-end",
+  },
+  forgotText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+    opacity: 0.7,
+  },
+  actions: {
+    gap: 16,
+    alignItems: "center",
+  },
   backText: {
     color: "#fff",
     fontSize: 14,
     textAlign: "center",
-    marginTop: 10,
-    opacity: 0.7,
-  },
-  forgotPasswordButton: {
-    alignSelf: "flex-end",
-  },
-  forgotPasswordText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-    opacity: 0.8,
+    opacity: 0.5,
   },
 });

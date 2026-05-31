@@ -17,21 +17,16 @@ export default function VerifyEmailScreen() {
       Alert.alert("Error", "Please enter your email address");
       return;
     }
-
     setLoading(true);
     try {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: email.trim(),
       });
-
       if (error) {
         Alert.alert("Error", error.message);
       } else {
-        Alert.alert(
-          "Success",
-          "Verification email sent! Please check your inbox.",
-        );
+        Alert.alert("Success", "Verification email sent! Please check your inbox.");
       }
     } catch (err) {
       Alert.alert("Error", "Failed to resend verification email");
@@ -42,23 +37,20 @@ export default function VerifyEmailScreen() {
   };
 
   return (
-    <Screen>
-      <View style={styles.container}>
-        {/* Icon */}
+    <Screen scrollable contentContainerStyle={styles.content}>
+      {/* Icon + heading */}
+      <View style={styles.heroBlock}>
         <Text style={styles.icon}>📧</Text>
-
-        {/* Title */}
-        <H1>Check Your Email</H1>
-
-        {/* Description */}
+        <H1 bold>Check Your Email</H1>
         <H4 style={styles.description}>
-          We&apos;ve sent a verification link to your email address. Please
-          check your inbox and click the link to verify your account.
+          We&apos;ve sent a verification link to your email. Click the link to verify your account.
         </H4>
+      </View>
 
-        {/* Email input */}
+      {/* Resend form */}
+      <View style={styles.form}>
         <Input
-          label="Email address:"
+          label="Email address"
           placeholder="your.email@example.com"
           value={email}
           onChangeText={setEmail}
@@ -66,18 +58,13 @@ export default function VerifyEmailScreen() {
           autoCapitalize="none"
           autoCorrect={false}
         />
+      </View>
 
-        {/* Resend button */}
-        <Button
-          variant="outline"
-          onPress={handleResendEmail}
-          disabled={loading}
-        >
-          {loading ? "Sending..." : "Resend Email"}
+      <View style={styles.actions}>
+        <Button variant="outline" fullWidth onPress={handleResendEmail} disabled={loading}>
+          {loading ? "Sending…" : "Resend Email"}
         </Button>
-
-        {/* Back to login */}
-        <Button variant="primary" onPress={() => router.replace("/login")}>
+        <Button fullWidth onPress={() => router.replace("/login")}>
           Back to Login
         </Button>
       </View>
@@ -86,19 +73,26 @@ export default function VerifyEmailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
+    gap: 32,
+  },
+  heroBlock: {
     alignItems: "center",
-    maxWidth: 400,
-    alignSelf: "center",
-    gap: 20,
+    gap: 12,
   },
   icon: {
-    fontSize: 80,
-    marginBottom: 8,
+    fontSize: 64,
+    marginBottom: 4,
   },
   description: {
-    textAlign: "center",
-    color: "#ccc",
-    lineHeight: 22,
+    color: "#888",
+    lineHeight: 20,
+    paddingHorizontal: 8,
+  },
+  form: {
+    gap: 16,
+  },
+  actions: {
+    gap: 12,
   },
 });

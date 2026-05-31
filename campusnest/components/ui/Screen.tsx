@@ -1,25 +1,48 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { ScrollView, StyleSheet, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ScreenProps {
   children: React.ReactNode;
   style?: ViewStyle;
-  useSafeArea?: boolean;
+  scrollable?: boolean;
+  contentContainerStyle?: ViewStyle;
+  noPadding?: boolean;
 }
 
 export default function Screen({
   children,
   style,
-  useSafeArea = false,
+  scrollable = false,
+  contentContainerStyle,
+  noPadding = false,
 }: ScreenProps) {
-  const Container = useSafeArea ? SafeAreaView : View;
+  const hPad: ViewStyle = noPadding ? {} : { paddingHorizontal: 20 };
+
+  if (scrollable) {
+    return (
+      <SafeAreaView style={[styles.container, style]}>
+        <StatusBar style="light" />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[
+            hPad,
+            styles.scrollBase,
+            contentContainerStyle,
+          ]}
+        >
+          {children}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <Container style={[styles.container, style]}>
+    <SafeAreaView style={[styles.container, hPad, style]}>
       <StatusBar style="light" />
-      {children}
-    </Container>
+      <View style={styles.inner}>{children}</View>
+    </SafeAreaView>
   );
 }
 
@@ -27,9 +50,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
-    justifyContent: "center",
-    alignContent: "center",
-    gap: 15,
-    padding: 50,
+  },
+  scrollBase: {
+    paddingTop: 32,
+    paddingBottom: 48,
+    gap: 0, // screens set their own gap via contentContainerStyle
+  },
+  inner: {
+    flex: 1,
   },
 });

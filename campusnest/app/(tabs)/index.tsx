@@ -12,7 +12,6 @@ import * as Location from "expo-location";
 import { getDistanceFromLatLonInKm } from "@/src/utils/distance";
 
 type Role = "student" | "landlord";
-
 type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
 type LandlordFilter = "recent" | "yourListings";
 type FilterKey = StudentFilter | LandlordFilter;
@@ -40,7 +39,6 @@ export default function HomeScreen() {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        // Fallback to Edmonton
         setUserLocation({ latitude: 53.5461, longitude: -113.4938 });
         return;
       }
@@ -77,7 +75,6 @@ export default function HomeScreen() {
         setRoleLoading(false);
       }
     };
-
     fetchRole();
   }, []);
 
@@ -87,12 +84,9 @@ export default function HomeScreen() {
     const fetchListings = async () => {
       setListingsLoading(true);
       const session = await authService.getSession();
-
-      // Fetch listings based on role and filter
       let fetchedListings: Listing[] = [];
 
       if (role === "student") {
-        // Students see public active listings
         fetchedListings = await listingService.getListings({
           status: "active",
           visibility: "public",
@@ -101,14 +95,12 @@ export default function HomeScreen() {
           maxRent: debouncedMax < 5000 ? debouncedMax : undefined,
         });
       } else {
-        // Landlord
         if (activeFilter === "yourListings") {
           fetchedListings = await listingService.getListings({
             landlord_id: session?.user?.id,
             searchQuery: debouncedQuery,
           });
         } else {
-          // "recent" shows public listings from everyone
           fetchedListings = await listingService.getListings({
             status: "active",
             visibility: "public",
@@ -117,7 +109,6 @@ export default function HomeScreen() {
         }
       }
 
-      // Local sorting
       if (activeFilter === "cheapest") {
         fetchedListings.sort((a, b) => a.rent - b.rent);
       } else if (activeFilter === "new" || activeFilter === "recent") {
@@ -157,14 +148,7 @@ export default function HomeScreen() {
     };
 
     fetchListings();
-  }, [
-    role,
-    activeFilter,
-    debouncedQuery,
-    debouncedMin,
-    debouncedMax,
-    userLocation,
-  ]);
+  }, [role, activeFilter, debouncedQuery, debouncedMin, debouncedMax, userLocation]);
 
   const filterOptions: { label: string; value: FilterKey }[] =
     role === "student"
@@ -179,56 +163,40 @@ export default function HomeScreen() {
           { label: "Recent", value: "recent" },
         ];
 
-  // Loading States
-  if (roleLoading) {
-    return <LoadingState label="Checking your role..." />;
-  }
+  const priceActive = minPrice > 0 || maxPrice < 5000;
 
-  if (!role) {
-    return (
-      <LoadingState
-        label="No role found — please re-login."
-        showSpinner={false}
-      />
-    );
-  }
-
-  if (listingsLoading) {
-    return <LoadingState label="Loading listings..." />;
-  }
+  if (roleLoading) return <LoadingState label="Checking your role…" />;
+  if (!role) return <LoadingState label="No role found — please re-login." showSpinner={false} />;
+  if (listingsLoading) return <LoadingState label="Loading listings…" />;
 
   return (
     <PageContainer>
       <View style={styles.screen}>
-        <View style={styles.searchContainer}>
+        {/* Search */}
+        <View style={styles.searchWrapper}>
           <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
         </View>
-        <FilterPills
-          customPrependPill={
-            role === "student" ? (
-              <Pressable
-                onPress={() => setPriceModalVisible(true)}
-                style={[
-                  styles.pill,
-                  (minPrice > 0 || maxPrice < 5000) && styles.pillActive,
-                  { marginRight: 8 },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.text,
-                    (minPrice > 0 || maxPrice < 5000) && styles.textActive,
-                  ]}
+
+        {/* Filters */}
+        <View style={styles.filterWrapper}>
+          <FilterPills
+            customPrependPill={
+              role === "student" ? (
+                <Pressable
+                  onPress={() => setPriceModalVisible(true)}
+                  style={[styles.pricePill, priceActive && styles.pricePillActive]}
                 >
-                  Price
-                </Text>
-              </Pressable>
-            ) : null
-          }
-          options={filterOptions}
-          value={activeFilter}
-          onChange={setActiveFilter}
-        />
+                  <Text style={[styles.pricePillText, priceActive && styles.pricePillTextActive]}>
+                    {priceActive ? `$${minPrice}–$${maxPrice}` : "Price"}
+                  </Text>
+                </Pressable>
+              ) : null
+            }
+            options={filterOptions}
+            value={activeFilter}
+            onChange={setActiveFilter}
+          />
+        </View>
 
         <PriceRangeModal
           visible={isPriceModalVisible}
@@ -247,6 +215,11 @@ export default function HomeScreen() {
           renderItem={({ item }) => <ListingCard listing={item} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyText}>No listings found.</Text>
+            </View>
+          }
         />
       </View>
     </PageContainer>
@@ -255,36 +228,46 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 0,
+    flex: 1,
     backgroundColor: "#000",
-    paddingHorizontal: 0,
-    paddingTop: 0,
   },
-  searchContainer: {
-    paddingHorizontal: 16,
+  searchWrapper: {
     paddingTop: 8,
+    paddingBottom: 6,
+  },
+  filterWrapper: {
+    marginBottom: 8,
   },
   listContent: {
     paddingBottom: 60,
   },
-  pill: {
-    paddingHorizontal: 14,
+  pricePill: {
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 999,
+    borderRadius: 99,
     backgroundColor: "#000",
     borderWidth: 1,
     borderColor: "#333",
+    marginRight: 8,
   },
-  pillActive: {
+  pricePillActive: {
     backgroundColor: "#fff",
     borderColor: "#fff",
   },
-  text: {
+  pricePillText: {
     fontSize: 13,
     color: "#fff",
     fontWeight: "500",
   },
-  textActive: {
+  pricePillTextActive: {
     color: "#000",
+  },
+  emptyState: {
+    paddingTop: 80,
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#555",
+    fontSize: 15,
   },
 });

@@ -5,7 +5,7 @@ import Screen from "@/components/ui/Screen";
 import { getSupabase } from "@/src/lib/supabaseClient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, View, ScrollView } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -130,15 +130,11 @@ export default function SignUpScreen() {
   };
 
   return (
-    <Screen>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scroll}
-      >
-        <H1>Create Account</H1>
-        <H4 italic>
-          Join CampusNest as a {role === "student" ? "Student" : "Landlord"}
-        </H4>
+    <Screen scrollable contentContainerStyle={styles.scroll}>
+      <H1>Create Account</H1>
+      <H4 italic>
+        Join CampusNest as a {role === "student" ? "Student" : "Landlord"}
+      </H4>
 
         <Input
           label="Full Name *"
@@ -252,15 +248,15 @@ export default function SignUpScreen() {
         <Button fullWidth onPress={handleSignUp} disabled={loading}>
           {loading ? "Creating Account..." : "Sign Up"}
         </Button>
-      </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   scroll: {
+    paddingTop: 16,
     paddingBottom: 40,
-    gap: 15,
+    gap: 16,
   },
   row: {
     flexDirection: "row",

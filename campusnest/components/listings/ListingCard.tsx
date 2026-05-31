@@ -14,6 +14,7 @@ export function ListingCard({ listing }: Props) {
       style={styles.card}
       onPress={() => router.push(`/listing/${listing.id}`)}
     >
+      {/* Thumbnail */}
       <View style={styles.imageWrapper}>
         {listing.photo_urls?.length ? (
           <Image
@@ -26,14 +27,31 @@ export function ListingCard({ listing }: Props) {
         )}
       </View>
 
+      {/* Text content */}
       <View style={styles.content}>
-        <Text style={styles.title}>{listing.title}</Text>
+        <Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
 
-        <Text style={styles.meta}>Lease: {listing.lease_term}</Text>
+        {/* Rent — most important, show prominently */}
+        <Text style={styles.rent}>
+          <Text style={styles.rentAmount}>${listing.rent}</Text>
+          <Text style={styles.rentSuffix}> /mo</Text>
+        </Text>
 
-        <Text style={styles.meta}>Rent: ${listing.rent}</Text>
+        {/* Secondary info row */}
+        <View style={styles.metaRow}>
+          {listing.lease_term ? (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{listing.lease_term}</Text>
+            </View>
+          ) : null}
+          {listing.bedrooms != null ? (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{listing.bedrooms}bd</Text>
+            </View>
+          ) : null}
+        </View>
 
-        <Text style={styles.address} numberOfLines={2}>
+        <Text style={styles.address} numberOfLines={2} ellipsizeMode="tail">
           {listing.address}
         </Text>
       </View>
@@ -45,19 +63,23 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     backgroundColor: "#1a1a1a",
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    alignItems: "center",
   },
   imageWrapper: {
-    width: 72,
-    height: 72,
-    borderRadius: 12,
-    backgroundColor: "#333",
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: "#2a2a2a",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
     overflow: "hidden",
+    flexShrink: 0,
   },
   image: {
     width: "100%",
@@ -68,20 +90,49 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    gap: 4,
   },
   title: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "700",
-    marginBottom: 4,
+    lineHeight: 18,
   },
-  meta: {
-    color: "#ddd",
+  rent: {
+    marginTop: 1,
+  },
+  rentAmount: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  rentSuffix: {
+    color: "#777",
     fontSize: 12,
+    fontWeight: "400",
   },
-  address: {
+  metaRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 2,
+  },
+  tag: {
+    backgroundColor: "#2a2a2a",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  tagText: {
     color: "#aaa",
     fontSize: 11,
-    marginTop: 4,
+    fontWeight: "500",
+  },
+  address: {
+    color: "#888",
+    fontSize: 12,
+    lineHeight: 16,
+    marginTop: 2,
   },
 });
