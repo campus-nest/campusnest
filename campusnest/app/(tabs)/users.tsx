@@ -11,6 +11,7 @@ import { PageContainer } from "@/components/page-container";
 import { useRouter } from "expo-router";
 import { authService, postService, savedPostService } from "@/src/services";
 import { Post } from "@/src/types/post";
+import { Bookmark, Heart } from "lucide-react-native";
 
 type PostFilter = "yourPost" | "recent";
 
@@ -42,7 +43,7 @@ export default function UsersScreen() {
 
       if (currentUserId) {
         const savedPosts = await savedPostService.getSavedPosts(currentUserId);
-        setSavedPostIds(new Set(savedPosts.map((p) => p.id)));
+        setSavedPostIds(new Set(savedPosts.map((p: any) => p.id)));
       }
       setLoading(false);
     };
@@ -91,7 +92,7 @@ export default function UsersScreen() {
             style={styles.savedBtn}
             onPress={() => router.push("/(tabs)/saved")}
           >
-            <Text style={styles.savedBtnIcon}>❤️</Text>
+            <Bookmark size={18} color="#fff" strokeWidth={2} />
           </Pressable>
         </View>
 
@@ -163,14 +164,19 @@ function PostCard({
         </Text>
       </View>
       <Pressable
-        style={styles.saveBtn}
+        style={[styles.saveIconBtn, isSaved && styles.saveIconBtnActive]}
         onPress={(e) => {
           e.stopPropagation();
           onToggleSave();
         }}
         hitSlop={8}
       >
-        <Text style={styles.saveIcon}>{isSaved ? "❤️" : "🤍"}</Text>
+        <Heart
+          size={16}
+          color={isSaved ? "#000" : "#666"}
+          fill={isSaved ? "#000" : "transparent"}
+          strokeWidth={2}
+        />
       </Pressable>
     </Pressable>
   );
@@ -195,17 +201,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
   savedBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: "#1a1a1a",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "#2a2a2a",
-  },
-  savedBtnIcon: {
-    fontSize: 18,
   },
   filtersRow: {
     flexDirection: "row",
@@ -234,14 +237,14 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 60,
-    gap: 12,
+    gap: 10,
   },
   card: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
+    backgroundColor: "#111",
+    borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: "#1e1e1e",
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
@@ -258,14 +261,24 @@ const styles = StyleSheet.create({
   },
   cardText: {
     color: "#888",
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 19,
   },
-  saveBtn: {
-    paddingTop: 2,
+  saveIconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: "#1a1a1a",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+    flexShrink: 0,
   },
-  saveIcon: {
-    fontSize: 20,
+  saveIconBtnActive: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
   },
   centered: {
     flex: 1,
