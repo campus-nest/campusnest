@@ -10,6 +10,7 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "../hooks/use-color-scheme";
 import { authService } from "@/src/services";
+import { SavedPostsProvider } from "@/src/context/SavedPostsContext";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -62,6 +63,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <SavedPostsProvider>
       <Stack screenOptions={{ headerShown: false, gestureEnabled: true }}>
         <Stack.Screen
           name="index"
@@ -120,6 +122,7 @@ export default function RootLayout() {
           options={{ headerShown: false, gestureEnabled: true }}
         />
       </Stack>
+      </SavedPostsProvider>
       <StatusBar style="auto" />
     </ThemeProvider>
   );

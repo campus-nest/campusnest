@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -8,40 +8,53 @@ import {
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { authService, savedPostService } from "@/src/services";
 import { Post } from "@/src/types/post";
 import { Bookmark, BookmarkX } from "lucide-react-native";
+import { useSavedPosts } from "@/src/context/SavedPostsContext";
 
 export default function SavedPostsScreen() {
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [fetchingList, setFetchingList] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { savedPostIds, toggleSave, loading: contextLoading } = useSavedPosts();
   const router = useRouter();
 
+  // Resolve the current user id once
   useEffect(() => {
-    const fetchSavedPosts = async () => {
-      setLoading(true);
-      const session = await authService.getSession();
-      if (!session?.user?.id) {
-        setLoading(false);
-        return;
-      }
-      setCurrentUserId(session.user.id);
-      const posts = await savedPostService.getSavedPosts(session.user.id);
-      setSavedPosts(posts);
-      setLoading(false);
-    };
-    fetchSavedPosts();
+    authService.getSession().then((session) => {
+      setCurrentUserId(session?.user?.id ?? null);
+    });
   }, []);
 
-  const handleUnsave = async (postId: string) => {
-    if (!currentUserId) return;
-    const result = await savedPostService.unsavePost(postId, currentUserId);
-    if (result.success) {
-      setSavedPosts((prev) => prev.filter((p) => p.id !== postId));
-    }
-  };
+  // Re-fetch the full list of saved posts whenever the tab is focused
+  // (or whenever savedPostIds changes — the context already keeps that in sync).
+  useFocusEffect(
+    useCallback(() => {
+      if (!currentUserId) return;
+      setFetchingList(true);
+      savedPostService.getSavedPosts(currentUserId).then((posts) => {
+        setSavedPosts(posts);
+        setFetchingList(false);
+      });
+    }, [currentUserId])
+  );
+
+  // Keep the displayed list pruned when the context removes a saved post
+  // (e.g. unsaved from the Users screen while this tab was in the background).
+  useEffect(() => {
+    setSavedPosts((prev) => prev.filter((p) => savedPostIds.has(p.id)));
+  }, [savedPostIds]);
+
+  const handleUnsave = useCallback(
+    async (postId: string) => {
+      await toggleSave(postId);
+    },
+    [toggleSave]
+  );
+
+  const loading = fetchingList || contextLoading;
 
   if (loading) {
     return (

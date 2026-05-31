@@ -14,7 +14,6 @@ import { ChevronLeft, Bookmark } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authService, profileService, savedPostService } from "@/src/services";
 import { Post } from "@/src/types/post";
-import { useRouter as useNav } from "expo-router";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -353,13 +352,12 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   cardTitle: {
-    color: "#fff",
+    color: "#888",
     fontSize: 14,
     fontWeight: "700",
     marginBottom: 14,
     letterSpacing: 0.1,
     textTransform: "uppercase",
-    color: "#888",
   },
   viewAllBtn: {
     paddingHorizontal: 10,

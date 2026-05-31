@@ -1,0 +1,225 @@
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { supabase } from "@/src/lib/supabaseClient";
+import { savedPostService } from "@/src/services";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface SavedPostsContextValue {
+  /** Set of post IDs that the current user has saved. */
+  savedPostIds: Set<string>;
+  /** True while the initial load or a refetch is in flight. */
+  loading: boolean;
+  /** Toggle save / unsave for a post. Returns true on success. */
+  toggleSave: (postId: string) => Promise<boolean>;
+  /** Manually re-fetch the full list from the server. */
+  refresh: () => Promise<void>;
+}
+
+const SavedPostsContext = createContext<SavedPostsContextValue>({
+  savedPostIds: new Set(),
+  loading: true,
+  toggleSave: async () => false,
+  refresh: async () => {},
+});
+
+// ---------------------------------------------------------------------------
+// Provider
+// ---------------------------------------------------------------------------
+
+export function SavedPostsProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  // Keep a ref so we can read userId inside the realtime callback without
+  // re-subscribing every time userId changes.
+  const userIdRef = useRef<string | null>(null);
+
+  // ------------------------------------------------------------------
+  // Resolve current user once (and react to sign-in / sign-out)
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    let mounted = true;
+
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      const uid = session?.user?.id ?? null;
+      userIdRef.current = uid;
+      setUserId(uid);
+    });
+
+    // Keep in sync with auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!mounted) return;
+        const uid = session?.user?.id ?? null;
+        userIdRef.current = uid;
+        setUserId(uid);
+        if (!uid) {
+          // User signed out — clear everything
+          setSavedPostIds(new Set());
+          setLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // ------------------------------------------------------------------
+  // Fetch the full saved-post list whenever userId changes
+  // ------------------------------------------------------------------
+  const fetchSaved = useCallback(async (uid: string) => {
+    setLoading(true);
+    try {
+      const posts = await savedPostService.getSavedPosts(uid);
+      setSavedPostIds(new Set(posts.map((p) => p.id)));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    fetchSaved(userId);
+  }, [userId, fetchSaved]);
+
+  // ------------------------------------------------------------------
+  // Supabase Realtime subscription on saved_posts
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`saved_posts:user=${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "saved_posts",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          // A new row was inserted — add the post_id to the set
+          const postId = (payload.new as { post_id: string }).post_id;
+          if (postId) {
+            setSavedPostIds((prev) => {
+              if (prev.has(postId)) return prev;
+              const next = new Set(prev);
+              next.add(postId);
+              return next;
+            });
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "saved_posts",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          // A row was deleted — remove the post_id from the set
+          const postId = (payload.old as { post_id: string }).post_id;
+          if (postId) {
+            setSavedPostIds((prev) => {
+              if (!prev.has(postId)) return prev;
+              const next = new Set(prev);
+              next.delete(postId);
+              return next;
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
+  // ------------------------------------------------------------------
+  // Public actions
+  // ------------------------------------------------------------------
+
+  const toggleSave = useCallback(
+    async (postId: string): Promise<boolean> => {
+      const uid = userIdRef.current;
+      if (!uid) return false;
+
+      const isSaved = savedPostIds.has(postId);
+
+      // Optimistic update — flip the state immediately
+      setSavedPostIds((prev) => {
+        const next = new Set(prev);
+        if (isSaved) {
+          next.delete(postId);
+        } else {
+          next.add(postId);
+        }
+        return next;
+      });
+
+      // Persist to the server
+      const result = isSaved
+        ? await savedPostService.unsavePost(postId, uid)
+        : await savedPostService.savePost(postId, uid);
+
+      if (!result.success) {
+        // Roll back the optimistic update on failure
+        setSavedPostIds((prev) => {
+          const next = new Set(prev);
+          if (isSaved) {
+            next.add(postId); // re-add
+          } else {
+            next.delete(postId); // re-remove
+          }
+          return next;
+        });
+      }
+
+      return result.success;
+    },
+    [savedPostIds]
+  );
+
+  const refresh = useCallback(async () => {
+    const uid = userIdRef.current;
+    if (uid) await fetchSaved(uid);
+  }, [fetchSaved]);
+
+  return (
+    <SavedPostsContext.Provider
+      value={{ savedPostIds, loading, toggleSave, refresh }}
+    >
+      {children}
+    </SavedPostsContext.Provider>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Hook
+// ---------------------------------------------------------------------------
+
+export function useSavedPosts(): SavedPostsContextValue {
+  return useContext(SavedPostsContext);
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -8,10 +8,11 @@ import {
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { useRouter } from "expo-router";
-import { authService, postService, savedPostService } from "@/src/services";
+import { useFocusEffect, useRouter } from "expo-router";
+import { authService, postService } from "@/src/services";
 import { Post } from "@/src/types/post";
 import { Bookmark, Heart } from "lucide-react-native";
+import { useSavedPosts } from "@/src/context/SavedPostsContext";
 
 type PostFilter = "yourPost" | "recent";
 
@@ -20,7 +21,7 @@ export default function UsersScreen() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<PostFilter>("yourPost");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
+  const { savedPostIds, toggleSave } = useSavedPosts();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,42 +32,31 @@ export default function UsersScreen() {
     fetchCurrentUser();
   }, []);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      const allPosts = await postService.getPosts();
-      let filteredPosts = allPosts;
-      if (activeFilter === "yourPost" && currentUserId) {
-        filteredPosts = allPosts.filter((post) => post.user_id === currentUserId);
-      }
-      setPosts(filteredPosts);
+  // Reload posts list when the tab is focused or filter changes
+  useFocusEffect(
+    useCallback(() => {
+      const fetchPosts = async () => {
+        setLoading(true);
+        const allPosts = await postService.getPosts();
+        let filteredPosts = allPosts;
+        if (activeFilter === "yourPost" && currentUserId) {
+          filteredPosts = allPosts.filter(
+            (post) => post.user_id === currentUserId
+          );
+        }
+        setPosts(filteredPosts);
+        setLoading(false);
+      };
+      fetchPosts();
+    }, [activeFilter, currentUserId])
+  );
 
-      if (currentUserId) {
-        const savedPosts = await savedPostService.getSavedPosts(currentUserId);
-        setSavedPostIds(new Set(savedPosts.map((p: any) => p.id)));
-      }
-      setLoading(false);
-    };
-    fetchPosts();
-  }, [activeFilter, currentUserId]);
-
-  const handleToggleSave = async (postId: string) => {
-    if (!currentUserId) return;
-    const isSaved = savedPostIds.has(postId);
-    if (isSaved) {
-      const result = await savedPostService.unsavePost(postId, currentUserId);
-      if (result.success) {
-        setSavedPostIds((prev) => {
-          const next = new Set(prev);
-          next.delete(postId);
-          return next;
-        });
-      }
-    } else {
-      const result = await savedPostService.savePost(postId, currentUserId);
-      if (result.success) setSavedPostIds((prev) => new Set(prev).add(postId));
-    }
-  };
+  const handleToggleSave = useCallback(
+    (postId: string) => {
+      toggleSave(postId);
+    },
+    [toggleSave]
+  );
 
   const filters: { key: PostFilter; label: string }[] = [
     { key: "yourPost", label: "Your Posts" },
