@@ -12,13 +12,15 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Profile } from "@/src/types/profile";
 import { ChevronLeft, Bookmark } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { authService, profileService, savedPostService } from "@/src/services";
+import { authService, profileService, savedListingService, savedPostService } from "@/src/services";
 import { Post } from "@/src/types/post";
+import { Listing } from "@/src/types/listing";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
+  const [savedListings, setSavedListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -26,16 +28,19 @@ export default function ProfileScreen() {
     if (isLoggingOut) return;
     try {
       setLoading(true);
-      const profileData = await profileService.getCurrentUserProfile();
-      if (profileData) {
-        setProfile(profileData);
-        // Also fetch saved posts count
-        const session = await authService.getSession();
-        if (session?.user?.id) {
-          const posts = await savedPostService.getSavedPosts(session.user.id);
-          setSavedPosts(posts);
+        const profileData = await profileService.getCurrentUserProfile();
+        if (profileData) {
+          setProfile(profileData);
+          const session = await authService.getSession();
+          if (session?.user?.id) {
+            const [posts, listings] = await Promise.all([
+              savedPostService.getSavedPosts(session.user.id),
+              savedListingService.getSavedListings(session.user.id),
+            ]);
+            setSavedPosts(posts);
+            setSavedListings(listings);
+          }
         }
-      }
     } catch (error) {
       console.error("Unexpected error:", error);
     } finally {
@@ -191,6 +196,54 @@ export default function ProfileScreen() {
                 <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}>
                   <Text style={styles.moreText}>
                     +{savedPosts.length - 3} more
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </View>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Saved Listings</Text>
+            {savedListings.length > 0 && (
+              <TouchableOpacity
+                style={styles.viewAllBtn}
+                onPress={() => router.push("/(tabs)/saved")}
+              >
+                <Text style={styles.viewAllText}>View all</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {savedListings.length === 0 ? (
+            <View style={styles.savedEmpty}>
+              <Bookmark size={18} color="#333" strokeWidth={1.5} />
+              <Text style={styles.savedEmptyText}>No saved listings yet</Text>
+            </View>
+          ) : (
+            <View style={styles.savedList}>
+              {savedListings.slice(0, 3).map((listing) => (
+                <TouchableOpacity
+                  key={listing.id}
+                  style={styles.savedListingRow}
+                  onPress={() => router.push(`/listing/${listing.id}`)}
+                >
+                  <View>
+                    <Text style={styles.savedListingTitle} numberOfLines={1}>
+                      {listing.title}
+                    </Text>
+                    <Text style={styles.savedListingMeta} numberOfLines={1}>
+                      ${listing.rent.toLocaleString()} /mo — {listing.address}
+                    </Text>
+                  </View>
+                  <View style={styles.savedPostDot} />
+                </TouchableOpacity>
+              ))}
+              {savedListings.length > 3 && (
+                <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}
+                >
+                  <Text style={styles.moreText}>
+                    +{savedListings.length - 3} more
                   </Text>
                 </TouchableOpacity>
               )}
@@ -408,6 +461,21 @@ const styles = StyleSheet.create({
   },
   savedList: {
     gap: 10,
+  },
+  savedListingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+  },
+  savedListingTitle: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  savedListingMeta: {
+    color: "#777",
+    fontSize: 11,
   },
   savedPostRow: {
     flexDirection: "row",
