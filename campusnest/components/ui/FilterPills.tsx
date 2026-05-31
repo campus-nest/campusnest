@@ -48,11 +48,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     gap: 8,
-    marginVertical: 14,
+    marginVertical: 12,
     paddingHorizontal: 16,
   },
   pill: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 999,
     backgroundColor: "#000",
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
   },
   text: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#fff",
     fontWeight: "500",
   },

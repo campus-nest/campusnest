@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     paddingHorizontal: 16,
-    paddingVertical: 9,
+    paddingVertical: 8,
     borderRadius: 99,
     backgroundColor: "#1a1a1a",
     borderWidth: 1,
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     color: "#aaa",
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "500",
   },
   chipTextActive: {
@@ -237,11 +237,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    backgroundColor: "#111",
-    borderRadius: 14,
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#1e1e1e",
+    borderColor: "#2a2a2a",
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   },
   cardText: {
     color: "#888",
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 18,
   },
   saveBtn: {
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#000",
-    gap: 10,
+    gap: 12,
   },
   centeredText: {
     color: "#aaa",

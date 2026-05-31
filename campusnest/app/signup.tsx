@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   scroll: {
     paddingTop: 16,
     paddingBottom: 40,
-    gap: 15,
+    gap: 16,
   },
   row: {
     flexDirection: "row",

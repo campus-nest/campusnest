@@ -191,20 +191,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#1a1a1a",
   },
   headerTitle: {
     color: "#fff",
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "600",
     letterSpacing: 0.2,
   },
   iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#1a1a1a",
     alignItems: "center",
     justifyContent: "center",
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   heroSection: {
     alignItems: "center",
     marginBottom: 8,
-    gap: 10,
+    gap: 12,
   },
   avatarRing: {
     width: 88,
@@ -263,12 +263,12 @@ const styles = StyleSheet.create({
   },
   rolePillText: {
     color: "#aaa",
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "500",
   },
   actionRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
   },
   actionBtn: {
     flex: 1,
@@ -291,11 +291,11 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   card: {
-    backgroundColor: "#111",
-    borderRadius: 16,
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#1e1e1e",
+    borderColor: "#2a2a2a",
     gap: 2,
   },
   cardTitle: {
@@ -309,9 +309,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 11,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#1e1e1e",
+    borderBottomColor: "#2a2a2a",
   },
   detailRowLast: {
     borderBottomWidth: 0,
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     color: "#666",
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "500",
   },
   detailValue: {

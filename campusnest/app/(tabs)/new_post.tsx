@@ -574,12 +574,12 @@ const styles = StyleSheet.create({
   },
   field: {
     width: "100%",
-    marginBottom: 14,
+    marginBottom: 16,
   },
   row: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 14,
+    gap: 12,
+    marginBottom: 16,
     width: "100%",
   },
   halfField: {
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   },
   suggestionBox: {
     marginTop: 6,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: "#fff",
     padding: 8,
     shadowColor: "#000",
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   suggestionText: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#333",
   },
   dateDropdown: {
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
   uploadButton: {
     marginTop: 12,
     borderRadius: 999,
-    paddingVertical: 10,
+    paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#000",
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
   },
   centeredText: {
     color: "#fff",
-    marginTop: 10,
+    marginTop: 12,
     textAlign: "center",
   },
 });

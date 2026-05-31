@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
   },
   pricePill: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 99,
     backgroundColor: "#000",

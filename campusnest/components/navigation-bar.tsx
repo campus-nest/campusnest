@@ -170,7 +170,7 @@ export function NavigationBar() {
         <Home
           width={24}
           height={24}
-          color={isActive("/(tabs)") ? "#888" : "#000"}
+          color={isActive("/(tabs)") ? "#007AFF" : "#888"}
         />
       </Pressable>
 
@@ -183,7 +183,7 @@ export function NavigationBar() {
         <SearchListing
           width={24}
           height={24}
-          color={isActive("/explore") ? "#888" : "#000"}
+          color={isActive("/explore") ? "#007AFF" : "#888"}
         />
       </Pressable>
 
@@ -196,7 +196,7 @@ export function NavigationBar() {
         <CreateListing
           width={24}
           height={24}
-          color={isActive("/new_post") ? "#888" : "#000"}
+          color={isActive("/new_post") ? "#007AFF" : "#888"}
         />
       </Pressable>
 
@@ -209,7 +209,7 @@ export function NavigationBar() {
         <Users
           width={24}
           height={24}
-          color={isActive("/users") ? "#888" : "#000"}
+          color={isActive("/users") ? "#007AFF" : "#888"}
         />
       </Pressable>
 
@@ -222,7 +222,7 @@ export function NavigationBar() {
         <Profile
           width={24}
           height={24}
-          color={isActive("/profile") ? "#888" : "#000"}
+          color={isActive("/profile") ? "#007AFF" : "#888"}
         />
       </Pressable>
     </View>
@@ -293,6 +293,6 @@ const styles = StyleSheet.create({
   navItem: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 10,
+    padding: 8,
   },
 });

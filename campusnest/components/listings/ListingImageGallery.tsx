@@ -149,10 +149,10 @@ const styles = StyleSheet.create({
   placeholder: {
     marginHorizontal: H_PAD,
     height: MAIN_HEIGHT,
-    borderRadius: 16,
-    backgroundColor: "#111",
+    borderRadius: 12,
+    backgroundColor: "#1a1a1a",
     borderWidth: 1,
-    borderColor: "#1e1e1e",
+    borderColor: "#2a2a2a",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
@@ -162,15 +162,15 @@ const styles = StyleSheet.create({
     fontSize: 36,
   },
   placeholderText: {
-    color: "#444",
-    fontSize: 13,
+    color: "#555",
+    fontSize: 12,
   },
   singleWrapper: {
     marginHorizontal: H_PAD,
     height: MAIN_HEIGHT,
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#111",
+    backgroundColor: "#1a1a1a",
     marginBottom: 4,
   },
   singleImage: {
@@ -184,17 +184,17 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   mainImage: {
-    borderRadius: 14,
+    borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#111",
+    backgroundColor: "#1a1a1a",
   },
   sideColumn: {
     gap: 8,
   },
   thumbImage: {
-    borderRadius: 14,
+    borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#111",
+    backgroundColor: "#1a1a1a",
     flex: 1,
   },
   emptyThumb: {
