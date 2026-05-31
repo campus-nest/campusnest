@@ -1,6 +1,8 @@
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { Listing } from "@/src/types/listing";
+import { Bookmark } from "lucide-react-native";
+import { useSavedListings } from "@/src/context/SavedListingsContext";
 
 interface Props {
   listing: Listing;
@@ -8,6 +10,8 @@ interface Props {
 
 export function ListingCard({ listing }: Props) {
   const router = useRouter();
+  const { savedListingIds, toggleSaveListing } = useSavedListings();
+  const isSaved = savedListingIds.has(listing.id);
 
   return (
     <Pressable
@@ -31,13 +35,11 @@ export function ListingCard({ listing }: Props) {
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
 
-        {/* Rent — most important, show prominently */}
         <Text style={styles.rent}>
           <Text style={styles.rentAmount}>${listing.rent}</Text>
           <Text style={styles.rentSuffix}> /mo</Text>
         </Text>
 
-        {/* Secondary info row */}
         <View style={styles.metaRow}>
           {listing.lease_term ? (
             <View style={styles.tag}>
@@ -55,6 +57,23 @@ export function ListingCard({ listing }: Props) {
           {listing.address}
         </Text>
       </View>
+
+      {/* Save button */}
+      <Pressable
+        style={styles.saveBtn}
+        onPress={(e) => {
+          e.stopPropagation();
+          toggleSaveListing(listing.id);
+        }}
+        hitSlop={8}
+      >
+        <Bookmark
+          size={18}
+          color={isSaved ? "#fff" : "#555"}
+          fill={isSaved ? "#fff" : "transparent"}
+          strokeWidth={2}
+        />
+      </Pressable>
     </Pressable>
   );
 }
@@ -134,5 +153,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     marginTop: 2,
+  },
+  saveBtn: {
+    paddingLeft: 8,
+    paddingTop: 2,
+    alignSelf: "flex-start",
   },
 });

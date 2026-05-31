@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -9,58 +10,70 @@ import {
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { useFocusEffect, useRouter } from "expo-router";
-import { authService, savedPostService } from "@/src/services";
+import { authService, savedPostService, savedListingService } from "@/src/services";
 import { Post } from "@/src/types/post";
+import { Listing } from "@/src/types/listing";
 import { Bookmark, BookmarkX } from "lucide-react-native";
 import { useSavedPosts } from "@/src/context/SavedPostsContext";
+import { useSavedListings } from "@/src/context/SavedListingsContext";
 
-export default function SavedPostsScreen() {
+type Tab = "listings" | "posts";
+
+export default function SavedScreen() {
+  const [activeTab, setActiveTab] = useState<Tab>("listings");
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
-  const [fetchingList, setFetchingList] = useState(true);
+  const [savedListings, setSavedListings] = useState<Listing[]>([]);
+  const [fetchingPosts, setFetchingPosts] = useState(true);
+  const [fetchingListings, setFetchingListings] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const { savedPostIds, toggleSave, loading: contextLoading } = useSavedPosts();
+
+  const { savedPostIds, toggleSave, loading: postsContextLoading } = useSavedPosts();
+  const { savedListingIds, toggleSaveListing, loading: listingsContextLoading } = useSavedListings();
   const router = useRouter();
 
-  // Resolve the current user id once
   useEffect(() => {
     authService.getSession().then((session) => {
       setCurrentUserId(session?.user?.id ?? null);
     });
   }, []);
 
-  // Re-fetch the full list of saved posts whenever the tab is focused
-  // (or whenever savedPostIds changes — the context already keeps that in sync).
   useFocusEffect(
     useCallback(() => {
       if (!currentUserId) return;
-      setFetchingList(true);
+
+      setFetchingPosts(true);
       savedPostService.getSavedPosts(currentUserId).then((posts) => {
         setSavedPosts(posts);
-        setFetchingList(false);
+        setFetchingPosts(false);
+      });
+
+      setFetchingListings(true);
+      savedListingService.getSavedListings(currentUserId).then((listings) => {
+        setSavedListings(listings);
+        setFetchingListings(false);
       });
     }, [currentUserId])
   );
 
-  // Keep the displayed list pruned when the context removes a saved post
-  // (e.g. unsaved from the Users screen while this tab was in the background).
+  // Prune lists when context changes
   useEffect(() => {
     setSavedPosts((prev) => prev.filter((p) => savedPostIds.has(p.id)));
   }, [savedPostIds]);
 
-  const handleUnsave = useCallback(
-    async (postId: string) => {
-      await toggleSave(postId);
-    },
-    [toggleSave]
-  );
+  useEffect(() => {
+    setSavedListings((prev) => prev.filter((l) => savedListingIds.has(l.id)));
+  }, [savedListingIds]);
 
-  const loading = fetchingList || contextLoading;
+  const loading =
+    activeTab === "listings"
+      ? fetchingListings || listingsContextLoading
+      : fetchingPosts || postsContextLoading;
 
   if (loading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading saved posts…</Text>
+        <Text style={styles.centeredText}>Loading saved…</Text>
       </View>
     );
   }
@@ -68,40 +81,120 @@ export default function SavedPostsScreen() {
   return (
     <PageContainer>
       <View style={styles.screen}>
+        {/* Header */}
         <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>Saved Posts</Text>
+          <Text style={styles.pageTitle}>Saved</Text>
           <View style={styles.countPill}>
-            <Text style={styles.countText}>{savedPosts.length}</Text>
+            <Text style={styles.countText}>
+              {activeTab === "listings" ? savedListings.length : savedPosts.length}
+            </Text>
           </View>
         </View>
 
-        {savedPosts.length === 0 ? (
-          <View style={styles.emptyState}>
-            <View style={styles.emptyIconWrap}>
-              <Bookmark size={28} color="#444" strokeWidth={1.5} />
-            </View>
-            <Text style={styles.emptyTitle}>Nothing saved yet</Text>
-            <Text style={styles.emptySubtext}>
-              Posts you save will appear here
+        {/* Tab switcher */}
+        <View style={styles.tabRow}>
+          <Pressable
+            style={[styles.tab, activeTab === "listings" && styles.tabActive]}
+            onPress={() => setActiveTab("listings")}
+          >
+            <Text style={[styles.tabText, activeTab === "listings" && styles.tabTextActive]}>
+              Listings
             </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={savedPosts}
-            keyExtractor={(post) => post.id}
-            renderItem={({ item }) => (
-              <SavedPostCard
-                post={item}
-                onPress={() => router.push(`/post/${item.id}`)}
-                onUnsave={() => handleUnsave(item.id)}
-              />
-            )}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
+          </Pressable>
+          <Pressable
+            style={[styles.tab, activeTab === "posts" && styles.tabActive]}
+            onPress={() => setActiveTab("posts")}
+          >
+            <Text style={[styles.tabText, activeTab === "posts" && styles.tabTextActive]}>
+              Posts
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Listings tab */}
+        {activeTab === "listings" && (
+          savedListings.length === 0 ? (
+            <EmptyState label="No saved listings yet" subtext="Tap the bookmark on any listing to save it" />
+          ) : (
+            <FlatList
+              data={savedListings}
+              keyExtractor={(l) => l.id}
+              renderItem={({ item }) => (
+                <SavedListingCard
+                  listing={item}
+                  onPress={() => router.push(`/listing/${item.id}`)}
+                  onUnsave={() => toggleSaveListing(item.id)}
+                />
+              )}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+            />
+          )
+        )}
+
+        {/* Posts tab */}
+        {activeTab === "posts" && (
+          savedPosts.length === 0 ? (
+            <EmptyState label="Nothing saved yet" subtext="Posts you save will appear here" />
+          ) : (
+            <FlatList
+              data={savedPosts}
+              keyExtractor={(p) => p.id}
+              renderItem={({ item }) => (
+                <SavedPostCard
+                  post={item}
+                  onPress={() => router.push(`/post/${item.id}`)}
+                  onUnsave={() => toggleSave(item.id)}
+                />
+              )}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+            />
+          )
         )}
       </View>
     </PageContainer>
+  );
+}
+
+function SavedListingCard({
+  listing,
+  onPress,
+  onUnsave,
+}: {
+  listing: Listing;
+  onPress: () => void;
+  onUnsave: () => void;
+}) {
+  return (
+    <Pressable style={styles.listingCard} onPress={onPress}>
+      <View style={styles.listingThumb}>
+        {listing.photo_urls?.length ? (
+          <Image
+            source={{ uri: listing.photo_urls[0] }}
+            style={styles.listingThumbImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <Text style={styles.listingThumbFallback}>🏠</Text>
+        )}
+      </View>
+      <View style={styles.listingBody}>
+        <Text style={styles.listingTitle} numberOfLines={1}>{listing.title}</Text>
+        <Text style={styles.listingRent}>
+          <Text style={styles.listingRentAmount}>${listing.rent}</Text>
+          <Text style={styles.listingRentSuffix}> /mo</Text>
+        </Text>
+        <Text style={styles.listingAddress} numberOfLines={1}>{listing.address}</Text>
+      </View>
+      <Pressable
+        style={styles.unsaveBtn}
+        onPress={(e) => { e.stopPropagation(); onUnsave(); }}
+        hitSlop={8}
+      >
+        <BookmarkX size={16} color="#555" strokeWidth={2} />
+      </Pressable>
+    </Pressable>
   );
 }
 
@@ -123,21 +216,28 @@ function SavedPostCard({
       </View>
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle}>{post.title}</Text>
-        <Text style={styles.cardText} numberOfLines={2}>
-          {post.body}
-        </Text>
+        <Text style={styles.cardText} numberOfLines={2}>{post.body}</Text>
       </View>
       <Pressable
         style={styles.unsaveBtn}
-        onPress={(e) => {
-          e.stopPropagation();
-          onUnsave();
-        }}
+        onPress={(e) => { e.stopPropagation(); onUnsave(); }}
         hitSlop={8}
       >
         <BookmarkX size={16} color="#555" strokeWidth={2} />
       </Pressable>
     </Pressable>
+  );
+}
+
+function EmptyState({ label, subtext }: { label: string; subtext: string }) {
+  return (
+    <View style={styles.emptyState}>
+      <View style={styles.emptyIconWrap}>
+        <Bookmark size={28} color="#444" strokeWidth={1.5} />
+      </View>
+      <Text style={styles.emptyTitle}>{label}</Text>
+      <Text style={styles.emptySubtext}>{subtext}</Text>
+    </View>
   );
 }
 
@@ -151,7 +251,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   pageTitle: {
     color: "#fff",
@@ -172,10 +272,88 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  tabRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 16,
+  },
+  tab: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 99,
+    backgroundColor: "#111",
+    borderWidth: 1,
+    borderColor: "#222",
+  },
+  tabActive: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
+  },
+  tabText: {
+    color: "#666",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  tabTextActive: {
+    color: "#000",
+  },
   listContent: {
     paddingBottom: 60,
     gap: 10,
   },
+  // Listing card
+  listingCard: {
+    backgroundColor: "#111",
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#1e1e1e",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  listingThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 10,
+    backgroundColor: "#2a2a2a",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    flexShrink: 0,
+  },
+  listingThumbImage: {
+    width: "100%",
+    height: "100%",
+  },
+  listingThumbFallback: {
+    fontSize: 24,
+  },
+  listingBody: {
+    flex: 1,
+    gap: 3,
+  },
+  listingTitle: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 18,
+  },
+  listingRent: {},
+  listingRentAmount: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  listingRentSuffix: {
+    color: "#666",
+    fontSize: 12,
+  },
+  listingAddress: {
+    color: "#666",
+    fontSize: 12,
+  },
+  // Post card
   card: {
     backgroundColor: "#111",
     borderRadius: 14,
@@ -218,6 +396,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
     paddingLeft: 4,
   },
+  // Shared
   centered: {
     flex: 1,
     justifyContent: "center",

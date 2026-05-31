@@ -3,7 +3,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, usePathname, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
@@ -11,11 +11,13 @@ import "react-native-reanimated";
 import { useColorScheme } from "../hooks/use-color-scheme";
 import { authService } from "@/src/services";
 import { SavedPostsProvider } from "@/src/context/SavedPostsContext";
+import { SavedListingsProvider } from "@/src/context/SavedListingsContext";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const segments = useSegments();
+  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
@@ -26,7 +28,6 @@ export default function RootLayout() {
 
     checkAuth();
 
-    // Listen for auth state changes
     const { data: authListener } = authService
       .getSupabase()
       .auth.onAuthStateChange((event, session) => {
@@ -39,7 +40,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated === null) return; // Still loading
+    if (isAuthenticated === null) return;
 
     const inAuthGroup =
       segments[0] === "landing" ||
@@ -50,78 +51,78 @@ export default function RootLayout() {
       segments[0] === "reset-password" ||
       segments[0] === "enter-code" ||
       segments[0] === "verify-email" ||
-      segments[0] === "index";
+      pathname === "/";
 
     if (isAuthenticated && inAuthGroup) {
-      // User is authenticated but trying to access auth pages - redirect to home
       router.replace("/(tabs)");
     } else if (!isAuthenticated && !inAuthGroup && segments[0] !== undefined) {
-      // User is not authenticated and trying to access protected pages - redirect to landing
       router.replace("/landing");
     }
-  }, [isAuthenticated, segments, router]);
+  }, [isAuthenticated, pathname, segments, router]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <SavedPostsProvider>
-      <Stack screenOptions={{ headerShown: false, gestureEnabled: true }}>
-        <Stack.Screen
-          name="index"
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="select-location"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-        <Stack.Screen
-          name="landing"
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="login"
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="pre-signup"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-        <Stack.Screen
-          name="signup"
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="(tabs)"
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="listing"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-        <Stack.Screen
-          name="post"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-        <Stack.Screen
-          name="edit-profile"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-        <Stack.Screen
-          name="forgot-password"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-        <Stack.Screen
-          name="reset-password"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-        <Stack.Screen
-          name="enter-code"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-        <Stack.Screen
-          name="verify-email"
-          options={{ headerShown: false, gestureEnabled: true }}
-        />
-      </Stack>
+        <SavedListingsProvider>
+          <Stack screenOptions={{ headerShown: false, gestureEnabled: true }}>
+            <Stack.Screen
+              name="index"
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="select-location"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+            <Stack.Screen
+              name="landing"
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="login"
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="pre-signup"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+            <Stack.Screen
+              name="signup"
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="(tabs)"
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="listing"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+            <Stack.Screen
+              name="post"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+            <Stack.Screen
+              name="edit-profile"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+            <Stack.Screen
+              name="forgot-password"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+            <Stack.Screen
+              name="reset-password"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+            <Stack.Screen
+              name="enter-code"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+            <Stack.Screen
+              name="verify-email"
+              options={{ headerShown: false, gestureEnabled: true }}
+            />
+          </Stack>
+        </SavedListingsProvider>
       </SavedPostsProvider>
       <StatusBar style="auto" />
     </ThemeProvider>
