@@ -11,6 +11,8 @@ export interface UpdateProfileInput {
   province?: string;
   email?: string;
   avatar_url?: string;
+  phone_number?: string;
+  property_address?: string;
 }
 
 export interface CreateProfileInput {
@@ -23,6 +25,8 @@ export interface CreateProfileInput {
   city?: string;
   province?: string;
   avatar_url?: string;
+  phone_number?: string;
+  property_address?: string;
 }
 
 export class ProfileService {
@@ -47,6 +51,8 @@ export class ProfileService {
         city: profileData.city || null,
         province: profileData.province || null,
         avatar_url: profileData.avatar_url || null,
+        phone_number: profileData.phone_number || null,
+        property_address: profileData.property_address || null,
       });
 
       if (error) {

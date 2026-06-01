@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Linking,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -11,10 +13,12 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft } from "lucide-react-native";
+import { ChevronLeft, Phone, Mail, Copy, X } from "lucide-react-native";
 import { authService, listingService, profileService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
+import { Profile } from "@/src/types/profile";
 import { ListingImageGallery } from "@/components/listings/ListingImageGallery";
+import * as Clipboard from "expo-clipboard";
 
 // Dynamic imports for platform-specific map components
 let MapView: any;
@@ -35,6 +39,8 @@ export default function ListingDetailScreen() {
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [landlordName, setLandlordName] = useState<string | null>(null);
+  const [landlordProfile, setLandlordProfile] = useState<Profile | null>(null);
+  const [contactModalVisible, setContactModalVisible] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -60,6 +66,7 @@ export default function ListingDetailScreen() {
 
         try {
           const profile = await profileService.getProfileById(listingData.landlord_id);
+          setLandlordProfile(profile);
           setLandlordName(profile?.full_name || "Landlord");
         } catch {
           setLandlordName("Landlord");
@@ -76,7 +83,32 @@ export default function ListingDetailScreen() {
   }, [id]);
 
   const handleContact = () => {
-    Alert.alert("Contact landlord", "Contact options will be added soon.");
+    setContactModalVisible(true);
+  };
+
+  const handleCall = async (phone: string) => {
+    try {
+      const url = `tel:${phone.replace(/[^0-9+]/g, "")}`;
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Not Supported", "Direct calling is not supported on this device.");
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Could not place a call.");
+    }
+  };
+
+  const handleCopyEmail = async (email: string) => {
+    try {
+      await Clipboard.setStringAsync(email);
+      Alert.alert("Copied", "Email address copied to clipboard!");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to copy email.");
+    }
   };
 
   const handleEdit = () => {
@@ -230,6 +262,106 @@ export default function ListingDetailScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      {/* Contact Landlord Modal */}
+      <Modal
+        visible={contactModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setContactModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={styles.modalBackdrop}
+            onPress={() => setContactModalVisible(false)}
+          />
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Contact Landlord</Text>
+              <Pressable
+                style={styles.modalCloseBtn}
+                onPress={() => setContactModalVisible(false)}
+              >
+                <X color="#fff" size={20} />
+              </Pressable>
+            </View>
+
+            <View style={styles.landlordHero}>
+              <Text style={styles.landlordName}>{landlordName || "Landlord"}</Text>
+              <Text style={styles.landlordSubtitle}>Interested in this property?</Text>
+            </View>
+
+            <View style={styles.contactOptions}>
+              {landlordProfile?.phone_number ? (
+                <Pressable
+                  style={styles.contactItem}
+                  onPress={() => handleCall(landlordProfile.phone_number!)}
+                >
+                  <View style={styles.contactItemLeft}>
+                    <View style={styles.iconWrapper}>
+                      <Phone color="#fff" size={18} />
+                    </View>
+                    <View>
+                      <Text style={styles.contactItemLabel}>Phone Number</Text>
+                      <Text style={styles.contactItemValue}>
+                        {landlordProfile.phone_number}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.actionLinkText}>Call</Text>
+                </Pressable>
+              ) : (
+                <View style={styles.contactItemDisabled}>
+                  <View style={styles.contactItemLeft}>
+                    <View style={styles.iconWrapperDisabled}>
+                      <Phone color="#555" size={18} />
+                    </View>
+                    <View>
+                      <Text style={styles.contactItemLabelDisabled}>Phone Number</Text>
+                      <Text style={styles.contactItemValueDisabled}>Not provided</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {landlordProfile?.email ? (
+                <Pressable
+                  style={styles.contactItem}
+                  onPress={() => handleCopyEmail(landlordProfile.email!)}
+                >
+                  <View style={styles.contactItemLeft}>
+                    <View style={styles.iconWrapper}>
+                      <Mail color="#fff" size={18} />
+                    </View>
+                    <View>
+                      <Text style={styles.contactItemLabel}>Email Address</Text>
+                      <Text style={styles.contactItemValue}>
+                        {landlordProfile.email}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.actionCopyBtn}>
+                    <Copy color="#aaa" size={14} style={{ marginRight: 4 }} />
+                    <Text style={styles.actionLinkText}>Copy</Text>
+                  </View>
+                </Pressable>
+              ) : (
+                <View style={styles.contactItemDisabled}>
+                  <View style={styles.contactItemLeft}>
+                    <View style={styles.iconWrapperDisabled}>
+                      <Mail color="#555" size={18} />
+                    </View>
+                    <View>
+                      <Text style={styles.contactItemLabelDisabled}>Email Address</Text>
+                      <Text style={styles.contactItemValueDisabled}>Not provided</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -427,5 +559,139 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 16,
     fontWeight: "700",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalContent: {
+    backgroundColor: "#121212",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "#222",
+    borderBottomWidth: 0,
+    paddingBottom: Platform.OS === "ios" ? 40 : 24,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  modalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#222",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  landlordHero: {
+    marginBottom: 24,
+  },
+  landlordName: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  landlordSubtitle: {
+    color: "#888",
+    fontSize: 14,
+    marginTop: 4,
+  },
+  contactOptions: {
+    gap: 16,
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1a1a1a",
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  contactItemDisabled: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#121212",
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#1c1c1c",
+    opacity: 0.5,
+  },
+  contactItemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#222",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  iconWrapperDisabled: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#181818",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#222",
+  },
+  contactItemLabel: {
+    color: "#666",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  contactItemValue: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  contactItemLabelDisabled: {
+    color: "#444",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  contactItemValueDisabled: {
+    color: "#666",
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  actionLinkText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  actionCopyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2a2a2a",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
 });
