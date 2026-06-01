@@ -32,6 +32,7 @@ export default function EditProfileScreen() {
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
 
@@ -61,6 +62,7 @@ export default function EditProfileScreen() {
       setCity(profile.city || "");
       setProvince(profile.province || "");
       setEmail(profile.email || "");
+      setPhoneNumber(profile.phone_number || "");
       setAvatarUrl(profile.avatar_url || null);
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -97,6 +99,11 @@ export default function EditProfileScreen() {
       return;
     }
 
+    if (role === "landlord" && !phoneNumber.trim()) {
+      Alert.alert("Error", "Phone number is required for landlords");
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -121,6 +128,7 @@ export default function EditProfileScreen() {
         province,
         email,
         avatar_url: finalAvatarUrl || undefined,
+        phone_number: phoneNumber,
       });
 
       if (!result.success) {
@@ -187,6 +195,17 @@ export default function EditProfileScreen() {
         autoCapitalize="none"
         keyboardType="email-address"
       />
+
+      {role === "landlord" && (
+        <Input
+          label="Phone Number *"
+          placeholder="e.g., (403) 123-4567"
+          placeholderTextColor="#666"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
+        />
+      )}
 
       {role === "student" && (
         <Input
