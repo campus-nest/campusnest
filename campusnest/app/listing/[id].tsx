@@ -340,10 +340,7 @@ export default function ListingDetailScreen() {
                       </Text>
                     </View>
                   </View>
-                  <View style={styles.actionCopyBtn}>
-                    <Copy color="#aaa" size={14} style={{ marginRight: 4 }} />
-                    <Text style={styles.actionLinkText}>Copy</Text>
-                  </View>
+                  <Copy color="#fff" size={18} />
                 </Pressable>
               ) : (
                 <View style={styles.contactItemDisabled}>
