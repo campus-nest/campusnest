@@ -137,7 +137,7 @@ export default function ListingDetailScreen() {
         <Text style={styles.headerTitle} numberOfLines={1}>
           {listing.title}
         </Text>
-        <View style={styles.backBtn} />
+        <View style={{ width: 40, height: 40 }} />
       </View>
 
       <ScrollView

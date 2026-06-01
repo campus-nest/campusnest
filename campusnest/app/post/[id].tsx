@@ -101,7 +101,7 @@ export default function PostDetailScreen() {
           <ChevronLeft color="#fff" size={22} />
         </Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>Post</Text>
-        <View style={styles.backBtn} />
+        <View style={{ width: 40, height: 40 }} />
       </View>
 
       <KeyboardAvoidingView
