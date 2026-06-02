@@ -58,6 +58,45 @@ export class PostService {
 
     return { success: true, postId: data.id };
   }
+
+  /**
+   * Update an existing post
+   */
+  async updatePost(
+    postId: string,
+    input: Partial<CreatePostInput>,
+  ): Promise<{ success: boolean; error?: string }> {
+    const { error } = await this.supabase
+      .from("posts")
+      .update(input)
+      .eq("id", postId);
+
+    if (error) {
+      console.error("Error updating post:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  }
+
+  /**
+   * Delete a post
+   */
+  async deletePost(
+    postId: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    const { error } = await this.supabase
+      .from("posts")
+      .delete()
+      .eq("id", postId);
+
+    if (error) {
+      console.error("Error deleting post:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  }
 }
 
 // Export singleton instance

@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft } from "lucide-react-native";
+import { ChevronLeft, Pencil, Trash2 } from "lucide-react-native";
 import {
   authService,
   commentService,
@@ -35,6 +35,13 @@ export default function PostDetailScreen() {
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Edit/delete state
+  const [isOwner, setIsOwner] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editBody, setEditBody] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
   const fetchComments = async (postId: string) => {
     const fetched = await commentService.getCommentsByPostId(postId);
     setComments(fetched);
@@ -44,17 +51,30 @@ export default function PostDetailScreen() {
     if (!id) return;
 
     const load = async () => {
-      setLoading(true);
-      const postData = await postService.getPostById(id);
-      if (!postData) {
+      try {
+        setLoading(true);
+        const postData = await postService.getPostById(id);
+        if (!postData) {
+          setLoading(false);
+          return;
+        }
+        setPost(postData);
+        setEditTitle(postData.title ?? "");
+        setEditBody(postData.body ?? "");
+
+        const session = await authService.getSession();
+        if (session?.user?.id === postData.user_id) {
+          setIsOwner(true);
+        }
+
+        const creatorProfile = await profileService.getProfileById(postData.user_id);
+        setCreator(creatorProfile);
+        await fetchComments(id);
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
-        return;
       }
-      setPost(postData);
-      const creatorProfile = await profileService.getProfileById(postData.user_id);
-      setCreator(creatorProfile);
-      await fetchComments(id);
-      setLoading(false);
     };
 
     load();
@@ -84,11 +104,69 @@ export default function PostDetailScreen() {
     setSubmitting(false);
   };
 
-  if (loading || !post) {
+  const handleSaveEdit = async () => {
+    if (!editTitle.trim() || !editBody.trim() || !id) {
+      Alert.alert("Error", "Title and description cannot be empty.");
+      return;
+    }
+
+    setSubmitting(true);
+    const result = await postService.updatePost(id, {
+      title: editTitle.trim(),
+      body: editBody.trim(),
+    });
+
+    if (result.success) {
+      setPost((prev) =>
+        prev
+          ? { ...prev, title: editTitle.trim(), body: editBody.trim() }
+          : prev,
+      );
+      setIsEditing(false);
+    } else {
+      Alert.alert("Error", result.error || "Failed to update post.");
+    }
+    setSubmitting(false);
+  };
+
+  const handleDelete = () => {
+    if (!id) return;
+    Alert.alert(
+      "Delete Post",
+      "Are you sure you want to delete this post? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              const result = await postService.deletePost(id);
+              if (result.success) {
+                router.replace("/(tabs)");
+              } else {
+                Alert.alert("Error", result.error ?? "Failed to delete post.");
+              }
+            } catch (err) {
+              console.error(err);
+              Alert.alert("Error", "Something went wrong while deleting.");
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  if (loading || !post || deleting) {
     return (
       <SafeAreaView style={styles.loadingScreen}>
         <ActivityIndicator color="#fff" size="large" />
-        <Text style={styles.loadingText}>Loading post…</Text>
+        <Text style={styles.loadingText}>
+          {deleting ? "Deleting post…" : "Loading post…"}
+        </Text>
       </SafeAreaView>
     );
   }
@@ -100,8 +178,29 @@ export default function PostDetailScreen() {
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
           <ChevronLeft color="#fff" size={22} />
         </Pressable>
-        <Text style={styles.headerTitle} numberOfLines={1}>Post</Text>
-        <View style={{ width: 40, height: 40 }} />
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          Post
+        </Text>
+        {isOwner && !isEditing ? (
+          <View style={styles.headerActions}>
+            <Pressable
+              style={styles.headerIconBtn}
+              onPress={() => setIsEditing(true)}
+              hitSlop={6}
+            >
+              <Pencil color="#fff" size={16} />
+            </Pressable>
+            <Pressable
+              style={[styles.headerIconBtn, styles.headerDeleteBtn]}
+              onPress={handleDelete}
+              hitSlop={6}
+            >
+              <Trash2 color="#ff4444" size={16} />
+            </Pressable>
+          </View>
+        ) : (
+          <View style={{ width: 40, height: 40 }} />
+        )}
       </View>
 
       <KeyboardAvoidingView
@@ -115,18 +214,63 @@ export default function PostDetailScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Post card */}
-          <View style={styles.postCard}>
-            <Text style={styles.postTitle}>{post.title}</Text>
-            <Text style={styles.postBody}>{post.body}</Text>
-            <View style={styles.postMeta}>
-              <Text style={styles.postAuthor}>
-                {creator?.full_name || "Unknown"}
-              </Text>
-              <Text style={styles.postDate}>
-                {new Date(post.created_at).toLocaleDateString()}
-              </Text>
+          {isEditing ? (
+            <View style={styles.postCard}>
+              <Text style={styles.editLabel}>Title</Text>
+              <TextInput
+                style={styles.editTitleInput}
+                value={editTitle}
+                onChangeText={setEditTitle}
+                placeholder="Post title"
+                placeholderTextColor="#555"
+              />
+              <Text style={styles.editLabel}>Description</Text>
+              <TextInput
+                style={styles.editBodyInput}
+                value={editBody}
+                onChangeText={setEditBody}
+                placeholder="Post description"
+                placeholderTextColor="#555"
+                multiline
+                numberOfLines={6}
+              />
+              <View style={styles.editActionsRow}>
+                <Pressable
+                  style={[styles.saveBtn, submitting && styles.btnDisabled]}
+                  onPress={handleSaveEdit}
+                  disabled={submitting}
+                >
+                  <Text style={styles.saveBtnText}>Save</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.cancelBtn}
+                  onPress={() => {
+                    if (post) {
+                      setEditTitle(post.title);
+                      setEditBody(post.body);
+                    }
+                    setIsEditing(false);
+                  }}
+                  disabled={submitting}
+                >
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.postCard}>
+              <Text style={styles.postTitle}>{post.title}</Text>
+              <Text style={styles.postBody}>{post.body}</Text>
+              <View style={styles.postMeta}>
+                <Text style={styles.postAuthor}>
+                  {creator?.full_name || "Unknown"}
+                </Text>
+                <Text style={styles.postDate}>
+                  {new Date(post.created_at).toLocaleDateString()}
+                </Text>
+              </View>
+            </View>
+          )}
 
           {/* Comments section */}
           <View style={styles.commentsSection}>
@@ -228,6 +372,25 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     flex: 1,
     textAlign: "center",
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  headerIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#1a1a1a",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  headerDeleteBtn: {
+    borderColor: "#3a1a1a",
+    backgroundColor: "#1a0a0a",
   },
   backBtn: {
     width: 40,
@@ -378,5 +541,70 @@ const styles = StyleSheet.create({
     color: "#ccc",
     fontSize: 13,
     lineHeight: 19,
+  },
+  editLabel: {
+    color: "#888",
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginTop: 4,
+  },
+  editTitleInput: {
+    backgroundColor: "#222",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#333",
+    padding: 10,
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  editBodyInput: {
+    backgroundColor: "#222",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#333",
+    padding: 10,
+    color: "#fff",
+    fontSize: 14,
+    textAlignVertical: "top",
+    minHeight: 100,
+  },
+  editActionsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 12,
+  },
+  saveBtn: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  saveBtnText: {
+    color: "#000",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: "#222",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  cancelBtnText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  btnDisabled: {
+    opacity: 0.5,
   },
 });
