@@ -26,7 +26,7 @@ import { CycleDropdown } from "@/components/ui/Dropdown";
 import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
-import Section, { Divider } from "@/components/ui/Section";
+import Section from "@/components/ui/Section";
 
 // Constants
 const UTILITY_OPTIONS = ["electricity", "water", "wifi", "heat"];
@@ -154,7 +154,7 @@ export default function EditListingScreen() {
     };
 
     fetchListing();
-  }, [listingId]);
+  }, [listingId, router]);
 
   // Utility toggle handler
   const handleUtilityToggle = (utility: string) => {
