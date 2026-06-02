@@ -300,7 +300,15 @@ export default function PostDetailScreen() {
                 {submitting ? (
                   <ActivityIndicator color="#000" size="small" />
                 ) : (
-                  <Text style={styles.postBtnText}>Post</Text>
+                  <Text
+                    style={[
+                      styles.postBtnText,
+                      (!commentText.trim() || submitting) &&
+                        styles.postBtnTextDisabled,
+                    ]}
+                  >
+                    Post
+                  </Text>
                 )}
               </Pressable>
             </View>
@@ -455,37 +463,42 @@ const styles = StyleSheet.create({
   commentInputRow: {
     flexDirection: "row",
     gap: 12,
-    alignItems: "flex-end",
+    alignItems: "center",
   },
   commentInput: {
     flex: 1,
     backgroundColor: "#1a1a1a",
     borderRadius: 12,
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     color: "#fff",
     fontSize: 14,
-    minHeight: 52,
+    minHeight: 46,
     maxHeight: 120,
-    textAlignVertical: "top",
     borderWidth: 1,
     borderColor: "#2a2a2a",
+    textAlignVertical: "center",
   },
   postBtn: {
     backgroundColor: "#fff",
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    height: 46,
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 64,
   },
   postBtnDisabled: {
-    backgroundColor: "#222",
+    backgroundColor: "#1a1a1a",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
   },
   postBtnText: {
     color: "#000",
     fontSize: 14,
     fontWeight: "700",
+  },
+  postBtnTextDisabled: {
+    color: "#444",
   },
   noComments: {
     color: "#555",
