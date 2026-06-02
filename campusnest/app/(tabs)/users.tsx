@@ -19,17 +19,20 @@ type PostFilter = "yourPost" | "recent";
 export default function UsersScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<PostFilter>("yourPost");
+  const [activeFilter, setActiveFilter] = useState<PostFilter>("recent");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [role, setRole] = useState<"student" | "landlord" | null>(null);
   const { savedPostIds, toggleSave } = useSavedPosts();
   const router = useRouter();
 
   useEffect(() => {
-    const fetchCurrentUser = async () => {
+    const fetchCurrentUserAndRole = async () => {
       const session = await authService.getSession();
       setCurrentUserId(session?.user?.id || null);
+      const userRole = await authService.getUserRole();
+      setRole(userRole);
     };
-    fetchCurrentUser();
+    fetchCurrentUserAndRole();
   }, []);
 
   // Reload posts list when the tab is focused or filter changes
@@ -39,7 +42,7 @@ export default function UsersScreen() {
         setLoading(true);
         const allPosts = await postService.getPosts();
         let filteredPosts = allPosts;
-        if (activeFilter === "yourPost" && currentUserId) {
+        if (activeFilter === "yourPost" && currentUserId && role !== "landlord") {
           filteredPosts = allPosts.filter(
             (post) => post.user_id === currentUserId
           );
@@ -48,7 +51,7 @@ export default function UsersScreen() {
         setLoading(false);
       };
       fetchPosts();
-    }, [activeFilter, currentUserId])
+    }, [activeFilter, currentUserId, role])
   );
 
   const handleToggleSave = useCallback(
@@ -58,10 +61,13 @@ export default function UsersScreen() {
     [toggleSave]
   );
 
-  const filters: { key: PostFilter; label: string }[] = [
-    { key: "yourPost", label: "Your Posts" },
-    { key: "recent", label: "Recent" },
-  ];
+  const filters: { key: PostFilter; label: string }[] =
+    role === "landlord"
+      ? [{ key: "recent", label: "Recent" }]
+      : [
+          { key: "recent", label: "Recent" },
+          { key: "yourPost", label: "Your Posts" },
+        ];
 
   if (loading) {
     return (

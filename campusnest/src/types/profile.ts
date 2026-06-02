@@ -10,4 +10,6 @@ export interface Profile {
   email: string | null;
   avatar_url: string | null;
   created_at: string | null;
+  phone_number?: string | null;
+  property_address?: string | null;
 }

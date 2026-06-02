@@ -96,7 +96,7 @@ export default function ProfileScreen() {
           <ChevronLeft color="#fff" size={20} strokeWidth={2.5} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
-        <View style={styles.iconBtn} />
+        <View style={{ width: 36, height: 36 }} />
       </View>
 
       <ScrollView
