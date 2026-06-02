@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Phone, Mail, Copy, X } from "lucide-react-native";
+import { ChevronLeft, Phone, Mail, Copy, X, Pencil, Trash2 } from "lucide-react-native";
 import { authService, listingService, profileService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
 import { Profile } from "@/src/types/profile";
@@ -43,6 +43,7 @@ export default function ListingDetailScreen() {
   const [contactModalVisible, setContactModalVisible] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -112,7 +113,38 @@ export default function ListingDetailScreen() {
   };
 
   const handleEdit = () => {
-    Alert.alert("Edit listing", "Edit flow coming soon.");
+    if (!id) return;
+    router.push(`/listing/${id}/edit`);
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Listing",
+      "Are you sure you want to delete this listing? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              const result = await listingService.deleteListing(id);
+                if (result.success) {
+                  router.replace("/(tabs)");
+              } else {
+                Alert.alert("Error", result.error ?? "Failed to delete listing.");
+              }
+            } catch (err) {
+              console.error(err);
+              Alert.alert("Error", "Something went wrong while deleting.");
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
   };
 
   if (loading || !listing) {
@@ -120,6 +152,15 @@ export default function ListingDetailScreen() {
       <SafeAreaView style={styles.loadingScreen}>
         <ActivityIndicator color="#fff" size="large" />
         <Text style={styles.loadingText}>Loading listing…</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (deleting) {
+    return (
+      <SafeAreaView style={styles.loadingScreen}>
+        <ActivityIndicator color="#fff" size="large" />
+        <Text style={styles.loadingText}>Deleting listing…</Text>
       </SafeAreaView>
     );
   }
@@ -137,7 +178,19 @@ export default function ListingDetailScreen() {
         <Text style={styles.headerTitle} numberOfLines={1}>
           {listing.title}
         </Text>
-        <View style={{ width: 40, height: 40 }} />
+        {/* Owner actions in header */}
+        {isOwner ? (
+          <View style={styles.headerActions}>
+            <Pressable style={styles.headerIconBtn} onPress={handleEdit} hitSlop={6}>
+              <Pencil color="#fff" size={18} />
+            </Pressable>
+            <Pressable style={[styles.headerIconBtn, styles.headerDeleteBtn]} onPress={handleDelete} hitSlop={6}>
+              <Trash2 color="#ff4444" size={18} />
+            </Pressable>
+          </View>
+        ) : (
+          <View style={{ width: 40, height: 40 }} />
+        )}
       </View>
 
       <ScrollView
@@ -252,14 +305,22 @@ export default function ListingDetailScreen() {
           )}
 
           {/* CTA button */}
-          <Pressable
-            style={styles.ctaButton}
-            onPress={isOwner ? handleEdit : handleContact}
-          >
-            <Text style={styles.ctaButtonText}>
-              {isOwner ? "Edit listing" : "Contact landlord"}
-            </Text>
-          </Pressable>
+          {isOwner ? (
+            <View style={styles.ownerCTARow}>
+              <Pressable style={styles.editBtn} onPress={handleEdit}>
+                <Pencil color="#000" size={16} />
+                <Text style={styles.editBtnText}>Edit Listing</Text>
+              </Pressable>
+              <Pressable style={styles.deleteBtn} onPress={handleDelete}>
+                <Trash2 color="#ff4444" size={16} />
+                <Text style={styles.deleteBtnText}>Delete</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable style={styles.ctaButton} onPress={handleContact}>
+              <Text style={styles.ctaButtonText}>Contact landlord</Text>
+            </Pressable>
+          )}
         </View>
       </ScrollView>
 
@@ -303,9 +364,7 @@ export default function ListingDetailScreen() {
                     </View>
                     <View>
                       <Text style={styles.contactItemLabel}>Phone Number</Text>
-                      <Text style={styles.contactItemValue}>
-                        {landlordProfile.phone_number}
-                      </Text>
+                      <Text style={styles.contactItemValue}>{landlordProfile.phone_number}</Text>
                     </View>
                   </View>
                   <Text style={styles.actionLinkText}>Call</Text>
@@ -335,12 +394,12 @@ export default function ListingDetailScreen() {
                     </View>
                     <View>
                       <Text style={styles.contactItemLabel}>Email Address</Text>
-                      <Text style={styles.contactItemValue}>
-                        {landlordProfile.email}
-                      </Text>
+                      <Text style={styles.contactItemValue}>{landlordProfile.email}</Text>
                     </View>
                   </View>
-                  <Copy color="#fff" size={18} />
+                  <View style={styles.actionCopyBtn}>
+                    <Copy color="#fff" size={14} />
+                  </View>
                 </Pressable>
               ) : (
                 <View style={styles.contactItemDisabled}>
@@ -412,6 +471,25 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     marginHorizontal: 8,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  headerIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#1a1a1a",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  headerDeleteBtn: {
+    borderColor: "#3a1a1a",
+    backgroundColor: "#1a0a0a",
   },
   backBtn: {
     width: 40,
@@ -545,6 +623,45 @@ const styles = StyleSheet.create({
     color: "#555",
     fontSize: 14,
   },
+  // Owner CTA row (Edit + Delete side by side)
+  ownerCTARow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 4,
+  },
+  editBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#fff",
+    paddingVertical: 16,
+    borderRadius: 12,
+  },
+  editBtnText: {
+    color: "#000",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  deleteBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#1a0a0a",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#3a1515",
+  },
+  deleteBtnText: {
+    color: "#ff4444",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  // Student CTA
   ctaButton: {
     backgroundColor: "#fff",
     paddingVertical: 16,
@@ -557,6 +674,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
+  // Modal styles
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",

@@ -1,6 +1,3 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,9 +8,13 @@ import {
   Text,
   View,
 } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
 
 // Services
-import { authService, listingService, postService } from "@/src/services";
+import { authService, listingService } from "@/src/services";
+import { ListingStatus, ListingVisibility } from "@/src/types/listing";
 
 // UI Components
 import { ImagePickerPreview } from "@/components/listings/ImagePickerPreview";
@@ -26,9 +27,6 @@ import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import Section, { Divider } from "@/components/ui/Section";
-import TabSelector from "@/components/ui/TabSelector";
-
-type Role = "student" | "landlord";
 
 // Constants
 const UTILITY_OPTIONS = ["electricity", "water", "wifi", "heat"];
@@ -41,15 +39,25 @@ const FURNISHED_OPTIONS = [
   { label: "Furnished", value: "furnished" },
   { label: "Unfurnished", value: "unfurnished" },
 ];
+const STATUS_OPTIONS = [
+  { label: "Active", value: "active" },
+  { label: "Inactive", value: "inactive" },
+  { label: "Rented", value: "rented" },
+];
+const VISIBILITY_OPTIONS = [
+  { label: "Public", value: "public" },
+  { label: "Private", value: "private" },
+];
 
-export default function NewPostScreen() {
+export default function EditListingScreen() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const listingId = id ?? "";
 
-  const [role, setRole] = useState<Role | null>(null);
-  const [roleLoading, setRoleLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Landlord form state
+  // Form state
   const [listingTitle, setListingTitle] = useState("");
   const [listingAddress, setListingAddress] = useState("");
   const [listingRent, setListingRent] = useState("");
@@ -63,33 +71,90 @@ export default function NewPostScreen() {
   const [moveInDate, setMoveInDate] = useState<Date | null>(null);
   const [locationArea, setLocationArea] = useState("");
   const [photoUris, setPhotoUris] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState("rent");
+  const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>([]);
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [securityDeposit, setSecurityDeposit] = useState("");
+  const [status, setStatus] = useState<ListingStatus>("active");
+  const [visibility, setVisibility] = useState<ListingVisibility>("public");
 
-  // Location state (from map picker)
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
     null,
   );
 
-  // Student post form state
-  const [postTitle, setPostTitle] = useState("");
-  const [postBody, setPostBody] = useState("");
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  // Fetch role on mount
+  // Load existing listing on mount
   useEffect(() => {
-    const loadRole = async () => {
+    if (!listingId) return;
+
+    const fetchListing = async () => {
       try {
-        const userRole = await authService.getUserRole();
-        setRole(userRole);
+        setLoading(true);
+        const listing = await listingService.getListingById(listingId);
+        if (!listing) {
+          Alert.alert("Error", "Listing not found.");
+          router.back();
+          return;
+        }
+
+        setListingTitle(listing.title ?? "");
+        setListingAddress(listing.address ?? "");
+        setListingRent(listing.rent != null ? String(listing.rent) : "");
+        setListingLeaseTerm(listing.lease_term ?? "");
+
+        const utils = listing.utilities
+          ? listing.utilities.split(", ").map((u) => u.trim())
+          : [];
+        setSelectedUtilities(utils);
+
+        setNearbyUniversity(listing.nearby_university ?? "");
+        setDescription(listing.description ?? "");
+        setTenantPreferences(listing.tenant_preferences ?? "");
+
+        const match = LEASE_TERM_OPTIONS.find(
+          (opt) => opt.value === listing.lease_term,
+        );
+        setLeaseTermOption(match ? match.value : null);
+
+        setFurnishedStatus(
+          listing.is_furnished === true
+            ? "furnished"
+            : listing.is_furnished === false
+              ? "unfurnished"
+              : null,
+        );
+
+        setMoveInDate(listing.move_in_date ? new Date(listing.move_in_date) : null);
+        setLocationArea(listing.location_area ?? "");
+        setExistingPhotoUrls(listing.photo_urls ?? []);
+
+        setBedrooms(listing.bedrooms != null ? String(listing.bedrooms) : "");
+        setBathrooms(listing.bathrooms != null ? String(listing.bathrooms) : "");
+        setSecurityDeposit(
+          listing.security_deposit != null ? String(listing.security_deposit) : "",
+        );
+
+        setStatus(listing.status ?? "active");
+        setVisibility(listing.visibility ?? "public");
+
+        if (listing.latitude != null && listing.longitude != null) {
+          setSelectedLocation({
+            latitude: listing.latitude,
+            longitude: listing.longitude,
+            address: listing.address,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Error", "Could not load listing.");
+        router.back();
       } finally {
-        setRoleLoading(false);
+        setLoading(false);
       }
     };
-    loadRole();
-  }, []);
+
+    fetchListing();
+  }, [listingId]);
 
   // Utility toggle handler
   const handleUtilityToggle = (utility: string) => {
@@ -119,31 +184,8 @@ export default function NewPostScreen() {
     }
   };
 
-  // Reset landlord form
-  const resetLandlordForm = () => {
-    setListingTitle("");
-    setListingAddress("");
-    setListingRent("");
-    setListingLeaseTerm("");
-    setSelectedUtilities([]);
-    setNearbyUniversity("");
-    setDescription("");
-    setTenantPreferences("");
-    setLeaseTermOption(null);
-    setFurnishedStatus(null);
-    setMoveInDate(null);
-    setLocationArea("");
-    setPhotoUris([]);
-    setActiveTab("rent");
-    setSelectedLocation(null);
-    setBedrooms("");
-    setBathrooms("");
-    setSecurityDeposit("");
-  };
-
-  // Create listing handler
-  const handleCreateListing = async () => {
-    // Validate required fields
+  // Save changes handler
+  const handleSave = async () => {
     if (!listingTitle) {
       Alert.alert("Missing info", "Please enter a listing title.");
       return;
@@ -167,12 +209,10 @@ export default function NewPostScreen() {
       return;
     }
 
-    // Validate location is selected on map
     if (!selectedLocation) {
       Alert.alert(
         "Location Required",
-        "Please select your listing location on the map so students can find it easily.",
-        [{ text: "OK" }],
+        "Please select your listing location on the map.",
       );
       return;
     }
@@ -192,14 +232,19 @@ export default function NewPostScreen() {
         return;
       }
 
-      // Upload photos
-      const uploadedUrls = await listingService.uploadListingPhotos(
-        user.id,
-        photoUris,
-      );
+      // Upload newly added photos
+      let uploadedUrls: string[] = [];
+      if (photoUris.length > 0) {
+        uploadedUrls = await listingService.uploadListingPhotos(
+          user.id,
+          photoUris,
+        );
+      }
 
-      const result = await listingService.createListing({
-        landlord_id: user.id,
+      // Combine remaining existing photos with new ones
+      const finalPhotoUrls = [...existingPhotoUrls, ...uploadedUrls];
+
+      const result = await listingService.updateListing(listingId, {
         title: listingTitle,
         address:
           listingAddress ||
@@ -209,8 +254,8 @@ export default function NewPostScreen() {
         longitude: selectedLocation.longitude,
         rent: rentNumber,
         lease_term: leaseTermOption || listingLeaseTerm,
-        status: "active",
-        visibility: "public",
+        status: status,
+        visibility: visibility,
         utilities:
           selectedUtilities.length > 0 ? selectedUtilities.join(", ") : null,
         nearby_university: nearbyUniversity || null,
@@ -224,90 +269,48 @@ export default function NewPostScreen() {
               : null,
         move_in_date: moveInDate ? moveInDate.toISOString() : null,
         location_area: locationArea || null,
-        photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
-        bedrooms: bedrooms ? parseInt(bedrooms, 10) : null,
-        bathrooms: bathrooms ? parseInt(bathrooms, 10) : null,
-        security_deposit: securityDeposit ? parseFloat(securityDeposit) : null,
+        photo_urls: finalPhotoUrls.length > 0 ? finalPhotoUrls : null,
+        bedrooms: bedrooms !== "" ? parseInt(bedrooms, 10) : null,
+        bathrooms: bathrooms !== "" ? parseInt(bathrooms, 10) : null,
+        security_deposit:
+          securityDeposit !== "" ? parseFloat(securityDeposit) : null,
       });
 
       if (!result.success) {
-        Alert.alert("Error", result.error || "Could not create listing.");
+        Alert.alert("Error", result.error || "Could not save listing.");
         return;
       }
 
-      resetLandlordForm();
-      Alert.alert(
-        "Success",
-        "Listing created! It will now appear on the map for students.",
-      );
-      router.push("/(tabs)");
+      Alert.alert("Success", "Listing updated successfully!");
+      router.replace(`/listing/${listingId}`);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Something went wrong.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Create post handler (student)
-  const handleCreatePost = async () => {
-    if (!postTitle || !postBody) {
-      Alert.alert("Missing info", "Please enter a title and description.");
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const user = await authService.getCurrentUser();
-      if (!user) {
-        Alert.alert("Error", "Could not get current user.");
-        return;
-      }
-
-      const result = await postService.createPost({
-        user_id: user.id,
-        title: postTitle,
-        body: postBody,
-      });
-
-      if (!result.success) {
-        Alert.alert("Error", result.error || "Could not create post.");
-        return;
-      }
-
-      setPostTitle("");
-      setPostBody("");
-      Alert.alert("Success", "Post created.");
-      router.push("/(tabs)");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Handle location selection from map
   const handleLocationSelected = (location: LocationData | null) => {
     setSelectedLocation(location);
   };
 
-  // Landlord Form
-  const renderLandlordForm = () => (
-    <>
-      <H1 style={styles.title}>Create Listing</H1>
-      <H4 style={styles.subtitle}>Share a place students can rent</H4>
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#fff" />
+        <Text style={styles.centeredText}>Loading listing details...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <Screen scrollable contentContainerStyle={styles.scrollContent}>
+      <H1 style={styles.title}>Edit Listing</H1>
+      <H4 style={styles.subtitle}>Update the details of your property</H4>
 
       <Card variant="light" style={styles.formCard}>
-        <TabSelector
-          tabs={[
-            { label: "Rent", value: "rent" },
-            { label: "Price", value: "price" },
-          ]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          variant="light"
-          style={styles.tabSelector}
-        />
-
-        <Divider variant="light" />
-
-        {/* Basic Info */}
+        {/* Title */}
         <Input
           label="Listing Title"
           labelStyle={styles.labelDark}
@@ -416,9 +419,7 @@ export default function NewPostScreen() {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.dateDropdownText}>
-              {moveInDate
-                ? moveInDate.toLocaleDateString()
-                : "Select move in date"}
+              {moveInDate ? moveInDate.toLocaleDateString() : "Select move in date"}
             </Text>
             <Text style={styles.dateIcon}>📅</Text>
           </Pressable>
@@ -506,87 +507,68 @@ export default function NewPostScreen() {
           containerStyle={styles.field}
         />
 
-        {/* Photo Preview */}
+        {/* Status Dropdown */}
+        <CycleDropdown
+          label="Listing Status"
+          value={status}
+          placeholder="Select status"
+          options={STATUS_OPTIONS}
+          onChange={(val) => setStatus(val as ListingStatus)}
+          variant="light"
+          containerStyle={styles.field}
+        />
+
+        {/* Visibility Dropdown */}
+        <CycleDropdown
+          label="Visibility"
+          value={visibility}
+          placeholder="Select visibility"
+          options={VISIBILITY_OPTIONS}
+          onChange={(val) => setVisibility(val as ListingVisibility)}
+          variant="light"
+          containerStyle={styles.field}
+        />
+
+        {/* Existing Photos Preview */}
+        {existingPhotoUrls.length > 0 && (
+          <View style={styles.field}>
+            <Text style={styles.labelDark}>Existing Photos</Text>
+            <ImagePickerPreview
+              photos={existingPhotoUrls}
+              onRemove={(url) =>
+                setExistingPhotoUrls((prev) => prev.filter((p) => p !== url))
+              }
+            />
+          </View>
+        )}
+
+        {/* Newly Selected Photos Preview */}
         {photoUris.length > 0 && (
-          <ImagePickerPreview
-            photos={photoUris}
-            onRemove={(uri) =>
-              setPhotoUris((prev) => prev.filter((p) => p !== uri))
-            }
-          />
+          <View style={styles.field}>
+            <Text style={styles.labelDark}>New Photos to Upload</Text>
+            <ImagePickerPreview
+              photos={photoUris}
+              onRemove={(uri) =>
+                setPhotoUris((prev) => prev.filter((p) => p !== uri))
+              }
+            />
+          </View>
         )}
 
         {/* Upload Button */}
         <Pressable style={styles.uploadButton} onPress={pickImages}>
           <Text style={styles.uploadButtonText}>
-            {photoUris.length ? "Add more photos" : "Upload photos"}
+            {photoUris.length || existingPhotoUrls.length
+              ? "Add more photos"
+              : "Upload photos"}
           </Text>
         </Pressable>
       </Card>
 
       {/* Submit Button */}
-      <Button fullWidth onPress={handleCreateListing} disabled={submitting}>
-        {submitting ? "Publishing..." : "Publish listing"}
+      <Button fullWidth onPress={handleSave} disabled={submitting}>
+        {submitting ? "Saving changes..." : "Save Changes"}
       </Button>
-    </>
-  );
-
-  // Student Form
-  const renderStudentForm = () => (
-    <>
-      <H1 style={styles.title}>Create Post</H1>
-      <H4 style={styles.subtitle}>Tell others what you&apos;re looking for</H4>
-
-      <Input
-        label="Title"
-        labelStyle={styles.labelDark}
-        placeholder="Looking for a roommate for Fall 2025"
-        value={postTitle}
-        onChangeText={setPostTitle}
-        containerStyle={styles.field}
-      />
-
-      <Input
-        label="Description"
-        labelStyle={styles.labelDark}
-        placeholder="Describe yourself, your preferences, and what you're looking for."
-        value={postBody}
-        onChangeText={setPostBody}
-        multiline
-        style={styles.multilineInput}
-        containerStyle={styles.field}
-      />
-
-      <Button fullWidth onPress={handleCreatePost} disabled={submitting}>
-        {submitting ? "Posting..." : "Post"}
-      </Button>
-    </>
-  );
-
-  // Loading state
-  if (roleLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading...</Text>
-      </View>
-    );
-  }
-
-  // No role state
-  if (!role) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.centeredText}>
-          Could not determine your role. Please re-login.
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <Screen scrollable contentContainerStyle={styles.scrollContent}>
-      {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
     </Screen>
   );
 }
@@ -601,6 +583,7 @@ const styles = StyleSheet.create({
   title: {
     textAlign: "left",
     marginBottom: 4,
+    color: "#fff",
   },
   subtitle: {
     textAlign: "left",
@@ -613,9 +596,6 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "stretch",
     maxWidth: 1000,
-  },
-  tabSelector: {
-    marginBottom: 12,
   },
   field: {
     width: "100%",
