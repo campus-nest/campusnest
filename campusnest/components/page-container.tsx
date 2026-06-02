@@ -28,6 +28,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: "100%",
-    paddingHorizontal: 20,
+    paddingHorizontal: 8,
   },
 });
