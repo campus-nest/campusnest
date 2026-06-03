@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -8,66 +8,22 @@ import {
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { useFocusEffect, useRouter } from "expo-router";
-import { authService, postService } from "@/src/services";
-import { Post } from "@/src/types/post";
 import { Bookmark, Heart } from "lucide-react-native";
-import { useSavedPosts } from "@/src/context/SavedPostsContext";
-
-type PostFilter = "yourPost" | "recent";
+import { useUsers } from "@/hooks/useUsers";
+import { Post } from "@/src/types/post";
 
 export default function UsersScreen() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<PostFilter>("recent");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [role, setRole] = useState<"student" | "landlord" | null>(null);
-  const { savedPostIds, toggleSave } = useSavedPosts();
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchCurrentUserAndRole = async () => {
-      const session = await authService.getSession();
-      setCurrentUserId(session?.user?.id || null);
-      const userRole = await authService.getUserRole();
-      setRole(userRole);
-    };
-    fetchCurrentUserAndRole();
-  }, []);
-
-  // Reload posts list when the tab is focused or filter changes
-  useFocusEffect(
-    useCallback(() => {
-      const fetchPosts = async () => {
-        setLoading(true);
-        const allPosts = await postService.getPosts();
-        let filteredPosts = allPosts;
-        if (activeFilter === "yourPost" && currentUserId && role !== "landlord") {
-          filteredPosts = allPosts.filter(
-            (post) => post.user_id === currentUserId
-          );
-        }
-        setPosts(filteredPosts);
-        setLoading(false);
-      };
-      fetchPosts();
-    }, [activeFilter, currentUserId, role])
-  );
-
-  const handleToggleSave = useCallback(
-    (postId: string) => {
-      toggleSave(postId);
-    },
-    [toggleSave]
-  );
-
-  const filters: { key: PostFilter; label: string }[] =
-    role === "landlord"
-      ? [{ key: "recent", label: "Recent" }]
-      : [
-          { key: "recent", label: "Recent" },
-          { key: "yourPost", label: "Your Posts" },
-        ];
+  const {
+    posts,
+    loading,
+    activeFilter,
+    setActiveFilter,
+    savedPostIds,
+    handleToggleSave,
+    filters,
+    handleNavigateToPost,
+    handleNavigateToSaved,
+  } = useUsers();
 
   if (loading) {
     return (
@@ -86,7 +42,7 @@ export default function UsersScreen() {
           <Text style={styles.pageTitle}>Student Posts</Text>
           <Pressable
             style={styles.savedBtn}
-            onPress={() => router.push("/(tabs)/saved")}
+            onPress={handleNavigateToSaved}
           >
             <Bookmark size={18} color="#fff" strokeWidth={2} />
           </Pressable>
@@ -127,7 +83,7 @@ export default function UsersScreen() {
               <PostCard
                 post={item}
                 isSaved={savedPostIds.has(item.id)}
-                onPress={() => router.push(`/post/${item.id}`)}
+                onPress={() => handleNavigateToPost(item.id)}
                 onToggleSave={() => handleToggleSave(item.id)}
               />
             )}
