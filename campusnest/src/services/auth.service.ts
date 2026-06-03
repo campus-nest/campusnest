@@ -6,6 +6,7 @@ interface SignUpInput {
   password: string;
   fullName: string;
   role: "student" | "landlord";
+  metadata?: Record<string, any>;
 }
 
 export class AuthService {
@@ -35,6 +36,7 @@ export class AuthService {
           data: {
             full_name: input.fullName,
             role: input.role,
+            ...input.metadata,
           },
         },
       });
