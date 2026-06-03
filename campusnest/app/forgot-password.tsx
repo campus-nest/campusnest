@@ -1,49 +1,13 @@
+import React from "react";
 import Button from "@/components/ui/Button";
 import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
-import { supabase } from "@/src/lib/supabaseClient";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { useForgotPassword } from "@/hooks/useForgotPassword";
+import { StyleSheet, View } from "react-native";
 
 export default function ForgotPasswordScreen() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSendCode = async () => {
-    if (!email.trim()) {
-      Alert.alert("Error", "Please enter your email address");
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      Alert.alert("Error", "Please enter a valid email address");
-      return;
-    }
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
-      if (error) {
-        Alert.alert("Error", error.message);
-      } else {
-        Alert.alert(
-          "Check your email",
-          "If an account exists for this email, you will receive a password reset code.",
-          [{
-            text: "Enter Code",
-            onPress: () => router.push({ pathname: "/enter-code", params: { email: email.trim() } }),
-          }],
-        );
-      }
-    } catch (error) {
-      console.error("Forgot password error:", error);
-      Alert.alert("Error", "An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { email, setEmail, loading, handleSendCode } = useForgotPassword();
 
   return (
     <Screen scrollable contentContainerStyle={styles.content}>
