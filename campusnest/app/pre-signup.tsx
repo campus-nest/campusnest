@@ -1,21 +1,15 @@
+import React from "react";
 import Button from "@/components/ui/Button";
 import { H1, H4 } from "@/components/ui/Headings";
 import Logo from "@/components/ui/Logo";
 import Screen from "@/components/ui/Screen";
 import Select from "@/components/ui/Select";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { usePreSignUp } from "@/hooks/usePreSignUp";
 import { StyleSheet, View } from "react-native";
 import PreSignUpBottomHouse from "../assets/images/pre_sign_up_bottom_house.svg";
 
 export default function PreSignUpScreen() {
-  const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<"student" | "landlord" | null>(null);
-
-  const handleCreateAccount = () => {
-    if (!selectedRole) return;
-    router.push({ pathname: "/signup", params: { role: selectedRole } });
-  };
+  const { selectedRole, setSelectedRole, handleCreateAccount } = usePreSignUp();
 
   return (
     <Screen style={styles.screen}>

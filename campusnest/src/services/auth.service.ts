@@ -203,6 +203,28 @@ export class AuthService {
       };
     }
   }
+
+  /**
+   * Resend signup verification email
+   */
+  async resendSignUpEmail(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { error } = await this.supabase.auth.resend({
+        type: "signup",
+        email,
+      });
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (error) {
+      console.error("resendSignUpEmail error:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 }
 
 // Export singleton instance

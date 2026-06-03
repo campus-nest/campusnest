@@ -19,55 +19,20 @@ import { useSavedListings } from "@/src/context/SavedListingsContext";
 
 type Tab = "listings" | "posts";
 
+import { useSaved } from "@/hooks/useSaved";
+
 export default function SavedScreen() {
-  const [activeTab, setActiveTab] = useState<Tab>("listings");
-  const [savedPosts, setSavedPosts] = useState<Post[]>([]);
-  const [savedListings, setSavedListings] = useState<Listing[]>([]);
-  const [fetchingPosts, setFetchingPosts] = useState(true);
-  const [fetchingListings, setFetchingListings] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  const { savedPostIds, toggleSave, loading: postsContextLoading } = useSavedPosts();
-  const { savedListingIds, toggleSaveListing, loading: listingsContextLoading } = useSavedListings();
-  const router = useRouter();
-
-  useEffect(() => {
-    authService.getSession().then((session) => {
-      setCurrentUserId(session?.user?.id ?? null);
-    });
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!currentUserId) return;
-
-      setFetchingPosts(true);
-      savedPostService.getSavedPosts(currentUserId).then((posts) => {
-        setSavedPosts(posts);
-        setFetchingPosts(false);
-      });
-
-      setFetchingListings(true);
-      savedListingService.getSavedListings(currentUserId).then((listings) => {
-        setSavedListings(listings);
-        setFetchingListings(false);
-      });
-    }, [currentUserId])
-  );
-
-  // Prune lists when context changes
-  useEffect(() => {
-    setSavedPosts((prev) => prev.filter((p) => savedPostIds.has(p.id)));
-  }, [savedPostIds]);
-
-  useEffect(() => {
-    setSavedListings((prev) => prev.filter((l) => savedListingIds.has(l.id)));
-  }, [savedListingIds]);
-
-  const loading =
-    activeTab === "listings"
-      ? fetchingListings || listingsContextLoading
-      : fetchingPosts || postsContextLoading;
+  const {
+    activeTab,
+    setActiveTab,
+    savedPosts,
+    savedListings,
+    loading,
+    toggleSave,
+    toggleSaveListing,
+    handleNavigateToListing,
+    handleNavigateToPost,
+  } = useSaved();
 
   if (loading) {
     return (
@@ -122,7 +87,7 @@ export default function SavedScreen() {
               renderItem={({ item }) => (
                 <SavedListingCard
                   listing={item}
-                  onPress={() => router.push(`/listing/${item.id}`)}
+                  onPress={() => handleNavigateToListing(item.id)}
                   onUnsave={() => toggleSaveListing(item.id)}
                 />
               )}
@@ -143,7 +108,7 @@ export default function SavedScreen() {
               renderItem={({ item }) => (
                 <SavedPostCard
                   post={item}
-                  onPress={() => router.push(`/post/${item.id}`)}
+                  onPress={() => handleNavigateToPost(item.id)}
                   onUnsave={() => toggleSave(item.id)}
                 />
               )}

@@ -1,40 +1,19 @@
+import React from "react";
 import Button from "@/components/ui/Button";
 import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
-import { supabase } from "@/src/lib/supabaseClient";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { useVerifyEmail } from "@/hooks/useVerifyEmail";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function VerifyEmailScreen() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
-
-  const handleResendEmail = async () => {
-    if (!email) {
-      Alert.alert("Error", "Please enter your email address");
-      return;
-    }
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email: email.trim(),
-      });
-      if (error) {
-        Alert.alert("Error", error.message);
-      } else {
-        Alert.alert("Success", "Verification email sent! Please check your inbox.");
-      }
-    } catch (err) {
-      Alert.alert("Error", "Failed to resend verification email");
-      console.error("Verification error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    loading,
+    email,
+    setEmail,
+    handleResendEmail,
+    handleBackToLogin,
+  } = useVerifyEmail();
 
   return (
     <Screen scrollable contentContainerStyle={styles.content}>
@@ -64,7 +43,7 @@ export default function VerifyEmailScreen() {
         <Button variant="outline" fullWidth onPress={handleResendEmail} disabled={loading}>
           {loading ? "Sending…" : "Resend Email"}
         </Button>
-        <Button fullWidth onPress={() => router.replace("/login")}>
+        <Button fullWidth onPress={handleBackToLogin}>
           Back to Login
         </Button>
       </View>
