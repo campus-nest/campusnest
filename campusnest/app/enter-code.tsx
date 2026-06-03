@@ -3,6 +3,7 @@ import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
+import { colors, spacing } from "@/src/constants/theme";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Keyboard, StyleSheet, View } from "react-native";
@@ -80,19 +81,19 @@ export default function EnterCodeScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: 32,
+    gap: spacing.xxxl,
   },
   heading: {
     alignItems: "center",
-    gap: 8,
+    gap: spacing.sm,
   },
   subtitle: {
-    color: "#888",
-    paddingHorizontal: 16,
+    color: colors.text.secondary,
+    paddingHorizontal: spacing.lg,
     lineHeight: 20,
   },
   form: {
-    gap: 16,
+    gap: spacing.lg,
   },
   codeInput: {
     fontSize: 28,

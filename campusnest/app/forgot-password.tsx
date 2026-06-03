@@ -3,6 +3,7 @@ import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
+import { colors, spacing } from "@/src/constants/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
@@ -72,16 +73,16 @@ export default function ForgotPasswordScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: 32,
+    gap: spacing.xxxl,
   },
   heading: {
     alignItems: "center",
     gap: 6,
   },
   subtitle: {
-    color: "#888",
+    color: colors.text.secondary,
   },
   form: {
-    gap: 16,
+    gap: spacing.lg,
   },
 });

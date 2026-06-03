@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, StyleSheet, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { colors, spacing } from "@/src/constants/theme";
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -17,7 +18,7 @@ export default function Screen({
   contentContainerStyle,
   noPadding = false,
 }: ScreenProps) {
-  const hPad: ViewStyle = noPadding ? {} : { paddingHorizontal: 20 };
+  const hPad: ViewStyle = noPadding ? {} : { paddingHorizontal: spacing.xl };
 
   if (scrollable) {
     return (
@@ -49,12 +50,12 @@ export default function Screen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.background.screen,
   },
   scrollBase: {
-    paddingTop: 32,
+    paddingTop: spacing.xxxl,
     paddingBottom: 48,
-    gap: 0, // screens set their own gap via contentContainerStyle
+    gap: 0,
   },
   inner: {
     flex: 1,

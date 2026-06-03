@@ -4,6 +4,7 @@ import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import { getSupabase } from "@/src/lib/supabaseClient";
 import { authService, profileService } from "@/src/services";
+import { colors, spacing, typography } from "@/src/constants/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
@@ -125,34 +126,34 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: 32,
+    gap: spacing.xxxl,
   },
   heading: {
     alignItems: "center",
     gap: 6,
   },
   subtitle: {
-    color: "#888",
+    color: colors.text.secondary,
   },
   form: {
-    gap: 16,
+    gap: spacing.lg,
   },
   forgotRow: {
     alignSelf: "flex-end",
   },
   forgotText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
     opacity: 0.7,
   },
   actions: {
-    gap: 16,
+    gap: spacing.lg,
     alignItems: "center",
   },
   backText: {
-    color: "#fff",
-    fontSize: 14,
+    color: colors.text.primary,
+    fontSize: typography.size.md,
     textAlign: "center",
     opacity: 0.5,
   },

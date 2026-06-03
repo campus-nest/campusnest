@@ -6,6 +6,7 @@ import { getSupabase } from "@/src/lib/supabaseClient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
+import { spacing } from "@/src/constants/theme";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -254,13 +255,13 @@ export default function SignUpScreen() {
 
 const styles = StyleSheet.create({
   scroll: {
-    paddingTop: 16,
+    paddingTop: spacing.lg,
     paddingBottom: 40,
-    gap: 16,
+    gap: spacing.lg,
   },
   row: {
     flexDirection: "row",
-    gap: 12,
+    gap: spacing.md,
   },
   half: {
     flex: 1,

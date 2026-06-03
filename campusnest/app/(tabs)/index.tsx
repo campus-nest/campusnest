@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, StyleSheet, View, Pressable, Text } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
@@ -8,8 +8,11 @@ import FilterPills from "@/components/ui/FilterPills";
 import LoadingState from "@/components/ui/LoadingState";
 import SearchBar from "@/components/ui/SearchBar";
 import PriceRangeModal from "@/components/ui/PriceRangeModal";
+import EmptyState from "@/components/ui/EmptyState";
 import * as Location from "expo-location";
 import { getDistanceFromLatLonInKm } from "@/src/utils/distance";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
+import { pillStyles } from "@/components/ui/FilterPills";
 
 type Role = "student" | "landlord";
 type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
@@ -30,10 +33,7 @@ export default function HomeScreen() {
   const [debouncedMin, setDebouncedMin] = useState<number>(0);
   const [debouncedMax, setDebouncedMax] = useState<number>(5000);
   const [isPriceModalVisible, setPriceModalVisible] = useState(false);
-  const [userLocation, setUserLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -44,10 +44,7 @@ export default function HomeScreen() {
       }
       try {
         let location = await Location.getCurrentPositionAsync({});
-        setUserLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
+        setUserLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
       } catch {
         setUserLocation({ latitude: 53.5461, longitude: -113.4938 });
       }
@@ -80,7 +77,6 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (!role) return;
-
     const fetchListings = async () => {
       setListingsLoading(true);
       const session = await authService.getSession();
@@ -112,33 +108,17 @@ export default function HomeScreen() {
       if (activeFilter === "cheapest") {
         fetchedListings.sort((a, b) => a.rent - b.rent);
       } else if (activeFilter === "new" || activeFilter === "recent") {
-        fetchedListings.sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-        );
+        fetchedListings.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       } else if (activeFilter === "moveIn") {
         fetchedListings.sort((a, b) => {
           if (!a.move_in_date) return 1;
           if (!b.move_in_date) return -1;
-          return (
-            new Date(a.move_in_date).getTime() -
-            new Date(b.move_in_date).getTime()
-          );
+          return new Date(a.move_in_date).getTime() - new Date(b.move_in_date).getTime();
         });
       } else if (activeFilter === "closest" && userLocation) {
         fetchedListings.sort((a, b) => {
-          const distA = getDistanceFromLatLonInKm(
-            userLocation.latitude,
-            userLocation.longitude,
-            a.latitude || 0,
-            a.longitude || 0,
-          );
-          const distB = getDistanceFromLatLonInKm(
-            userLocation.latitude,
-            userLocation.longitude,
-            b.latitude || 0,
-            b.longitude || 0,
-          );
+          const distA = getDistanceFromLatLonInKm(userLocation.latitude, userLocation.longitude, a.latitude || 0, a.longitude || 0);
+          const distB = getDistanceFromLatLonInKm(userLocation.latitude, userLocation.longitude, b.latitude || 0, b.longitude || 0);
           return distA - distB;
         });
       }
@@ -146,7 +126,6 @@ export default function HomeScreen() {
       setListings(fetchedListings);
       setListingsLoading(false);
     };
-
     fetchListings();
   }, [role, activeFilter, debouncedQuery, debouncedMin, debouncedMax, userLocation]);
 
@@ -172,21 +151,19 @@ export default function HomeScreen() {
   return (
     <PageContainer>
       <View style={styles.screen}>
-        {/* Search */}
         <View style={styles.searchWrapper}>
           <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
         </View>
 
-        {/* Filters */}
         <View style={styles.filterWrapper}>
           <FilterPills
             customPrependPill={
               role === "student" ? (
                 <Pressable
                   onPress={() => setPriceModalVisible(true)}
-                  style={[styles.pricePill, priceActive && styles.pricePillActive]}
+                  style={[pillStyles.pill, priceActive && pillStyles.pillActive, styles.pricePillMargin]}
                 >
-                  <Text style={[styles.pricePillText, priceActive && styles.pricePillTextActive]}>
+                  <Text style={[pillStyles.text, priceActive && pillStyles.textActive]}>
                     {priceActive ? `$${minPrice}–$${maxPrice}` : "Price"}
                   </Text>
                 </Pressable>
@@ -203,10 +180,7 @@ export default function HomeScreen() {
           initialMin={minPrice}
           initialMax={maxPrice}
           onClose={() => setPriceModalVisible(false)}
-          onApply={(min, max) => {
-            setMinPrice(min);
-            setMaxPrice(max);
-          }}
+          onApply={(min, max) => { setMinPrice(min); setMaxPrice(max); }}
         />
 
         <FlatList
@@ -215,11 +189,7 @@ export default function HomeScreen() {
           renderItem={({ item }) => <ListingCard listing={item} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No listings found.</Text>
-            </View>
-          }
+          ListEmptyComponent={<EmptyState title="No listings found." style={styles.emptyState} />}
         />
       </View>
     </PageContainer>
@@ -229,45 +199,22 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.background.screen,
   },
   searchWrapper: {
-    paddingTop: 8,
-    paddingBottom: 6,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm - 2,
   },
   filterWrapper: {
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   listContent: {
     paddingBottom: 60,
   },
-  pricePill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "#333",
-    marginRight: 8,
-  },
-  pricePillActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
-  },
-  pricePillText: {
-    fontSize: 13,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  pricePillTextActive: {
-    color: "#000",
+  pricePillMargin: {
+    marginRight: spacing.sm,
   },
   emptyState: {
     paddingTop: 80,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: "#555",
-    fontSize: 15,
   },
 });

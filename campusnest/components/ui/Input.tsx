@@ -8,6 +8,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { colors, radius, spacing } from "@/src/constants/theme";
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -27,7 +28,7 @@ export default function Input({
       {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
       <TextInput
         style={[styles.input, style]}
-        placeholderTextColor="#666"
+        placeholderTextColor={colors.text.faint}
         {...props}
       />
     </View>
@@ -36,21 +37,21 @@ export default function Input({
 
 const styles = StyleSheet.create({
   inputContainer: {
-    gap: 8,
+    gap: spacing.sm,
   },
   label: {
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 14,
     fontWeight: "500",
   },
   input: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    color: "#fff",
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    color: colors.text.primary,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
     letterSpacing: 0,
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
   },

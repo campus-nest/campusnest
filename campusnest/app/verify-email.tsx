@@ -3,6 +3,7 @@ import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import { supabase } from "@/src/lib/supabaseClient";
+import { colors, spacing } from "@/src/constants/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
@@ -74,25 +75,25 @@ export default function VerifyEmailScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: 32,
+    gap: spacing.xxxl,
   },
   heroBlock: {
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
   },
   icon: {
     fontSize: 64,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   description: {
-    color: "#888",
+    color: colors.text.secondary,
     lineHeight: 20,
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
   },
   form: {
-    gap: 16,
+    gap: spacing.lg,
   },
   actions: {
-    gap: 12,
+    gap: spacing.md,
   },
 });

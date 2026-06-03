@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   StyleSheet,
@@ -13,6 +12,9 @@ import { authService, postService } from "@/src/services";
 import { Post } from "@/src/types/post";
 import { Bookmark, Heart } from "lucide-react-native";
 import { useSavedPosts } from "@/src/context/SavedPostsContext";
+import LoadingState from "@/components/ui/LoadingState";
+import EmptyState from "@/components/ui/EmptyState";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 type PostFilter = "yourPost" | "recent";
 
@@ -35,7 +37,6 @@ export default function UsersScreen() {
     fetchCurrentUserAndRole();
   }, []);
 
-  // Reload posts list when the tab is focused or filter changes
   useFocusEffect(
     useCallback(() => {
       const fetchPosts = async () => {
@@ -43,9 +44,7 @@ export default function UsersScreen() {
         const allPosts = await postService.getPosts();
         let filteredPosts = allPosts;
         if (activeFilter === "yourPost" && currentUserId && role !== "landlord") {
-          filteredPosts = allPosts.filter(
-            (post) => post.user_id === currentUserId
-          );
+          filteredPosts = allPosts.filter((post) => post.user_id === currentUserId);
         }
         setPosts(filteredPosts);
         setLoading(false);
@@ -55,9 +54,7 @@ export default function UsersScreen() {
   );
 
   const handleToggleSave = useCallback(
-    (postId: string) => {
-      toggleSave(postId);
-    },
+    (postId: string) => { toggleSave(postId); },
     [toggleSave]
   );
 
@@ -69,14 +66,7 @@ export default function UsersScreen() {
           { key: "yourPost", label: "Your Posts" },
         ];
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading posts…</Text>
-      </View>
-    );
-  }
+  if (loading) return <LoadingState label="Loading posts…" />;
 
   return (
     <PageContainer>
@@ -84,11 +74,8 @@ export default function UsersScreen() {
         {/* Page header */}
         <View style={styles.pageHeader}>
           <Text style={styles.pageTitle}>Student Posts</Text>
-          <Pressable
-            style={styles.savedBtn}
-            onPress={() => router.push("/(tabs)/saved")}
-          >
-            <Bookmark size={18} color="#fff" strokeWidth={2} />
+          <Pressable style={styles.savedBtn} onPress={() => router.push("/(tabs)/saved")}>
+            <Bookmark size={18} color={colors.text.primary} strokeWidth={2} />
           </Pressable>
         </View>
 
@@ -110,15 +97,10 @@ export default function UsersScreen() {
           })}
         </View>
 
-        {/* List */}
         {posts.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>
-              {activeFilter === "yourPost"
-                ? "You haven't created any posts yet."
-                : "No posts available."}
-            </Text>
-          </View>
+          <EmptyState
+            title={activeFilter === "yourPost" ? "You haven't created any posts yet." : "No posts available."}
+          />
         ) : (
           <FlatList
             data={posts}
@@ -155,22 +137,17 @@ function PostCard({
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle}>{post.title}</Text>
-        <Text style={styles.cardText} numberOfLines={3}>
-          {post.body}
-        </Text>
+        <Text style={styles.cardText} numberOfLines={3}>{post.body}</Text>
       </View>
       <Pressable
         style={[styles.saveIconBtn, isSaved && styles.saveIconBtnActive]}
-        onPress={(e) => {
-          e.stopPropagation();
-          onToggleSave();
-        }}
+        onPress={(e) => { e.stopPropagation(); onToggleSave(); }}
         hitSlop={8}
       >
         <Heart
           size={16}
-          color={isSaved ? "#000" : "#666"}
-          fill={isSaved ? "#000" : "transparent"}
+          color={isSaved ? colors.black : colors.text.faint}
+          fill={isSaved ? colors.black : "transparent"}
           strokeWidth={2}
         />
       </Pressable>
@@ -181,122 +158,99 @@ function PostCard({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#000",
-    paddingTop: 12,
+    backgroundColor: colors.background.screen,
+    paddingTop: spacing.md,
   },
   pageHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   pageTitle: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.xxxl,
+    fontWeight: typography.weight.bold,
     letterSpacing: 0.1,
   },
   savedBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.background.elevated,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   filtersRow: {
     flexDirection: "row",
-    gap: 8,
-    marginBottom: 20,
+    gap: spacing.sm,
+    marginBottom: spacing.xl,
   },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    backgroundColor: "#1a1a1a",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   chipActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
+    backgroundColor: colors.white,
+    borderColor: colors.white,
   },
   chipText: {
-    color: "#aaa",
-    fontSize: 14,
-    fontWeight: "500",
+    color: colors.text.muted,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
   },
   chipTextActive: {
-    color: "#000",
+    color: colors.black,
   },
   listContent: {
     paddingBottom: 60,
     gap: 10,
   },
   card: {
-    backgroundColor: "#111",
-    borderRadius: 14,
-    padding: 16,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: "#1e1e1e",
+    borderColor: colors.border.subtle,
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 12,
+    gap: spacing.md,
   },
   cardBody: {
     flex: 1,
-    gap: 6,
+    gap: spacing.sm - 2,
   },
   cardTitle: {
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
     lineHeight: 20,
   },
   cardText: {
-    color: "#888",
-    fontSize: 13,
+    color: colors.text.secondary,
+    fontSize: typography.size.base,
     lineHeight: 19,
   },
   saveIconBtn: {
     width: 32,
     height: 32,
-    borderRadius: 8,
-    backgroundColor: "#1a1a1a",
+    borderRadius: radius.sm,
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 2,
     flexShrink: 0,
   },
   saveIconBtnActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-    gap: 12,
-  },
-  centeredText: {
-    color: "#aaa",
-    fontSize: 14,
-  },
-  empty: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-  },
-  emptyText: {
-    color: "#555",
-    fontSize: 15,
-    textAlign: "center",
-    lineHeight: 22,
+    backgroundColor: colors.white,
+    borderColor: colors.white,
   },
 });

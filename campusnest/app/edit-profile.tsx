@@ -2,13 +2,14 @@ import Button from "@/components/ui/Button";
 import { H1 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
+import LoadingState from "@/components/ui/LoadingState";
 import { authService, profileService } from "@/src/services";
+import { colors, radius, spacing } from "@/src/constants/theme";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { Upload } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
   StyleSheet,
@@ -23,7 +24,6 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Form state
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<"student" | "landlord">("student");
   const [university, setUniversity] = useState("");
@@ -39,21 +39,10 @@ export default function EditProfileScreen() {
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
-
       const user = await authService.getCurrentUser();
-
-      if (!user) {
-        router.replace("/");
-        return;
-      }
-
+      if (!user) { router.replace("/"); return; }
       const profile = await profileService.getProfileById(user.id);
-
-      if (!profile) {
-        Alert.alert("Error", "Could not fetch profile data.");
-        return;
-      }
-
+      if (!profile) { Alert.alert("Error", "Could not fetch profile data."); return; }
       setFullName(profile.full_name || "");
       setRole(profile.role || "student");
       setUniversity(profile.university || "");
@@ -83,10 +72,7 @@ export default function EditProfileScreen() {
         aspect: [1, 1],
         quality: 0.5,
       });
-
-      if (!result.canceled) {
-        setImageUri(result.assets[0].uri);
-      }
+      if (!result.canceled) setImageUri(result.assets[0].uri);
     } catch (error) {
       console.error("Error picking image:", error);
       Alert.alert("Error", "Could not pick image.");
@@ -98,26 +84,19 @@ export default function EditProfileScreen() {
       Alert.alert("Error", "Full name is required");
       return;
     }
-
     if (role === "landlord" && !phoneNumber.trim()) {
       Alert.alert("Error", "Phone number is required for landlords");
       return;
     }
-
     try {
       setSaving(true);
-
       const user = await authService.getCurrentUser();
-
       if (!user) return;
-
       let finalAvatarUrl = avatarUrl;
-
       if (imageUri) {
         const uploaded = await profileService.uploadAvatar(user.id, imageUri);
         if (uploaded) finalAvatarUrl = uploaded;
       }
-
       const result = await profileService.updateProfile(user.id, {
         full_name: fullName,
         role,
@@ -130,12 +109,10 @@ export default function EditProfileScreen() {
         avatar_url: finalAvatarUrl || undefined,
         phone_number: phoneNumber,
       });
-
       if (!result.success) {
         Alert.alert("Error", result.error || "Could not update profile.");
         return;
       }
-
       Alert.alert("Success", "Profile updated successfully!");
       router.back();
     } catch (error) {
@@ -146,42 +123,31 @@ export default function EditProfileScreen() {
     }
   }
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    );
-  }
+  if (loading) return <LoadingState />;
 
   return (
     <Screen scrollable contentContainerStyle={styles.content}>
-      {/* Header */}
       <H1>Edit Profile</H1>
-      {/* Avatar */}
+
       <View style={styles.avatarSection}>
         <TouchableOpacity onPress={pickImage}>
           {imageUri || avatarUrl ? (
-            <Image
-              source={{ uri: imageUri || avatarUrl || undefined }}
-              style={styles.avatar}
-            />
+            <Image source={{ uri: imageUri || avatarUrl || undefined }} style={styles.avatar} />
           ) : (
             <View style={styles.avatar}>
               <Text style={styles.avatarPlaceholder}>Add Photo</Text>
             </View>
           )}
           <View style={styles.editIconContainer}>
-            <Upload color="white" size={16} />
+            <Upload color={colors.white} size={16} />
           </View>
         </TouchableOpacity>
       </View>
 
-      {/* Form Fields */}
       <Input
         label="Full Name *"
         placeholder="Enter your full name"
-        placeholderTextColor="#666"
+        placeholderTextColor={colors.text.faint}
         value={fullName}
         onChangeText={setFullName}
       />
@@ -189,7 +155,7 @@ export default function EditProfileScreen() {
       <Input
         label="Email *"
         placeholder="Enter your email"
-        placeholderTextColor="#666"
+        placeholderTextColor={colors.text.faint}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -200,7 +166,7 @@ export default function EditProfileScreen() {
         <Input
           label="Phone Number *"
           placeholder="e.g., (403) 123-4567"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.text.faint}
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
@@ -211,7 +177,7 @@ export default function EditProfileScreen() {
         <Input
           label="University"
           placeholder="e.g., University of Calgary"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.text.faint}
           value={university}
           onChangeText={setUniversity}
         />
@@ -220,42 +186,29 @@ export default function EditProfileScreen() {
         <Input
           label="Year of Study"
           placeholder="e.g., 2nd Year"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.text.faint}
           value={year}
           onChangeText={setYear}
         />
       )}
+
       <Input
         label="Current Address"
         placeholder="Enter your address"
-        placeholderTextColor="#666"
+        placeholderTextColor={colors.text.faint}
         value={currentAddress}
         onChangeText={setCurrentAddress}
       />
 
       <View style={styles.rowContainer}>
-        <View style={[styles.halfWidth]}>
-          <Input
-            label="City"
-            placeholder="City"
-            placeholderTextColor="#666"
-            value={city}
-            onChangeText={setCity}
-          />
+        <View style={styles.halfWidth}>
+          <Input label="City" placeholder="City" placeholderTextColor={colors.text.faint} value={city} onChangeText={setCity} />
         </View>
-
-        <View style={[styles.halfWidth]}>
-          <Input
-            label="Province"
-            placeholder="Province"
-            placeholderTextColor="#666"
-            value={province}
-            onChangeText={setProvince}
-          />
+        <View style={styles.halfWidth}>
+          <Input label="Province" placeholder="Province" placeholderTextColor={colors.text.faint} value={province} onChangeText={setProvince} />
         </View>
       </View>
 
-      {/* Save Button */}
       <Button fullWidth onPress={handleSave} disabled={saving}>
         {saving ? "Please wait" : "Save Changes"}
       </Button>
@@ -264,20 +217,14 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: "black",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   content: {
-    gap: 16,
-    paddingTop: 16,
+    gap: spacing.lg,
+    paddingTop: spacing.lg,
     paddingBottom: 40,
   },
   avatarSection: {
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   avatar: {
     width: 100,
@@ -288,7 +235,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   avatarPlaceholder: {
-    color: "#666",
+    color: colors.text.faint,
     fontSize: 14,
   },
   editIconContainer: {
@@ -296,12 +243,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     backgroundColor: "#3b82f6",
-    padding: 8,
-    borderRadius: 20,
+    padding: spacing.sm,
+    borderRadius: radius.xl,
   },
   rowContainer: {
     flexDirection: "row",
-    gap: 12,
+    gap: spacing.md,
   },
   halfWidth: {
     flex: 1,

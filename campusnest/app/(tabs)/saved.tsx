@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -10,12 +9,15 @@ import {
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { useFocusEffect, useRouter } from "expo-router";
-import { authService, savedPostService, savedListingService } from "@/src/services";
+import { authService, savedListingService, savedPostService } from "@/src/services";
 import { Post } from "@/src/types/post";
 import { Listing } from "@/src/types/listing";
 import { Bookmark, BookmarkX } from "lucide-react-native";
 import { useSavedPosts } from "@/src/context/SavedPostsContext";
 import { useSavedListings } from "@/src/context/SavedListingsContext";
+import LoadingState from "@/components/ui/LoadingState";
+import EmptyState from "@/components/ui/EmptyState";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 type Tab = "listings" | "posts";
 
@@ -40,13 +42,11 @@ export default function SavedScreen() {
   useFocusEffect(
     useCallback(() => {
       if (!currentUserId) return;
-
       setFetchingPosts(true);
       savedPostService.getSavedPosts(currentUserId).then((posts) => {
         setSavedPosts(posts);
         setFetchingPosts(false);
       });
-
       setFetchingListings(true);
       savedListingService.getSavedListings(currentUserId).then((listings) => {
         setSavedListings(listings);
@@ -55,7 +55,6 @@ export default function SavedScreen() {
     }, [currentUserId])
   );
 
-  // Prune lists when context changes
   useEffect(() => {
     setSavedPosts((prev) => prev.filter((p) => savedPostIds.has(p.id)));
   }, [savedPostIds]);
@@ -69,14 +68,7 @@ export default function SavedScreen() {
       ? fetchingListings || listingsContextLoading
       : fetchingPosts || postsContextLoading;
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading saved…</Text>
-      </View>
-    );
-  }
+  if (loading) return <LoadingState label="Loading saved…" />;
 
   return (
     <PageContainer>
@@ -111,10 +103,13 @@ export default function SavedScreen() {
           </Pressable>
         </View>
 
-        {/* Listings tab */}
         {activeTab === "listings" && (
           savedListings.length === 0 ? (
-            <EmptyState label="No saved listings yet" subtext="Tap the bookmark on any listing to save it" />
+            <EmptyState
+              title="No saved listings yet"
+              subtitle="Tap the bookmark on any listing to save it"
+              icon={<Bookmark size={28} color="#444" strokeWidth={1.5} />}
+            />
           ) : (
             <FlatList
               data={savedListings}
@@ -132,10 +127,13 @@ export default function SavedScreen() {
           )
         )}
 
-        {/* Posts tab */}
         {activeTab === "posts" && (
           savedPosts.length === 0 ? (
-            <EmptyState label="Nothing saved yet" subtext="Posts you save will appear here" />
+            <EmptyState
+              title="Nothing saved yet"
+              subtitle="Posts you save will appear here"
+              icon={<Bookmark size={28} color="#444" strokeWidth={1.5} />}
+            />
           ) : (
             <FlatList
               data={savedPosts}
@@ -170,11 +168,7 @@ function SavedListingCard({
     <Pressable style={styles.listingCard} onPress={onPress}>
       <View style={styles.listingThumb}>
         {listing.photo_urls?.length ? (
-          <Image
-            source={{ uri: listing.photo_urls[0] }}
-            style={styles.listingThumbImage}
-            resizeMode="cover"
-          />
+          <Image source={{ uri: listing.photo_urls[0] }} style={styles.listingThumbImage} resizeMode="cover" />
         ) : (
           <Text style={styles.listingThumbFallback}>🏠</Text>
         )}
@@ -192,7 +186,7 @@ function SavedListingCard({
         onPress={(e) => { e.stopPropagation(); onUnsave(); }}
         hitSlop={8}
       >
-        <BookmarkX size={16} color="#555" strokeWidth={2} />
+        <BookmarkX size={16} color={colors.text.dim} strokeWidth={2} />
       </Pressable>
     </Pressable>
   );
@@ -211,7 +205,7 @@ function SavedPostCard({
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.cardLeft}>
         <View style={styles.cardIconWrap}>
-          <Bookmark size={14} color="#666" strokeWidth={2} />
+          <Bookmark size={14} color={colors.text.faint} strokeWidth={2} />
         </View>
       </View>
       <View style={styles.cardBody}>
@@ -223,100 +217,87 @@ function SavedPostCard({
         onPress={(e) => { e.stopPropagation(); onUnsave(); }}
         hitSlop={8}
       >
-        <BookmarkX size={16} color="#555" strokeWidth={2} />
+        <BookmarkX size={16} color={colors.text.dim} strokeWidth={2} />
       </Pressable>
     </Pressable>
-  );
-}
-
-function EmptyState({ label, subtext }: { label: string; subtext: string }) {
-  return (
-    <View style={styles.emptyState}>
-      <View style={styles.emptyIconWrap}>
-        <Bookmark size={28} color="#444" strokeWidth={1.5} />
-      </View>
-      <Text style={styles.emptyTitle}>{label}</Text>
-      <Text style={styles.emptySubtext}>{subtext}</Text>
-    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#000",
-    paddingTop: 12,
+    backgroundColor: colors.background.screen,
+    paddingTop: spacing.md,
   },
   pageHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   pageTitle: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.xxxl,
+    fontWeight: typography.weight.bold,
     letterSpacing: 0.1,
   },
   countPill: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 99,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.full,
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   countText: {
-    color: "#666",
-    fontSize: 13,
-    fontWeight: "600",
+    color: colors.text.faint,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
   },
   tabRow: {
     flexDirection: "row",
-    gap: 8,
-    marginBottom: 16,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   tab: {
     paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 99,
-    backgroundColor: "#111",
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.background.card,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: colors.border.dim,
   },
   tabActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
+    backgroundColor: colors.white,
+    borderColor: colors.white,
   },
   tabText: {
-    color: "#666",
-    fontSize: 13,
-    fontWeight: "600",
+    color: colors.text.faint,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
   },
   tabTextActive: {
-    color: "#000",
+    color: colors.black,
   },
   listContent: {
     paddingBottom: 60,
     gap: 10,
   },
-  // Listing card
   listingCard: {
-    backgroundColor: "#111",
-    borderRadius: 14,
-    padding: 12,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.lg,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: "#1e1e1e",
+    borderColor: colors.border.subtle,
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
   },
   listingThumb: {
     width: 64,
     height: 64,
     borderRadius: 10,
-    backgroundColor: "#2a2a2a",
+    backgroundColor: colors.background.surface,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
@@ -334,35 +315,34 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   listingTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.bold,
     lineHeight: 18,
   },
   listingRent: {},
   listingRentAmount: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
+    color: colors.text.primary,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.extrabold,
   },
   listingRentSuffix: {
-    color: "#666",
-    fontSize: 12,
+    color: colors.text.faint,
+    fontSize: typography.size.sm,
   },
   listingAddress: {
-    color: "#666",
-    fontSize: 12,
+    color: colors.text.faint,
+    fontSize: typography.size.sm,
   },
-  // Post card
   card: {
-    backgroundColor: "#111",
-    borderRadius: 14,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.lg,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#1e1e1e",
+    borderColor: colors.border.subtle,
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 12,
+    gap: spacing.md,
   },
   cardLeft: {
     paddingTop: 2,
@@ -370,10 +350,10 @@ const styles = StyleSheet.create({
   cardIconWrap: {
     width: 30,
     height: 30,
-    borderRadius: 8,
-    backgroundColor: "#1a1a1a",
+    borderRadius: radius.sm,
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: colors.border.dim,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -382,60 +362,18 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   cardTitle: {
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
     lineHeight: 20,
   },
   cardText: {
     color: "#777",
-    fontSize: 13,
+    fontSize: typography.size.base,
     lineHeight: 18,
   },
   unsaveBtn: {
     paddingTop: 2,
-    paddingLeft: 4,
-  },
-  // Shared
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-    gap: 12,
-  },
-  centeredText: {
-    color: "#aaa",
-    fontSize: 14,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 32,
-    paddingBottom: 60,
-  },
-  emptyIconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: "#111",
-    borderWidth: 1,
-    borderColor: "#1e1e1e",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
-  },
-  emptyTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  emptySubtext: {
-    color: "#555",
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
+    paddingLeft: spacing.xs,
   },
 });

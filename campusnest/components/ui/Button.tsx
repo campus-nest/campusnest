@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text } from "react-native";
+import { colors, radius } from "@/src/constants/theme";
 
 interface ButtonProps {
   onPress: () => void;
@@ -44,20 +45,20 @@ export default function Button({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 100,
+    borderRadius: radius.full,
     justifyContent: "center",
     alignItems: "center",
   },
   primary: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.white,
   },
   secondary: {
-    backgroundColor: "#333",
+    backgroundColor: colors.border.strong,
   },
   outline: {
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: "#fff",
+    borderColor: colors.white,
   },
   disabled: {
     opacity: 0.5,
@@ -78,21 +79,21 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   baseText: {
-    color: "#000",
+    color: colors.black,
     fontSize: 14,
     fontWeight: "500",
     letterSpacing: 0.1,
   },
   primaryText: {
-    color: "#000",
+    color: colors.black,
   },
   secondaryText: {
-    color: "#fff",
+    color: colors.white,
   },
   outlineText: {
-    color: "#fff",
+    color: colors.white,
   },
   disabledText: {
-    color: "#999",
+    color: colors.text.readable,
   },
 });

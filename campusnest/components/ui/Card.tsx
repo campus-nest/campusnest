@@ -1,21 +1,18 @@
 import { ReactNode } from "react";
 import { StyleSheet, View, ViewStyle } from "react-native";
+import { colors, radius, spacing } from "@/src/constants/theme";
+
+type CardVariant = "dark" | "elevated" | "light";
 
 interface CardProps {
   children: ReactNode;
-  variant?: "dark" | "light";
+  variant?: CardVariant;
   style?: ViewStyle;
 }
 
 export default function Card({ children, variant = "dark", style }: CardProps) {
   return (
-    <View
-      style={[
-        styles.card,
-        variant === "light" ? styles.cardLight : styles.cardDark,
-        style,
-      ]}
-    >
+    <View style={[styles.card, styles[variant], style]}>
       {children}
     </View>
   );
@@ -23,13 +20,25 @@ export default function Card({ children, variant = "dark", style }: CardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 24,
-    padding: 16,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
   },
-  cardDark: {
-    backgroundColor: "#1a1a1a",
+  // Used in profile, saved, users tabs — subtle dark card
+  dark: {
+    backgroundColor: colors.background.card,
+    borderColor: colors.border.subtle,
   },
-  cardLight: {
+  // Used in post detail, listing detail — slightly elevated card
+  elevated: {
+    backgroundColor: colors.background.elevated,
+    borderColor: colors.border.default,
+  },
+  // Used in new_post and edit listing forms — light card on dark background
+  light: {
     backgroundColor: "#f2f2f2",
+    borderColor: "#ddd",
+    borderRadius: radius.xxl,
+    padding: spacing.xl,
   },
 });

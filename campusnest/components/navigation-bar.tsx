@@ -5,6 +5,7 @@ import Profile from "@/assets/images/nav_bar/profile.svg";
 import Users from "@/assets/images/nav_bar/users_icon.svg";
 import { usePathname, useRouter } from "expo-router";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { colors, spacing, typography } from "@/src/constants/theme";
 
 export function NavigationBar() {
   const router = useRouter();
@@ -170,7 +171,7 @@ export function NavigationBar() {
         <Home
           width={24}
           height={24}
-          color={isActive("/(tabs)") ? "#007AFF" : "#888"}
+          color={isActive("/(tabs)") ? colors.accent.primary : colors.text.secondary}
         />
       </Pressable>
 
@@ -183,7 +184,7 @@ export function NavigationBar() {
         <SearchListing
           width={24}
           height={24}
-          color={isActive("/explore") ? "#007AFF" : "#888"}
+          color={isActive("/explore") ? colors.accent.primary : colors.text.secondary}
         />
       </Pressable>
 
@@ -196,7 +197,7 @@ export function NavigationBar() {
         <CreateListing
           width={24}
           height={24}
-          color={isActive("/new_post") ? "#007AFF" : "#888"}
+          color={isActive("/new_post") ? colors.accent.primary : colors.text.secondary}
         />
       </Pressable>
 
@@ -209,7 +210,7 @@ export function NavigationBar() {
         <Users
           width={24}
           height={24}
-          color={isActive("/users") ? "#007AFF" : "#888"}
+          color={isActive("/users") ? colors.accent.primary : colors.text.secondary}
         />
       </Pressable>
 
@@ -222,7 +223,7 @@ export function NavigationBar() {
         <Profile
           width={24}
           height={24}
-          color={isActive("/profile") ? "#007AFF" : "#888"}
+          color={isActive("/profile") ? colors.accent.primary : colors.text.secondary}
         />
       </Pressable>
     </View>
@@ -233,55 +234,55 @@ const styles = StyleSheet.create({
   // Web styles
   webContainer: {
     height: 60,
-    backgroundColor: "#000",
+    backgroundColor: colors.background.screen,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: colors.border.strong,
   },
   logo: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
+    color: colors.white,
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
   },
   webNav: {
     flexDirection: "row",
-    gap: 20,
+    gap: spacing.xl,
   },
   webNavItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     borderRadius: 6,
   },
   webNavItemActive: {
-    backgroundColor: "#333",
+    backgroundColor: colors.border.strong,
   },
   webNavLink: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
+    color: colors.white,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
   },
   webNavLinkActive: {
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
     textDecorationLine: "underline",
   },
 
   // Mobile styles
   mobileContainer: {
     position: "absolute",
-    bottom: 20,
+    bottom: spacing.xl,
     alignSelf: "center",
     width: "90%",
     maxWidth: 480,
     height: 70,
-    backgroundColor: "#fff",
+    backgroundColor: colors.white,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     borderRadius: 35,
-    shadowColor: "#000",
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -293,6 +294,6 @@ const styles = StyleSheet.create({
   navItem: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 8,
+    padding: spacing.sm,
   },
 });

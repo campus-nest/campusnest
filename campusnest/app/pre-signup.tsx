@@ -3,6 +3,7 @@ import { H1, H4 } from "@/components/ui/Headings";
 import Logo from "@/components/ui/Logo";
 import Screen from "@/components/ui/Screen";
 import Select from "@/components/ui/Select";
+import { colors, spacing } from "@/src/constants/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -53,20 +54,20 @@ export default function PreSignUpScreen() {
 
 const styles = StyleSheet.create({
   screen: {
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.xxl,
   },
   top: {
     flex: 1,
     alignItems: "center",
     paddingTop: 48,
-    gap: 16,
+    gap: spacing.lg,
   },
   logoGap: {
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    color: "#888",
-    marginBottom: 8,
+    color: colors.text.secondary,
+    marginBottom: spacing.sm,
   },
   selectWrapper: {
     width: "100%",

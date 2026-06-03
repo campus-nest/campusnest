@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 interface Tab {
   label: string;
@@ -57,36 +58,36 @@ export default function TabSelector({
 const styles = StyleSheet.create({
   tabRow: {
     flexDirection: "row",
-    borderRadius: 999,
-    padding: 4,
+    borderRadius: radius.full,
+    padding: spacing.xs,
   },
   tabRowDark: {
-    backgroundColor: "#333",
+    backgroundColor: colors.border.strong,
   },
   tabRowLight: {
     backgroundColor: "#e0e0e0",
   },
   tab: {
     flex: 1,
-    borderRadius: 999,
+    borderRadius: radius.full,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
   },
   tabActive: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.white,
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
   },
   tabTextDark: {
-    color: "#aaa",
+    color: colors.text.muted,
   },
   tabTextLight: {
-    color: "#555",
+    color: colors.text.dim,
   },
   tabTextActive: {
-    color: "#000",
+    color: colors.black,
   },
 });

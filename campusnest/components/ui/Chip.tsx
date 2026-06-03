@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 interface ChipProps {
   label: string;
@@ -7,14 +8,8 @@ interface ChipProps {
   variant?: "default" | "light";
 }
 
-export default function Chip({
-  label,
-  selected = false,
-  onPress,
-  variant = "default",
-}: ChipProps) {
+export default function Chip({ label, selected = false, onPress, variant = "default" }: ChipProps) {
   const isLight = variant === "light";
-
   return (
     <Pressable
       onPress={onPress}
@@ -28,8 +23,7 @@ export default function Chip({
         style={[
           styles.chipText,
           isLight ? styles.chipTextLight : styles.chipTextDefault,
-          selected &&
-            (isLight ? styles.chipTextLightSelected : styles.chipTextSelected),
+          selected && (isLight ? styles.chipTextLightSelected : styles.chipTextSelected),
         ]}
       >
         {label}
@@ -45,12 +39,7 @@ interface ChipGroupProps {
   variant?: "default" | "light";
 }
 
-export function ChipGroup({
-  options,
-  selected,
-  onToggle,
-  variant = "default",
-}: ChipGroupProps) {
+export function ChipGroup({ options, selected, onToggle, variant = "default" }: ChipGroupProps) {
   return (
     <View style={styles.chipGroup}>
       {options.map((option) => (
@@ -73,12 +62,7 @@ interface ToggleChipGroupProps {
   variant?: "default" | "light";
 }
 
-export function ToggleChipGroup({
-  options,
-  value,
-  onChange,
-  variant = "light",
-}: ToggleChipGroupProps) {
+export function ToggleChipGroup({ options, value, onChange, variant = "light" }: ToggleChipGroupProps) {
   return (
     <View style={styles.toggleGroup}>
       {options.map((option) => (
@@ -107,81 +91,76 @@ export function ToggleChipGroup({
 }
 
 const styles = StyleSheet.create({
-  // Single Chip styles
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
     borderWidth: 1,
   },
   chipDefault: {
-    backgroundColor: "#1a1a1a",
-    borderColor: "#333",
+    backgroundColor: colors.background.elevated,
+    borderColor: colors.border.strong,
   },
   chipLight: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.white,
     borderColor: "#bbb",
   },
   chipSelected: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
+    backgroundColor: colors.white,
+    borderColor: colors.white,
   },
   chipLightSelected: {
-    backgroundColor: "#000",
-    borderColor: "#000",
+    backgroundColor: colors.black,
+    borderColor: colors.black,
   },
   chipText: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
   chipTextDefault: {
-    color: "#fff",
+    color: colors.text.primary,
   },
   chipTextLight: {
-    color: "#333",
+    color: colors.border.strong,
   },
   chipTextSelected: {
-    color: "#000",
+    color: colors.black,
   },
   chipTextLightSelected: {
-    color: "#fff",
+    color: colors.white,
   },
-
-  // ChipGroup styles
   chipGroup: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: spacing.sm,
   },
-
-  // ToggleChipGroup styles
   toggleGroup: {
     flexDirection: "row",
-    gap: 8,
+    gap: spacing.sm,
   },
   toggleChip: {
     flex: 1,
-    borderRadius: 999,
-    paddingVertical: 12,
+    borderRadius: radius.full,
+    paddingVertical: spacing.md,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#333",
+    backgroundColor: colors.border.strong,
   },
   toggleChipLight: {
     backgroundColor: "#e0e0e0",
   },
   toggleChipActive: {
-    backgroundColor: "#000",
+    backgroundColor: colors.black,
   },
   toggleChipText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#fff",
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
+    color: colors.white,
   },
   toggleChipTextLight: {
-    color: "#333",
+    color: colors.border.strong,
   },
   toggleChipTextActive: {
-    color: "#fff",
+    color: colors.white,
   },
 });

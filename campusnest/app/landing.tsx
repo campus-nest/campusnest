@@ -5,6 +5,7 @@ import Logo from "@/components/ui/Logo";
 import Screen from "@/components/ui/Screen";
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
+import { spacing } from "@/src/constants/theme";
 
 export default function LandingScreen() {
   const router = useRouter();
@@ -38,25 +39,25 @@ export default function LandingScreen() {
 
 const styles = StyleSheet.create({
   screen: {
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.xxl,
   },
   top: {
     flex: 1,
     alignItems: "center",
     paddingTop: 48,
-    gap: 12,
+    gap: spacing.md,
   },
   logoGap: {
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   tagline: {
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   buttons: {
     width: "100%",
     alignItems: "center",
-    gap: 12,
-    marginTop: 8,
+    gap: spacing.md,
+    marginTop: spacing.sm,
   },
   illustration: {
     height: 180,

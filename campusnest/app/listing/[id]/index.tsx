@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Linking,
   Modal,
@@ -13,18 +12,19 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Phone, Mail, Copy, X, Pencil, Trash2 } from "lucide-react-native";
+import { Copy, Mail, Pencil, Phone, Trash2, X } from "lucide-react-native";
 import { authService, listingService, profileService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
 import { Profile } from "@/src/types/profile";
 import { ListingImageGallery } from "@/components/listings/ListingImageGallery";
 import * as Clipboard from "expo-clipboard";
+import LoadingState from "@/components/ui/LoadingState";
+import PageHeader, { HeaderActions, HeaderIconBtn } from "@/components/ui/PageHeader";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
-// Dynamic imports for platform-specific map components
 let MapView: any;
 let Marker: any;
 let UrlTile: any;
-
 if (Platform.OS !== "web") {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const maps = require("react-native-maps");
@@ -47,24 +47,14 @@ export default function ListingDetailScreen() {
 
   useEffect(() => {
     if (!id) return;
-
     const fetchData = async () => {
       try {
         setLoading(true);
         const session = await authService.getSession();
         const listingData = await listingService.getListingById(id);
-
-        if (!listingData) {
-          Alert.alert("Error", "Could not load listing.");
-          return;
-        }
-
+        if (!listingData) { Alert.alert("Error", "Could not load listing."); return; }
         setListing(listingData);
-
-        if (session?.user?.id === listingData.landlord_id) {
-          setIsOwner(true);
-        }
-
+        if (session?.user?.id === listingData.landlord_id) setIsOwner(true);
         try {
           const profile = await profileService.getProfileById(listingData.landlord_id);
           setLandlordProfile(profile);
@@ -79,13 +69,8 @@ export default function ListingDetailScreen() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [id]);
-
-  const handleContact = () => {
-    setContactModalVisible(true);
-  };
 
   const handleCall = async (phone: string) => {
     try {
@@ -112,10 +97,7 @@ export default function ListingDetailScreen() {
     }
   };
 
-  const handleEdit = () => {
-    if (!id) return;
-    router.push(`/listing/${id}/edit`);
-  };
+  const handleEdit = () => { if (id) router.push(`/listing/${id}/edit`); };
 
   const handleDelete = () => {
     Alert.alert(
@@ -129,9 +111,9 @@ export default function ListingDetailScreen() {
           onPress: async () => {
             try {
               setDeleting(true);
-              const result = await listingService.deleteListing(id);
-                if (result.success) {
-                  router.replace("/(tabs)");
+              const result = await listingService.deleteListing(id!);
+              if (result.success) {
+                router.replace("/(tabs)");
               } else {
                 Alert.alert("Error", result.error ?? "Failed to delete listing.");
               }
@@ -147,66 +129,36 @@ export default function ListingDetailScreen() {
     );
   };
 
-  if (loading || !listing) {
-    return (
-      <SafeAreaView style={styles.loadingScreen}>
-        <ActivityIndicator color="#fff" size="large" />
-        <Text style={styles.loadingText}>Loading listing…</Text>
-      </SafeAreaView>
-    );
-  }
+  if (loading || !listing) return <LoadingState label="Loading listing…" />;
+  if (deleting) return <LoadingState label="Deleting listing…" />;
 
-  if (deleting) {
-    return (
-      <SafeAreaView style={styles.loadingScreen}>
-        <ActivityIndicator color="#fff" size="large" />
-        <Text style={styles.loadingText}>Deleting listing…</Text>
-      </SafeAreaView>
-    );
-  }
+  const hasCoordinates = listing.latitude != null && listing.longitude != null;
 
-  const hasCoordinates =
-    listing.latitude != null && listing.longitude != null;
+  const headerRight = isOwner ? (
+    <HeaderActions>
+      <HeaderIconBtn onPress={handleEdit} hitSlop={6}>
+        <Pencil color={colors.text.primary} size={18} />
+      </HeaderIconBtn>
+      <HeaderIconBtn onPress={handleDelete} danger hitSlop={6}>
+        <Trash2 color={colors.danger.default} size={18} />
+      </HeaderIconBtn>
+    </HeaderActions>
+  ) : undefined;
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header bar */}
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <ChevronLeft color="#fff" size={22} />
-        </Pressable>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {listing.title}
-        </Text>
-        {/* Owner actions in header */}
-        {isOwner ? (
-          <View style={styles.headerActions}>
-            <Pressable style={styles.headerIconBtn} onPress={handleEdit} hitSlop={6}>
-              <Pencil color="#fff" size={18} />
-            </Pressable>
-            <Pressable style={[styles.headerIconBtn, styles.headerDeleteBtn]} onPress={handleDelete} hitSlop={6}>
-              <Trash2 color="#ff4444" size={18} />
-            </Pressable>
-          </View>
-        ) : (
-          <View style={{ width: 40, height: 40 }} />
-        )}
-      </View>
+      <PageHeader title={listing.title} onBack={() => router.back()} right={headerRight} />
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Image gallery */}
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <ListingImageGallery photos={listing.photo_urls ?? []} />
 
-        {/* Content */}
         <View style={styles.content}>
-          {/* Title + rent */}
           <Text style={styles.title}>{listing.title}</Text>
-          <Text style={styles.rent}>${listing.rent}<Text style={styles.rentSuffix}> / month</Text></Text>
+          <Text style={styles.rent}>
+            ${listing.rent}
+            <Text style={styles.rentSuffix}> / month</Text>
+          </Text>
 
-          {/* Key details row */}
           {(listing.bedrooms != null || listing.bathrooms != null) && (
             <View style={styles.detailsRow}>
               {listing.bedrooms != null && (
@@ -227,29 +179,21 @@ export default function ListingDetailScreen() {
             </View>
           )}
 
-          {/* Address */}
           <Text style={styles.address}>{listing.address}</Text>
 
-          {/* Info list */}
-          <View style={styles.card}>
+          <View style={styles.infoCard}>
             {listing.security_deposit != null && (
               <InfoRow label="Security deposit" value={`$${listing.security_deposit}`} />
             )}
-            {listing.utilities && (
-              <InfoRow label="Utilities" value={listing.utilities} />
-            )}
+            {listing.utilities && <InfoRow label="Utilities" value={listing.utilities} />}
             {listing.move_in_date && (
-              <InfoRow
-                label="Move-in date"
-                value={new Date(listing.move_in_date).toLocaleDateString()}
-              />
+              <InfoRow label="Move-in date" value={new Date(listing.move_in_date).toLocaleDateString()} />
             )}
             {listing.nearby_university && (
               <InfoRow label="Nearby university" value={listing.nearby_university} last />
             )}
           </View>
 
-          {/* Description */}
           {listing.description && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Description</Text>
@@ -257,13 +201,11 @@ export default function ListingDetailScreen() {
             </View>
           )}
 
-          {/* Listed by */}
-          <View style={styles.card}>
+          <View style={styles.infoCard}>
             <Text style={styles.cardLabel}>Listed by</Text>
             <Text style={styles.cardValue}>{landlordName || "Landlord"}</Text>
           </View>
 
-          {/* Map */}
           {hasCoordinates && MapView ? (
             <View style={styles.mapContainer}>
               <MapView
@@ -289,12 +231,7 @@ export default function ListingDetailScreen() {
                   />
                 )}
                 {Marker && (
-                  <Marker
-                    coordinate={{
-                      latitude: listing.latitude!,
-                      longitude: listing.longitude!,
-                    }}
-                  />
+                  <Marker coordinate={{ latitude: listing.latitude!, longitude: listing.longitude! }} />
                 )}
               </MapView>
             </View>
@@ -304,20 +241,19 @@ export default function ListingDetailScreen() {
             </View>
           )}
 
-          {/* CTA button */}
           {isOwner ? (
             <View style={styles.ownerCTARow}>
               <Pressable style={styles.editBtn} onPress={handleEdit}>
-                <Pencil color="#000" size={16} />
+                <Pencil color={colors.black} size={16} />
                 <Text style={styles.editBtnText}>Edit Listing</Text>
               </Pressable>
               <Pressable style={styles.deleteBtn} onPress={handleDelete}>
-                <Trash2 color="#ff4444" size={16} />
+                <Trash2 color={colors.danger.default} size={16} />
                 <Text style={styles.deleteBtnText}>Delete</Text>
               </Pressable>
             </View>
           ) : (
-            <Pressable style={styles.ctaButton} onPress={handleContact}>
+            <Pressable style={styles.ctaButton} onPress={() => setContactModalVisible(true)}>
               <Text style={styles.ctaButtonText}>Contact landlord</Text>
             </Pressable>
           )}
@@ -332,18 +268,12 @@ export default function ListingDetailScreen() {
         onRequestClose={() => setContactModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <Pressable
-            style={styles.modalBackdrop}
-            onPress={() => setContactModalVisible(false)}
-          />
+          <Pressable style={styles.modalBackdrop} onPress={() => setContactModalVisible(false)} />
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Contact Landlord</Text>
-              <Pressable
-                style={styles.modalCloseBtn}
-                onPress={() => setContactModalVisible(false)}
-              >
-                <X color="#fff" size={20} />
+              <Pressable style={styles.modalCloseBtn} onPress={() => setContactModalVisible(false)}>
+                <X color={colors.text.primary} size={20} />
               </Pressable>
             </View>
 
@@ -354,13 +284,10 @@ export default function ListingDetailScreen() {
 
             <View style={styles.contactOptions}>
               {landlordProfile?.phone_number ? (
-                <Pressable
-                  style={styles.contactItem}
-                  onPress={() => handleCall(landlordProfile.phone_number!)}
-                >
+                <Pressable style={styles.contactItem} onPress={() => handleCall(landlordProfile.phone_number!)}>
                   <View style={styles.contactItemLeft}>
                     <View style={styles.iconWrapper}>
-                      <Phone color="#fff" size={18} />
+                      <Phone color={colors.text.primary} size={18} />
                     </View>
                     <View>
                       <Text style={styles.contactItemLabel}>Phone Number</Text>
@@ -373,7 +300,7 @@ export default function ListingDetailScreen() {
                 <View style={styles.contactItemDisabled}>
                   <View style={styles.contactItemLeft}>
                     <View style={styles.iconWrapperDisabled}>
-                      <Phone color="#555" size={18} />
+                      <Phone color={colors.text.dim} size={18} />
                     </View>
                     <View>
                       <Text style={styles.contactItemLabelDisabled}>Phone Number</Text>
@@ -384,13 +311,10 @@ export default function ListingDetailScreen() {
               )}
 
               {landlordProfile?.email ? (
-                <Pressable
-                  style={styles.contactItem}
-                  onPress={() => handleCopyEmail(landlordProfile.email!)}
-                >
+                <Pressable style={styles.contactItem} onPress={() => handleCopyEmail(landlordProfile.email!)}>
                   <View style={styles.contactItemLeft}>
                     <View style={styles.iconWrapper}>
-                      <Mail color="#fff" size={18} />
+                      <Mail color={colors.text.primary} size={18} />
                     </View>
                     <View>
                       <Text style={styles.contactItemLabel}>Email Address</Text>
@@ -398,14 +322,14 @@ export default function ListingDetailScreen() {
                     </View>
                   </View>
                   <View style={styles.actionCopyBtn}>
-                    <Copy color="#fff" size={14} />
+                    <Copy color={colors.text.primary} size={14} />
                   </View>
                 </Pressable>
               ) : (
                 <View style={styles.contactItemDisabled}>
                   <View style={styles.contactItemLeft}>
                     <View style={styles.iconWrapperDisabled}>
-                      <Mail color="#555" size={18} />
+                      <Mail color={colors.text.dim} size={18} />
                     </View>
                     <View>
                       <Text style={styles.contactItemLabelDisabled}>Email Address</Text>
@@ -422,15 +346,7 @@ export default function ListingDetailScreen() {
   );
 }
 
-function InfoRow({
-  label,
-  value,
-  last,
-}: {
-  label: string;
-  value: string;
-  last?: boolean;
-}) {
+function InfoRow({ label, value, last }: { label: string; value: string; last?: boolean }) {
   return (
     <View style={[styles.infoRow, last && styles.infoRowLast]}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -442,239 +358,181 @@ function InfoRow({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#000",
-  },
-  loadingScreen: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  loadingText: {
-    color: "#aaa",
-    fontSize: 14,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    flex: 1,
-    textAlign: "center",
-    marginHorizontal: 8,
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#1a1a1a",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-  },
-  headerDeleteBtn: {
-    borderColor: "#3a1a1a",
-    backgroundColor: "#1a0a0a",
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#1a1a1a",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: colors.background.screen,
   },
   scrollContent: {
     paddingBottom: 40,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    gap: 16,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    gap: spacing.lg,
   },
   title: {
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 22,
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
     lineHeight: 28,
   },
   rent: {
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 26,
-    fontWeight: "800",
+    fontWeight: typography.weight.extrabold,
   },
   rentSuffix: {
     fontSize: 15,
-    fontWeight: "400",
-    color: "#888",
+    fontWeight: typography.weight.regular,
+    color: colors.text.secondary,
   },
   detailsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: spacing.sm,
   },
   detailChip: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 99,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.full,
     paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingVertical: spacing.sm - 2,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   detailChipText: {
-    color: "#ccc",
-    fontSize: 13,
-    fontWeight: "500",
+    color: colors.text.body,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.medium,
   },
   address: {
-    color: "#888",
-    fontSize: 14,
+    color: colors.text.secondary,
+    fontSize: typography.size.md,
     lineHeight: 20,
   },
-  card: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
+  infoCard: {
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   cardLabel: {
-    color: "#666",
-    fontSize: 12,
-    fontWeight: "500",
-    marginBottom: 4,
+    color: colors.text.faint,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    marginBottom: spacing.xs,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   cardValue: {
-    color: "#e0e0e0",
+    color: colors.text.value,
     fontSize: 15,
-    fontWeight: "500",
+    fontWeight: typography.weight.medium,
   },
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#2a2a2a",
+    borderBottomColor: colors.border.default,
   },
   infoRowLast: {
     borderBottomWidth: 0,
     paddingBottom: 0,
   },
   infoLabel: {
-    color: "#666",
-    fontSize: 13,
+    color: colors.text.faint,
+    fontSize: typography.size.base,
   },
   infoValue: {
-    color: "#e0e0e0",
-    fontSize: 13,
-    fontWeight: "500",
+    color: colors.text.value,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.medium,
   },
   section: {
-    gap: 8,
+    gap: spacing.sm,
   },
   sectionTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
   },
   bodyText: {
-    color: "#999",
-    fontSize: 14,
+    color: colors.text.readable,
+    fontSize: typography.size.md,
     lineHeight: 22,
   },
   mapContainer: {
     height: 160,
-    borderRadius: 12,
+    borderRadius: radius.md,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   map: {
     flex: 1,
   },
   mapPlaceholder: {
     height: 160,
-    borderRadius: 12,
-    backgroundColor: "#1a1a1a",
+    borderRadius: radius.md,
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
     alignItems: "center",
     justifyContent: "center",
   },
   mapText: {
-    color: "#555",
-    fontSize: 14,
+    color: colors.text.dim,
+    fontSize: typography.size.md,
   },
-  // Owner CTA row (Edit + Delete side by side)
   ownerCTARow: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 4,
+    gap: spacing.md,
+    marginTop: spacing.xs,
   },
   editBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#fff",
-    paddingVertical: 16,
-    borderRadius: 12,
+    gap: spacing.sm,
+    backgroundColor: colors.white,
+    paddingVertical: spacing.lg,
+    borderRadius: radius.md,
   },
   editBtnText: {
-    color: "#000",
+    color: colors.black,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
   },
   deleteBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
-    backgroundColor: "#1a0a0a",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    gap: spacing.sm - 2,
+    backgroundColor: colors.danger.background,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#3a1515",
+    borderColor: colors.danger.border,
   },
   deleteBtnText: {
-    color: "#ff4444",
+    color: colors.danger.default,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
   },
-  // Student CTA
   ctaButton: {
-    backgroundColor: "#fff",
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: colors.white,
+    paddingVertical: spacing.lg,
+    borderRadius: radius.md,
     alignItems: "center",
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   ctaButtonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "700",
+    color: colors.black,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
   },
-  // Modal styles
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -684,67 +542,67 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   modalContent: {
-    backgroundColor: "#121212",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
+    backgroundColor: colors.background.modal,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
+    padding: spacing.xxl,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: colors.border.dim,
     borderBottomWidth: 0,
-    paddingBottom: Platform.OS === "ios" ? 40 : 24,
+    paddingBottom: Platform.OS === "ios" ? 40 : spacing.xxl,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   modalTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
   },
   modalCloseBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#222",
+    backgroundColor: colors.border.dim,
     alignItems: "center",
     justifyContent: "center",
   },
   landlordHero: {
-    marginBottom: 24,
+    marginBottom: spacing.xxl,
   },
   landlordName: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.xxxl,
+    fontWeight: typography.weight.bold,
   },
   landlordSubtitle: {
-    color: "#888",
-    fontSize: 14,
-    marginTop: 4,
+    color: colors.text.secondary,
+    fontSize: typography.size.md,
+    marginTop: spacing.xs,
   },
   contactOptions: {
-    gap: 16,
+    gap: spacing.lg,
   },
   contactItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#1a1a1a",
-    padding: 16,
-    borderRadius: 16,
+    backgroundColor: colors.background.elevated,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   contactItemDisabled: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#121212",
-    padding: 16,
-    borderRadius: 16,
+    backgroundColor: colors.background.modal,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: "#1c1c1c",
     opacity: 0.5,
@@ -752,17 +610,17 @@ const styles = StyleSheet.create({
   contactItemLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
   },
   iconWrapper: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#222",
+    backgroundColor: colors.border.dim,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
   },
   iconWrapperDisabled: {
     width: 40,
@@ -772,41 +630,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: colors.border.dim,
   },
   contactItemLabel: {
-    color: "#666",
-    fontSize: 12,
-    fontWeight: "500",
+    color: colors.text.faint,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
   contactItemValue: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
     marginTop: 2,
   },
   contactItemLabelDisabled: {
     color: "#444",
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
   contactItemValueDisabled: {
-    color: "#666",
-    fontSize: 14,
-    fontWeight: "600",
+    color: colors.text.faint,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
     marginTop: 2,
   },
   actionLinkText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
   },
   actionCopyBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2a2a2a",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    backgroundColor: colors.border.default,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm - 2,
+    borderRadius: radius.sm,
   },
 });

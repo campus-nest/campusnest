@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export interface SelectOption<T extends string> {
   label: string;
@@ -68,39 +69,39 @@ export default function Select<T extends string>({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    gap: 8,
+    gap: spacing.sm,
   },
   label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
+    color: colors.white,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
   },
   trigger: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
   },
   triggerOpen: {
-    borderColor: "#555",
+    borderColor: colors.text.dim,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
   },
   triggerText: {
-    color: "#fff",
-    fontSize: 16,
+    color: colors.white,
+    fontSize: typography.size.lg,
   },
   placeholderText: {
-    color: "#666",
+    color: colors.text.faint,
   },
   chevron: {
-    color: "#666",
-    fontSize: 20,
+    color: colors.text.faint,
+    fontSize: typography.size.xxl,
     lineHeight: 20,
     transform: [{ rotate: "90deg" }],
   },
@@ -108,39 +109,39 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "270deg" }],
   },
   dropdown: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
     borderTopWidth: 0,
-    borderColor: "#555",
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    borderColor: colors.text.dim,
+    borderBottomLeftRadius: radius.md,
+    borderBottomRightRadius: radius.md,
     overflow: "hidden",
   },
   option: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
   },
   optionBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: "#2a2a2a",
+    borderBottomColor: colors.border.default,
   },
   optionActive: {
-    backgroundColor: "#222",
+    backgroundColor: colors.border.dim,
   },
   optionText: {
-    color: "#ccc",
-    fontSize: 16,
+    color: colors.text.body,
+    fontSize: typography.size.lg,
   },
   optionTextActive: {
-    color: "#fff",
-    fontWeight: "600",
+    color: colors.white,
+    fontWeight: typography.weight.semibold,
   },
   checkmark: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
+    color: colors.white,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.bold,
   },
 });

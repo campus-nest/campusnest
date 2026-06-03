@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Pencil, Trash2 } from "lucide-react-native";
+import { Pencil, Trash2 } from "lucide-react-native";
 import {
   authService,
   commentService,
@@ -23,6 +23,9 @@ import {
 import { Post } from "@/src/types/post";
 import { Profile } from "@/src/types/profile";
 import { CommentWithProfile } from "@/src/types/comment";
+import LoadingState from "@/components/ui/LoadingState";
+import PageHeader, { HeaderActions, HeaderIconBtn } from "@/components/ui/PageHeader";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function PostDetailScreen() {
   const router = useRouter();
@@ -35,7 +38,6 @@ export default function PostDetailScreen() {
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Edit/delete state
   const [isOwner, setIsOwner] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
@@ -49,24 +51,16 @@ export default function PostDetailScreen() {
 
   useEffect(() => {
     if (!id) return;
-
     const load = async () => {
       try {
         setLoading(true);
         const postData = await postService.getPostById(id);
-        if (!postData) {
-          setLoading(false);
-          return;
-        }
+        if (!postData) { setLoading(false); return; }
         setPost(postData);
         setEditTitle(postData.title ?? "");
         setEditBody(postData.body ?? "");
-
         const session = await authService.getSession();
-        if (session?.user?.id === postData.user_id) {
-          setIsOwner(true);
-        }
-
+        if (session?.user?.id === postData.user_id) setIsOwner(true);
         const creatorProfile = await profileService.getProfileById(postData.user_id);
         setCreator(creatorProfile);
         await fetchComments(id);
@@ -76,7 +70,6 @@ export default function PostDetailScreen() {
         setLoading(false);
       }
     };
-
     load();
   }, [id]);
 
@@ -87,14 +80,12 @@ export default function PostDetailScreen() {
       Alert.alert("Error", "You must be logged in to comment.");
       return;
     }
-
     setSubmitting(true);
     const result = await commentService.createComment({
       post_id: id,
       user_id: session.user.id,
       content: commentText.trim(),
     });
-
     if (result.success) {
       setCommentText("");
       await fetchComments(id);
@@ -109,19 +100,13 @@ export default function PostDetailScreen() {
       Alert.alert("Error", "Title and description cannot be empty.");
       return;
     }
-
     setSubmitting(true);
     const result = await postService.updatePost(id, {
       title: editTitle.trim(),
       body: editBody.trim(),
     });
-
     if (result.success) {
-      setPost((prev) =>
-        prev
-          ? { ...prev, title: editTitle.trim(), body: editBody.trim() }
-          : prev,
-      );
+      setPost((prev) => prev ? { ...prev, title: editTitle.trim(), body: editBody.trim() } : prev);
       setIsEditing(false);
     } else {
       Alert.alert("Error", result.error || "Failed to update post.");
@@ -161,47 +146,23 @@ export default function PostDetailScreen() {
   };
 
   if (loading || !post || deleting) {
-    return (
-      <SafeAreaView style={styles.loadingScreen}>
-        <ActivityIndicator color="#fff" size="large" />
-        <Text style={styles.loadingText}>
-          {deleting ? "Deleting post…" : "Loading post…"}
-        </Text>
-      </SafeAreaView>
-    );
+    return <LoadingState label={deleting ? "Deleting post…" : "Loading post…"} />;
   }
+
+  const headerRight = isOwner && !isEditing ? (
+    <HeaderActions>
+      <HeaderIconBtn onPress={() => setIsEditing(true)} hitSlop={6}>
+        <Pencil color={colors.text.primary} size={16} />
+      </HeaderIconBtn>
+      <HeaderIconBtn onPress={handleDelete} danger hitSlop={6}>
+        <Trash2 color={colors.danger.default} size={16} />
+      </HeaderIconBtn>
+    </HeaderActions>
+  ) : undefined;
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <ChevronLeft color="#fff" size={22} />
-        </Pressable>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          Post
-        </Text>
-        {isOwner && !isEditing ? (
-          <View style={styles.headerActions}>
-            <Pressable
-              style={styles.headerIconBtn}
-              onPress={() => setIsEditing(true)}
-              hitSlop={6}
-            >
-              <Pencil color="#fff" size={16} />
-            </Pressable>
-            <Pressable
-              style={[styles.headerIconBtn, styles.headerDeleteBtn]}
-              onPress={handleDelete}
-              hitSlop={6}
-            >
-              <Trash2 color="#ff4444" size={16} />
-            </Pressable>
-          </View>
-        ) : (
-          <View style={{ width: 40, height: 40 }} />
-        )}
-      </View>
+      <PageHeader title="Post" onBack={() => router.back()} right={headerRight} />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -222,7 +183,7 @@ export default function PostDetailScreen() {
                 value={editTitle}
                 onChangeText={setEditTitle}
                 placeholder="Post title"
-                placeholderTextColor="#555"
+                placeholderTextColor={colors.text.dim}
               />
               <Text style={styles.editLabel}>Description</Text>
               <TextInput
@@ -230,7 +191,7 @@ export default function PostDetailScreen() {
                 value={editBody}
                 onChangeText={setEditBody}
                 placeholder="Post description"
-                placeholderTextColor="#555"
+                placeholderTextColor={colors.text.dim}
                 multiline
                 numberOfLines={6}
               />
@@ -245,10 +206,7 @@ export default function PostDetailScreen() {
                 <Pressable
                   style={styles.cancelBtn}
                   onPress={() => {
-                    if (post) {
-                      setEditTitle(post.title);
-                      setEditBody(post.body);
-                    }
+                    if (post) { setEditTitle(post.title); setEditBody(post.body); }
                     setIsEditing(false);
                   }}
                   disabled={submitting}
@@ -262,12 +220,8 @@ export default function PostDetailScreen() {
               <Text style={styles.postTitle}>{post.title}</Text>
               <Text style={styles.postBody}>{post.body}</Text>
               <View style={styles.postMeta}>
-                <Text style={styles.postAuthor}>
-                  {creator?.full_name || "Unknown"}
-                </Text>
-                <Text style={styles.postDate}>
-                  {new Date(post.created_at).toLocaleDateString()}
-                </Text>
+                <Text style={styles.postAuthor}>{creator?.full_name || "Unknown"}</Text>
+                <Text style={styles.postDate}>{new Date(post.created_at).toLocaleDateString()}</Text>
               </View>
             </View>
           )}
@@ -278,46 +232,33 @@ export default function PostDetailScreen() {
               Comments{comments.length > 0 ? ` (${comments.length})` : ""}
             </Text>
 
-            {/* Comment input */}
             <View style={styles.commentInputRow}>
               <TextInput
                 style={styles.commentInput}
                 placeholder="Add a comment…"
-                placeholderTextColor="#555"
+                placeholderTextColor={colors.text.dim}
                 value={commentText}
                 onChangeText={setCommentText}
                 multiline
                 editable={!submitting}
               />
               <Pressable
-                style={[
-                  styles.postBtn,
-                  (!commentText.trim() || submitting) && styles.postBtnDisabled,
-                ]}
+                style={[styles.postBtn, (!commentText.trim() || submitting) && styles.postBtnDisabled]}
                 onPress={handleSubmitComment}
                 disabled={!commentText.trim() || submitting}
               >
                 {submitting ? (
-                  <ActivityIndicator color="#000" size="small" />
+                  <ActivityIndicator color={colors.black} size="small" />
                 ) : (
-                  <Text
-                    style={[
-                      styles.postBtnText,
-                      (!commentText.trim() || submitting) &&
-                        styles.postBtnTextDisabled,
-                    ]}
-                  >
+                  <Text style={[styles.postBtnText, (!commentText.trim() || submitting) && styles.postBtnTextDisabled]}>
                     Post
                   </Text>
                 )}
               </Pressable>
             </View>
 
-            {/* Comments list */}
             {comments.length === 0 ? (
-              <Text style={styles.noComments}>
-                No comments yet — be the first!
-              </Text>
+              <Text style={styles.noComments}>No comments yet — be the first!</Text>
             ) : (
               <View style={styles.commentsList}>
                 {comments.map((comment) => (
@@ -352,91 +293,37 @@ export default function PostDetailScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#000",
-  },
-  loadingScreen: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  loadingText: {
-    color: "#aaa",
-    fontSize: 14,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    flex: 1,
-    textAlign: "center",
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#1a1a1a",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-  },
-  headerDeleteBtn: {
-    borderColor: "#3a1a1a",
-    backgroundColor: "#1a0a0a",
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#1a1a1a",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: colors.background.screen,
   },
   flex: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    padding: spacing.xl,
     paddingBottom: 40,
-    gap: 16,
+    gap: spacing.lg,
   },
   postCard: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
+    padding: spacing.xl,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
-    gap: 12,
+    borderColor: colors.border.default,
+    gap: spacing.md,
   },
   postTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
     lineHeight: 26,
   },
   postBody: {
-    color: "#bbb",
-    fontSize: 14,
+    color: colors.text.body,
+    fontSize: typography.size.md,
     lineHeight: 22,
-    paddingBottom: 12,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#2a2a2a",
+    borderBottomColor: colors.border.default,
   },
   postMeta: {
     flexDirection: "row",
@@ -444,97 +331,97 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   postAuthor: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "600",
+    color: colors.text.primary,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
   },
   postDate: {
-    color: "#555",
-    fontSize: 12,
+    color: colors.text.dim,
+    fontSize: typography.size.sm,
   },
   commentsSection: {
-    gap: 16,
+    gap: spacing.lg,
   },
   commentsSectionTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
   },
   commentInputRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: spacing.md,
     alignItems: "center",
   },
   commentInput: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: "#fff",
-    fontSize: 14,
+    paddingVertical: spacing.md,
+    color: colors.text.primary,
+    fontSize: typography.size.md,
     minHeight: 46,
     maxHeight: 120,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
     textAlignVertical: "center",
   },
   postBtn: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: colors.white,
+    borderRadius: radius.md,
     paddingHorizontal: 18,
     height: 46,
     alignItems: "center",
     justifyContent: "center",
   },
   postBtnDisabled: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   postBtnText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "700",
+    color: colors.black,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.bold,
   },
   postBtnTextDisabled: {
     color: "#444",
   },
   noComments: {
-    color: "#555",
-    fontSize: 14,
+    color: colors.text.dim,
+    fontSize: typography.size.md,
     textAlign: "center",
-    paddingVertical: 24,
+    paddingVertical: spacing.xxl,
   },
   commentsList: {
-    gap: 12,
+    gap: spacing.md,
   },
   commentItem: {
     flexDirection: "row",
-    gap: 12,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 12,
+    gap: spacing.md,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   commentAvatar: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#2a2a2a",
+    backgroundColor: colors.background.surface,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
   commentAvatarText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.bold,
   },
   commentContent: {
     flex: 1,
-    gap: 4,
+    gap: spacing.xs,
   },
   commentHeader: {
     flexDirection: "row",
@@ -542,80 +429,80 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   commentAuthor: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "600",
+    color: colors.text.primary,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
   },
   commentDate: {
-    color: "#555",
-    fontSize: 11,
+    color: colors.text.dim,
+    fontSize: typography.size.xs,
   },
   commentText: {
-    color: "#ccc",
-    fontSize: 13,
+    color: colors.text.body,
+    fontSize: typography.size.base,
     lineHeight: 19,
   },
   editLabel: {
-    color: "#888",
-    fontSize: 11,
-    fontWeight: "600",
+    color: colors.text.secondary,
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   editTitleInput: {
-    backgroundColor: "#222",
-    borderRadius: 8,
+    backgroundColor: colors.border.dim,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
     padding: 10,
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.text.primary,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
   },
   editBodyInput: {
-    backgroundColor: "#222",
-    borderRadius: 8,
+    backgroundColor: colors.border.dim,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
     padding: 10,
-    color: "#fff",
-    fontSize: 14,
+    color: colors.text.primary,
+    fontSize: typography.size.md,
     textAlignVertical: "top",
     minHeight: 100,
   },
   editActionsRow: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 12,
+    gap: spacing.md,
+    marginTop: spacing.md,
   },
   saveBtn: {
     flex: 1,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingVertical: 12,
+    backgroundColor: colors.white,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.md,
     alignItems: "center",
     justifyContent: "center",
   },
   saveBtnText: {
-    color: "#000",
-    fontWeight: "700",
-    fontSize: 14,
+    color: colors.black,
+    fontWeight: typography.weight.bold,
+    fontSize: typography.size.md,
   },
   cancelBtn: {
     flex: 1,
-    backgroundColor: "#222",
-    borderRadius: 8,
-    paddingVertical: 12,
+    backgroundColor: colors.border.dim,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.md,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
   },
   cancelBtnText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
+    color: colors.text.primary,
+    fontWeight: typography.weight.semibold,
+    fontSize: typography.size.md,
   },
   btnDisabled: {
     opacity: 0.5,

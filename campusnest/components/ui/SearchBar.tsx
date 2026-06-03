@@ -1,6 +1,7 @@
 import React from "react";
-import { View, TextInput, StyleSheet } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 import { Search } from "lucide-react-native";
+import { colors, radius, spacing } from "@/src/constants/theme";
 
 interface SearchBarProps {
   value: string;
@@ -15,13 +16,13 @@ export default function SearchBar({
 }: SearchBarProps) {
   return (
     <View style={styles.container}>
-      <Search size={20} color="#999" style={styles.icon} />
+      <Search size={20} color={colors.text.readable} style={styles.icon} />
       <TextInput
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#999"
+        placeholderTextColor={colors.text.readable}
         autoCapitalize="none"
         autoCorrect={false}
       />
@@ -33,20 +34,20 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginVertical: 12,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
   },
   icon: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   input: {
     flex: 1,
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 16,
   },
 });

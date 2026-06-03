@@ -6,6 +6,7 @@ import { supabase } from "@/src/lib/supabaseClient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, StyleSheet } from "react-native";
+import { spacing } from "@/src/constants/theme";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -79,7 +80,7 @@ export default function ResetPasswordScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: 16,
-    paddingTop: 16,
+    gap: spacing.lg,
+    paddingTop: spacing.lg,
   },
 });

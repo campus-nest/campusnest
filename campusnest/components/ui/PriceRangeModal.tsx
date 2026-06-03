@@ -8,6 +8,7 @@ import {
   Platform,
 } from "react-native";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 interface PriceRangeModalProps {
   visible: boolean;
@@ -74,15 +75,15 @@ export default function PriceRangeModal({
               max={5000}
               step={50}
               selectedStyle={{
-                backgroundColor: "#0066CC",
+                backgroundColor: colors.accent.secondary,
               }}
               unselectedStyle={{
-                backgroundColor: "#333",
+                backgroundColor: colors.border.strong,
               }}
               markerStyle={{
-                backgroundColor: "#fff",
+                backgroundColor: colors.white,
                 borderWidth: 2,
-                borderColor: "#0066CC",
+                borderColor: colors.accent.secondary,
                 height: 24,
                 width: 24,
                 borderRadius: 12,
@@ -110,46 +111,46 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modalContent: {
-    backgroundColor: "#1a1a1a",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: Platform.OS === "ios" ? 40 : 24,
+    backgroundColor: colors.background.elevated,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
+    padding: spacing.xxl,
+    paddingBottom: Platform.OS === "ios" ? 40 : spacing.xxl,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: spacing.xxl,
   },
   title: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
+    color: colors.white,
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
   },
   closeText: {
-    color: "#999",
-    fontSize: 16,
+    color: colors.text.readable,
+    fontSize: typography.size.lg,
   },
   sliderContainer: {
     alignItems: "center",
     marginBottom: 32,
   },
   valueText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 24,
+    color: colors.white,
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.semibold,
+    marginBottom: spacing.xxl,
   },
   applyButton: {
-    backgroundColor: "#0066CC",
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: colors.accent.secondary,
+    paddingVertical: spacing.lg,
+    borderRadius: radius.md,
     alignItems: "center",
   },
   applyButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.white,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
   },
 });

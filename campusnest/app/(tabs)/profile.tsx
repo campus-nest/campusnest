@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -10,11 +9,14 @@ import {
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Profile } from "@/src/types/profile";
-import { ChevronLeft, Bookmark } from "lucide-react-native";
+import { Bookmark } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authService, profileService, savedListingService, savedPostService } from "@/src/services";
 import { Post } from "@/src/types/post";
 import { Listing } from "@/src/types/listing";
+import LoadingState from "@/components/ui/LoadingState";
+import PageHeader from "@/components/ui/PageHeader";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -28,19 +30,19 @@ export default function ProfileScreen() {
     if (isLoggingOut) return;
     try {
       setLoading(true);
-        const profileData = await profileService.getCurrentUserProfile();
-        if (profileData) {
-          setProfile(profileData);
-          const session = await authService.getSession();
-          if (session?.user?.id) {
-            const [posts, listings] = await Promise.all([
-              savedPostService.getSavedPosts(session.user.id),
-              savedListingService.getSavedListings(session.user.id),
-            ]);
-            setSavedPosts(posts);
-            setSavedListings(listings);
-          }
+      const profileData = await profileService.getCurrentUserProfile();
+      if (profileData) {
+        setProfile(profileData);
+        const session = await authService.getSession();
+        if (session?.user?.id) {
+          const [posts, listings] = await Promise.all([
+            savedPostService.getSavedPosts(session.user.id),
+            savedListingService.getSavedListings(session.user.id),
+          ]);
+          setSavedPosts(posts);
+          setSavedListings(listings);
         }
+      }
     } catch (error) {
       console.error("Unexpected error:", error);
     } finally {
@@ -67,22 +69,8 @@ export default function ProfileScreen() {
     }
   }, [router]);
 
-  if (loading && !profile) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </SafeAreaView>
-    );
-  }
-
-  if (isLoggingOut) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-        <Text style={styles.loadingText}>Logging out…</Text>
-      </SafeAreaView>
-    );
-  }
+  if (loading && !profile) return <LoadingState />;
+  if (isLoggingOut) return <LoadingState label="Logging out…" />;
 
   const initials = profile?.full_name
     ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -90,14 +78,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
-          <ChevronLeft color="#fff" size={20} strokeWidth={2.5} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <View style={{ width: 36, height: 36 }} />
-      </View>
+      <PageHeader title="Profile" onBack={() => router.back()} />
 
       <ScrollView
         style={styles.scrollView}
@@ -127,10 +108,7 @@ export default function ProfileScreen() {
 
         {/* Action buttons */}
         <View style={styles.actionRow}>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={() => router.push("/edit-profile")}
-          >
+          <TouchableOpacity style={styles.actionBtn} onPress={() => router.push("/edit-profile")}>
             <Text style={styles.actionBtnText}>Edit Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -138,9 +116,7 @@ export default function ProfileScreen() {
             onPress={handleSignOut}
             disabled={isLoggingOut}
           >
-            <Text style={[styles.actionBtnText, styles.actionBtnTextOutline]}>
-              Log Out
-            </Text>
+            <Text style={[styles.actionBtnText, styles.actionBtnTextOutline]}>Log Out</Text>
           </TouchableOpacity>
         </View>
 
@@ -164,10 +140,7 @@ export default function ProfileScreen() {
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Saved Posts</Text>
             {savedPosts.length > 0 && (
-              <TouchableOpacity
-                style={styles.viewAllBtn}
-                onPress={() => router.push("/(tabs)/saved")}
-              >
+              <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push("/(tabs)/saved")}>
                 <Text style={styles.viewAllText}>View all</Text>
               </TouchableOpacity>
             )}
@@ -175,7 +148,7 @@ export default function ProfileScreen() {
 
           {savedPosts.length === 0 ? (
             <View style={styles.savedEmpty}>
-              <Bookmark size={18} color="#333" strokeWidth={1.5} />
+              <Bookmark size={18} color={colors.border.strong} strokeWidth={1.5} />
               <Text style={styles.savedEmptyText}>No saved posts yet</Text>
             </View>
           ) : (
@@ -187,29 +160,24 @@ export default function ProfileScreen() {
                   onPress={() => router.push(`/post/${post.id}`)}
                 >
                   <View style={styles.savedPostDot} />
-                  <Text style={styles.savedPostTitle} numberOfLines={1}>
-                    {post.title}
-                  </Text>
+                  <Text style={styles.savedPostTitle} numberOfLines={1}>{post.title}</Text>
                 </TouchableOpacity>
               ))}
               {savedPosts.length > 3 && (
                 <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}>
-                  <Text style={styles.moreText}>
-                    +{savedPosts.length - 3} more
-                  </Text>
+                  <Text style={styles.moreText}>+{savedPosts.length - 3} more</Text>
                 </TouchableOpacity>
               )}
             </View>
           )}
         </View>
+
+        {/* Saved Listings card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Saved Listings</Text>
             {savedListings.length > 0 && (
-              <TouchableOpacity
-                style={styles.viewAllBtn}
-                onPress={() => router.push("/(tabs)/saved")}
-              >
+              <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push("/(tabs)/saved")}>
                 <Text style={styles.viewAllText}>View all</Text>
               </TouchableOpacity>
             )}
@@ -217,7 +185,7 @@ export default function ProfileScreen() {
 
           {savedListings.length === 0 ? (
             <View style={styles.savedEmpty}>
-              <Bookmark size={18} color="#333" strokeWidth={1.5} />
+              <Bookmark size={18} color={colors.border.strong} strokeWidth={1.5} />
               <Text style={styles.savedEmptyText}>No saved listings yet</Text>
             </View>
           ) : (
@@ -229,9 +197,7 @@ export default function ProfileScreen() {
                   onPress={() => router.push(`/listing/${listing.id}`)}
                 >
                   <View>
-                    <Text style={styles.savedListingTitle} numberOfLines={1}>
-                      {listing.title}
-                    </Text>
+                    <Text style={styles.savedListingTitle} numberOfLines={1}>{listing.title}</Text>
                     <Text style={styles.savedListingMeta} numberOfLines={1}>
                       ${listing.rent.toLocaleString()} /mo — {listing.address}
                     </Text>
@@ -240,11 +206,8 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               ))}
               {savedListings.length > 3 && (
-                <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}
-                >
-                  <Text style={styles.moreText}>
-                    +{savedListings.length - 3} more
-                  </Text>
+                <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}>
+                  <Text style={styles.moreText}>+{savedListings.length - 3} more</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -255,15 +218,7 @@ export default function ProfileScreen() {
   );
 }
 
-function DetailRow({
-  label,
-  value,
-  last,
-}: {
-  label: string;
-  value?: string | null;
-  last?: boolean;
-}) {
+function DetailRow({ label, value, last }: { label: string; value?: string | null; last?: boolean }) {
   return (
     <View style={[styles.detailRow, last && styles.detailRowLast]}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -273,49 +228,15 @@ function DetailRow({
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-    gap: 12,
-  },
-  loadingText: {
-    color: "#aaa",
-    fontSize: 14,
-  },
   safeArea: {
     flex: 1,
-    backgroundColor: "#000",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    letterSpacing: 0.2,
-  },
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#1a1a1a",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: colors.background.screen,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xl,
     paddingTop: 28,
     paddingBottom: 40,
     gap: 14,
@@ -323,14 +244,14 @@ const styles = StyleSheet.create({
   heroSection: {
     alignItems: "center",
     gap: 10,
-    marginBottom: 6,
+    marginBottom: spacing.sm,
   },
   avatarRing: {
     width: 84,
     height: 84,
     borderRadius: 42,
     borderWidth: 2,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
     overflow: "hidden",
   },
   avatar: {
@@ -339,33 +260,33 @@ const styles = StyleSheet.create({
   },
   avatarFallback: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.background.elevated,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarInitials: {
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 26,
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
   },
   heroName: {
-    color: "#fff",
+    color: colors.text.primary,
     fontSize: 21,
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
     letterSpacing: 0.1,
   },
   rolePill: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
-    borderRadius: 99,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    borderColor: colors.border.default,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   rolePillText: {
-    color: "#888",
-    fontSize: 12,
-    fontWeight: "500",
+    color: colors.text.secondary,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
   actionRow: {
     flexDirection: "row",
@@ -373,30 +294,30 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     flex: 1,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: colors.white,
+    borderRadius: radius.md,
     paddingVertical: 13,
     alignItems: "center",
   },
   actionBtnOutline: {
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   actionBtnText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "600",
+    color: colors.black,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
   },
   actionBtnTextOutline: {
-    color: "#fff",
+    color: colors.text.primary,
   },
   card: {
-    backgroundColor: "#111",
-    borderRadius: 14,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.lg,
     padding: 18,
     borderWidth: 1,
-    borderColor: "#1e1e1e",
+    borderColor: colors.border.subtle,
   },
   cardHeader: {
     flexDirection: "row",
@@ -405,25 +326,25 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   cardTitle: {
-    color: "#888",
-    fontSize: 14,
-    fontWeight: "700",
+    color: colors.text.secondary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.bold,
     marginBottom: 14,
     letterSpacing: 0.1,
     textTransform: "uppercase",
   },
   viewAllBtn: {
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: "#1a1a1a",
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
   },
   viewAllText: {
-    color: "#aaa",
-    fontSize: 12,
-    fontWeight: "500",
+    color: colors.text.muted,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
   detailRow: {
     flexDirection: "row",
@@ -431,33 +352,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 11,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
+    borderBottomColor: colors.border.faint,
   },
   detailRowLast: {
     borderBottomWidth: 0,
     paddingBottom: 0,
   },
   detailLabel: {
-    color: "#555",
-    fontSize: 13,
-    fontWeight: "500",
+    color: colors.text.dim,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.medium,
   },
   detailValue: {
-    color: "#e0e0e0",
-    fontSize: 13,
-    fontWeight: "500",
+    color: colors.text.value,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.medium,
     maxWidth: "58%",
     textAlign: "right",
   },
   savedEmpty: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 4,
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   savedEmptyText: {
     color: "#444",
-    fontSize: 13,
+    fontSize: typography.size.base,
   },
   savedList: {
     gap: 10,
@@ -466,16 +387,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
   },
   savedListingTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
   },
   savedListingMeta: {
     color: "#777",
-    fontSize: 11,
+    fontSize: typography.size.xs,
   },
   savedPostRow: {
     flexDirection: "row",
@@ -486,17 +407,17 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 3,
-    backgroundColor: "#333",
+    backgroundColor: colors.border.strong,
     flexShrink: 0,
   },
   savedPostTitle: {
-    color: "#ccc",
-    fontSize: 13,
+    color: colors.text.body,
+    fontSize: typography.size.base,
     flex: 1,
   },
   moreText: {
-    color: "#555",
-    fontSize: 12,
+    color: colors.text.dim,
+    fontSize: typography.size.sm,
     paddingTop: 2,
   },
 });
