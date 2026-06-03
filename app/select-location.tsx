@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MapPin, Search, X, Check, Navigation } from "lucide-react-native";
+import { useSelectLocation } from "@/hooks/useSelectLocation";
 
 // Dynamic imports for platform-specific map components
 let MapView: any;
@@ -29,15 +30,6 @@ interface SelectedLocation {
   longitude: number;
   address?: string;
 }
-
-interface Region {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-}
-
-import { useSelectLocation } from "@/hooks/useSelectLocation";
 
 export default function SelectLocationScreen() {
   const {

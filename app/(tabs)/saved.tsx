@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,17 +9,10 @@ import {
   View,
 } from "react-native";
 import { PageContainer } from "@/components/page-container";
-import { useFocusEffect, useRouter } from "expo-router";
-import { authService, savedPostService, savedListingService } from "@/src/services";
+import { Bookmark, BookmarkX } from "lucide-react-native";
+import { useSaved } from "@/hooks/useSaved";
 import { Post } from "@/src/types/post";
 import { Listing } from "@/src/types/listing";
-import { Bookmark, BookmarkX } from "lucide-react-native";
-import { useSavedPosts } from "@/src/context/SavedPostsContext";
-import { useSavedListings } from "@/src/context/SavedListingsContext";
-
-type Tab = "listings" | "posts";
-
-import { useSaved } from "@/hooks/useSaved";
 
 export default function SavedScreen() {
   const {

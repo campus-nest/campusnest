@@ -14,7 +14,7 @@ import { useNewPost } from "@/hooks/useNewPost";
 
 // UI Components
 import { ImagePickerPreview } from "@/components/listings/ImagePickerPreview";
-import AddressInput, { LocationData } from "@/components/ui/AddressInput";
+import AddressInput from "@/components/ui/AddressInput";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { ChipGroup, ToggleChipGroup } from "@/components/ui/Chip";
@@ -24,8 +24,6 @@ import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import Section, { Divider } from "@/components/ui/Section";
 import TabSelector from "@/components/ui/TabSelector";
-
-type Role = "student" | "landlord";
 
 // Constants
 const UTILITY_OPTIONS = ["electricity", "water", "wifi", "heat"];
