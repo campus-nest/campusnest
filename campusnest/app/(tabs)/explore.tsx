@@ -1,17 +1,11 @@
+import React from "react";
 import Screen from "@/components/ui/Screen";
-import { authService, listingService } from "@/src/services";
-import { Listing } from "@/src/types/listing";
-import { useRouter } from "expo-router";
 import { Home, MapPin } from "lucide-react-native";
-import { useEffect, useState, useCallback } from "react";
 import FilterPills from "@/components/ui/FilterPills";
 import PriceRangeModal from "@/components/ui/PriceRangeModal";
-import * as Location from "expo-location";
-import { getDistanceFromLatLonInKm } from "@/src/utils/distance";
+import { useExplore } from "@/hooks/useExplore";
 import {
   ActivityIndicator,
-  Alert,
-  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -32,185 +26,27 @@ if (Platform.OS !== "web") {
   UrlTile = maps.UrlTile;
 }
 
-interface Region {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-}
-
-type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
-
 export default function ExploreScreen() {
-  const router = useRouter();
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<"student" | "landlord" | null>(null);
-  const [mapReady, setMapReady] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<StudentFilter>("new");
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(5000);
-  const [debouncedMin, setDebouncedMin] = useState<number>(0);
-  const [debouncedMax, setDebouncedMax] = useState<number>(5000);
-  const [isPriceModalVisible, setPriceModalVisible] = useState(false);
-
-  const [userLocation, setUserLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        // Fallback to Edmonton
-        setUserLocation({ latitude: 53.5461, longitude: -113.4938 });
-        return;
-      }
-      try {
-        let location = await Location.getCurrentPositionAsync({});
-        setUserLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-      } catch {
-        setUserLocation({ latitude: 53.5461, longitude: -113.4938 });
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedMin(minPrice);
-      setDebouncedMax(maxPrice);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [minPrice, maxPrice]);
-
-  // Default to Edmonton (University of Alberta)
-  const [region, setRegion] = useState<Region>({
-    latitude: 53.5232,
-    longitude: -113.5263,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  });
-
-  const fetchListings = useCallback(async () => {
-    try {
-      const data = await listingService.getListings({
-        status: "active",
-        visibility: "public",
-        minRent: debouncedMin > 0 ? debouncedMin : undefined,
-        maxRent: debouncedMax < 5000 ? debouncedMax : undefined,
-      });
-
-      // Filter listings that have valid coordinates
-      const listingsWithCoords = data.filter(
-        (listing) =>
-          listing.latitude != null &&
-          listing.longitude != null &&
-          !isNaN(listing.latitude) &&
-          !isNaN(listing.longitude),
-      );
-
-      // Local sorting
-      if (activeFilter === "cheapest") {
-        listingsWithCoords.sort((a, b) => a.rent - b.rent);
-      } else if (activeFilter === "new") {
-        listingsWithCoords.sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-        );
-      } else if (activeFilter === "moveIn") {
-        listingsWithCoords.sort((a, b) => {
-          if (!a.move_in_date) return 1;
-          if (!b.move_in_date) return -1;
-          return (
-            new Date(a.move_in_date).getTime() -
-            new Date(b.move_in_date).getTime()
-          );
-        });
-      } else if (activeFilter === "closest" && userLocation) {
-        listingsWithCoords.sort((a, b) => {
-          const distA = getDistanceFromLatLonInKm(
-            userLocation.latitude,
-            userLocation.longitude,
-            a.latitude || 0,
-            a.longitude || 0,
-          );
-          const distB = getDistanceFromLatLonInKm(
-            userLocation.latitude,
-            userLocation.longitude,
-            b.latitude || 0,
-            b.longitude || 0,
-          );
-          return distA - distB;
-        });
-      }
-
-      setListings(listingsWithCoords);
-
-      // Adjust region to fit all markers if we have listings
-      if (listingsWithCoords.length > 0) {
-        const coords = listingsWithCoords.map((l) => ({
-          latitude: l.latitude!,
-          longitude: l.longitude!,
-        }));
-
-        const minLat = Math.min(...coords.map((c) => c.latitude));
-        const maxLat = Math.max(...coords.map((c) => c.latitude));
-        const minLng = Math.min(...coords.map((c) => c.longitude));
-        const maxLng = Math.max(...coords.map((c) => c.longitude));
-
-        setRegion({
-          latitude: (minLat + maxLat) / 2,
-          longitude: (minLng + maxLng) / 2,
-          latitudeDelta: Math.max((maxLat - minLat) * 1.5, 0.02),
-          longitudeDelta: Math.max((maxLng - minLng) * 1.5, 0.02),
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching listings:", error);
-      Alert.alert("Error", "Failed to load listings");
-    } finally {
-      setLoading(false);
-    }
-  }, [activeFilter, userLocation, debouncedMin, debouncedMax]);
-
-  useEffect(() => {
-    const initializeScreen = async () => {
-      try {
-        setLoading(true);
-
-        // Check user role first
-        const role = await authService.getUserRole();
-        setUserRole(role);
-
-        // If landlord, don't fetch listings (they shouldn't see this page)
-        if (role === "landlord") {
-          setLoading(false);
-          return;
-        }
-
-        // Fetch listings for students
-        await fetchListings();
-      } catch (error) {
-        console.error("Error in explore screen:", error);
-        Alert.alert("Error", "Failed to load explore page");
-        setLoading(false);
-      }
-    };
-
-    initializeScreen();
-  }, [fetchListings]);
-
-  const handleMarkerPress = (listingId: string) => {
-    router.push(`/listing/${listingId}`);
-  };
-
-  const openOSMAttribution = () => {
-    Linking.openURL("https://www.openstreetmap.org/copyright");
-  };
+  const {
+    listings,
+    loading,
+    userRole,
+    mapReady,
+    setMapReady,
+    activeFilter,
+    setActiveFilter,
+    minPrice,
+    maxPrice,
+    isPriceModalVisible,
+    setPriceModalVisible,
+    region,
+    fetchListings,
+    handleMarkerPress,
+    openOSMAttribution,
+    handleApplyPrice,
+    handleGoHome,
+    priceActive,
+  } = useExplore();
 
   // If landlord, show message that this page is for students only
   if (!loading && userRole === "landlord") {
@@ -225,7 +61,7 @@ export default function ExploreScreen() {
           </Text>
           <Pressable
             style={styles.goHomeButton}
-            onPress={() => router.push("/(tabs)/")}
+            onPress={handleGoHome}
           >
             <Text style={styles.goHomeButtonText}>Go to Home</Text>
           </Pressable>
@@ -364,14 +200,14 @@ export default function ExploreScreen() {
                 onPress={() => setPriceModalVisible(true)}
                 style={[
                   styles.pill,
-                  (minPrice > 0 || maxPrice < 5000) && styles.pillActive,
+                  priceActive && styles.pillActive,
                   { marginRight: 8 },
                 ]}
               >
                 <Text
                   style={[
                     styles.text,
-                    (minPrice > 0 || maxPrice < 5000) && styles.textActive,
+                    priceActive && styles.textActive,
                   ]}
                 >
                   Price
@@ -394,10 +230,7 @@ export default function ExploreScreen() {
           initialMin={minPrice}
           initialMax={maxPrice}
           onClose={() => setPriceModalVisible(false)}
-          onApply={(min, max) => {
-            setMinPrice(min);
-            setMaxPrice(max);
-          }}
+          onApply={handleApplyPrice}
         />
 
         {/* Attribution for CartoDB */}
