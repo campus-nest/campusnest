@@ -58,6 +58,38 @@ export class AuthService {
   }
 
   /**
+   * Sign in a user with email and password
+   */
+  async signIn(email: string, password: string): Promise<{
+    success: boolean;
+    user?: User;
+    error?: string;
+  }> {
+    try {
+      const { data, error } = await this.supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (!data.user) {
+        return { success: false, error: "No user returned from signin" };
+      }
+
+      return { success: true, user: data.user };
+    } catch (error) {
+      console.error("Sign in error:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
    * Get the current authenticated user
    */
   async getCurrentUser(): Promise<User | null> {
