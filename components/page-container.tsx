@@ -1,33 +1,23 @@
 import { ReactNode } from "react";
-import { StyleSheet, View, ViewProps } from "react-native";
+import { View, ViewProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface PageContainerProps extends ViewProps {
   children: ReactNode;
+  className?: string;
 }
 
 export function PageContainer({
   children,
   style,
+  className = "",
   ...props
 }: PageContainerProps) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={[styles.container, style]} {...props}>
+    <SafeAreaView className="flex-1 bg-black">
+      <View className={`flex-1 w-full px-2 ${className}`} style={style} {...props}>
         {children}
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  container: {
-    flex: 1,
-    width: "100%",
-    paddingHorizontal: 8,
-  },
-});

@@ -1,36 +1,37 @@
 import { StatusBar } from "expo-status-bar";
-import { ScrollView, StyleSheet, View, ViewStyle } from "react-native";
+import { ScrollView, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ScreenProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: ViewStyle | ViewStyle[];
+  className?: string;
   scrollable?: boolean;
-  contentContainerStyle?: ViewStyle;
+  contentContainerStyle?: ViewStyle | ViewStyle[];
+  contentContainerClassName?: string;
   noPadding?: boolean;
 }
 
 export default function Screen({
   children,
   style,
+  className = "",
   scrollable = false,
   contentContainerStyle,
+  contentContainerClassName = "",
   noPadding = false,
 }: ScreenProps) {
-  const hPad: ViewStyle = noPadding ? {} : { paddingHorizontal: 20 };
+  const paddingClass = noPadding ? "" : "px-6"; // px-6 is 24px
 
   if (scrollable) {
     return (
-      <SafeAreaView style={[styles.container, style]}>
+      <SafeAreaView className={`flex-1 bg-black ${className}`} style={style}>
         <StatusBar style="light" />
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={[
-            hPad,
-            styles.scrollBase,
-            contentContainerStyle,
-          ]}
+          contentContainerClassName={`${paddingClass} pt-[32px] pb-[48px] ${contentContainerClassName}`}
+          contentContainerStyle={contentContainerStyle}
         >
           {children}
         </ScrollView>
@@ -39,24 +40,9 @@ export default function Screen({
   }
 
   return (
-    <SafeAreaView style={[styles.container, hPad, style]}>
+    <SafeAreaView className={`flex-1 bg-black ${paddingClass} ${className}`} style={style}>
       <StatusBar style="light" />
-      <View style={styles.inner}>{children}</View>
+      <View className="flex-1">{children}</View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  scrollBase: {
-    paddingTop: 32,
-    paddingBottom: 48,
-    gap: 0, // screens set their own gap via contentContainerStyle
-  },
-  inner: {
-    flex: 1,
-  },
-});

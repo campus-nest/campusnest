@@ -1,6 +1,5 @@
 import {
   Platform,
-  StyleSheet,
   Text,
   TextInput,
   TextInputProps,
@@ -11,47 +10,31 @@ import {
 
 interface InputProps extends TextInputProps {
   label?: string;
-  containerStyle?: ViewStyle;
-  labelStyle?: TextStyle;
+  containerStyle?: ViewStyle | ViewStyle[];
+  containerClassName?: string;
+  labelStyle?: TextStyle | TextStyle[];
+  labelClassName?: string;
 }
 
 export default function Input({
   label,
   containerStyle,
+  containerClassName = "",
+  className = "",
   style,
   labelStyle,
+  labelClassName = "",
   ...props
 }: InputProps) {
   return (
-    <View style={[styles.inputContainer, containerStyle]}>
-      {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
+    <View className={`gap-2 ${containerClassName}`} style={containerStyle}>
+      {label && <Text className={`text-white text-[14px] font-medium ${labelClassName}`} style={labelStyle}>{label}</Text>}
       <TextInput
-        style={[styles.input, style]}
+        className={`bg-[#1a1a1a] rounded-[12px] p-4 text-white text-[16px] border border-[#333] tracking-[0px] ${className}`}
+        style={style}
         placeholderTextColor="#666"
         {...props}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    color: "#fff",
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#333",
-    letterSpacing: 0,
-    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
-  },
-});

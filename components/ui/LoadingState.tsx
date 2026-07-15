@@ -1,32 +1,20 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
 interface LoadingStateProps {
-  label: string;
+  label?: string;
   showSpinner?: boolean;
+  className?: string;
 }
 
 export default function LoadingState({
   label,
   showSpinner = true,
+  className = "",
 }: LoadingStateProps) {
   return (
-    <View style={styles.container}>
+    <View className={`flex-1 bg-black items-center justify-center ${className}`}>
       {showSpinner && <ActivityIndicator color="#fff" />}
-      <Text style={styles.text}>{label}</Text>
+      {label && <Text className="text-white mt-2.5 text-center">{label}</Text>}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  text: {
-    color: "#fff",
-    marginTop: 10,
-    textAlign: "center",
-  },
-});

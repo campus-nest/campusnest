@@ -1,35 +1,23 @@
 import { ReactNode } from "react";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { View, ViewStyle } from "react-native";
 
 interface CardProps {
   children: ReactNode;
   variant?: "dark" | "light";
-  style?: ViewStyle;
+  style?: ViewStyle | ViewStyle[];
+  className?: string;
 }
 
-export default function Card({ children, variant = "dark", style }: CardProps) {
+export default function Card({ children, variant = "dark", style, className = "" }: CardProps) {
+  const baseClasses = "rounded-[24px] p-4";
+  const variantClasses = variant === "light" ? "bg-[#f2f2f2]" : "bg-[#1a1a1a]";
+
   return (
     <View
-      style={[
-        styles.card,
-        variant === "light" ? styles.cardLight : styles.cardDark,
-        style,
-      ]}
+      className={`${baseClasses} ${variantClasses} ${className}`}
+      style={style}
     >
       {children}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: 24,
-    padding: 16,
-  },
-  cardDark: {
-    backgroundColor: "#1a1a1a",
-  },
-  cardLight: {
-    backgroundColor: "#f2f2f2",
-  },
-});
