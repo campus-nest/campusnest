@@ -17,6 +17,7 @@ export function NavigationBar() {
     "/signup",
     "/pre-signup",
     "/verify-email",
+    "/complete-profile",
   ].includes(pathname);
 
   // Helper function to check if route is active

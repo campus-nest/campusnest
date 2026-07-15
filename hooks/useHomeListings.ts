@@ -3,6 +3,7 @@ import { authService, listingService } from "@/src/services";
 import { Listing } from "@/src/types/listing";
 import * as Location from "expo-location";
 import { getDistanceFromLatLonInKm } from "@/src/utils/distance";
+import { useRouter } from "expo-router";
 
 export type Role = "student" | "landlord";
 export type StudentFilter = "new" | "closest" | "cheapest" | "moveIn";
@@ -10,6 +11,7 @@ export type LandlordFilter = "recent" | "yourListings";
 export type FilterKey = StudentFilter | LandlordFilter;
 
 export function useHomeListings() {
+  const router = useRouter();
   const [role, setRole] = useState<Role | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
   const [listingsLoading, setListingsLoading] = useState(true);
@@ -66,13 +68,18 @@ export function useHomeListings() {
         if (userRole) {
           setRole(userRole);
           setActiveFilter(userRole === "student" ? "new" : "recent");
+        } else {
+          // If no role is found (e.g. first Google sign in), redirect to profile completion
+          router.replace("/complete-profile");
         }
+      } catch (error) {
+        console.error("Error fetching user role:", error);
       } finally {
         setRoleLoading(false);
       }
     };
     fetchRole();
-  }, []);
+  }, [router]);
 
   // Fetch and sort listings based on active filters and location
   useEffect(() => {

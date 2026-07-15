@@ -90,6 +90,10 @@ export default function RootLayout() {
               options={{ headerShown: false, gestureEnabled: false }}
             />
             <Stack.Screen
+              name="complete-profile"
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
               name="(tabs)"
               options={{ headerShown: false, gestureEnabled: false }}
             />
