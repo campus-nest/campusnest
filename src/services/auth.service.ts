@@ -1,5 +1,9 @@
 import { User, Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/src/lib/supabaseClient";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
+
+WebBrowser.maybeCompleteAuthSession();
 
 interface SignUpInput {
   email: string;
@@ -219,6 +223,70 @@ export class AuthService {
       return { success: true };
     } catch (error) {
       console.error("resendSignUpEmail error:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
+   * Sign in with Google OAuth using Expo WebBrowser
+   */
+  async signInWithGoogle(): Promise<{ success: boolean; error?: string; session?: Session }> {
+    try {
+      const redirectUrl = Linking.createURL("/login");
+      const { data, error } = await this.supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: true,
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (!data?.url) {
+        return { success: false, error: "No OAuth URL returned from Supabase" };
+      }
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
+
+      if (result.type === "success" && result.url) {
+        const parts = result.url.split(/[#?]/);
+        const queryString = parts[1] || parts[2] || "";
+        const params: Record<string, string> = {};
+        queryString.split("&").forEach((param) => {
+          const [key, val] = param.split("=");
+          if (key && val) {
+            params[key] = decodeURIComponent(val);
+          }
+        });
+
+        const accessToken = params.access_token;
+        const refreshToken = params.refresh_token;
+
+        if (accessToken && refreshToken) {
+          const { data: sessionData, error: sessionError } = await this.supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (sessionError) {
+            return { success: false, error: sessionError.message };
+          }
+
+          return { success: true, session: sessionData.session || undefined };
+        } else {
+          return { success: false, error: "Tokens missing from redirect URL" };
+        }
+      }
+
+      return { success: false, error: "Sign in was cancelled or failed" };
+    } catch (error) {
+      console.error("Google OAuth error:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
