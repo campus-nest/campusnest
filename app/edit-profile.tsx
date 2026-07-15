@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import { H1 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
+import LoadingState from "@/components/ui/LoadingState";
 import { Upload } from "lucide-react-native";
 import { useEditProfile } from "@/hooks/useEditProfile";
 import {
@@ -42,11 +43,7 @@ export default function EditProfileScreen() {
   } = useEditProfile();
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    );
+    return <LoadingState label="Loading profile…" />;
   }
 
   return (
@@ -159,12 +156,6 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: "black",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   content: {
     gap: 16,
     paddingTop: 16,

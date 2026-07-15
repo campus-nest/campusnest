@@ -13,6 +13,8 @@ import { Bookmark, BookmarkX } from "lucide-react-native";
 import { useSaved } from "@/hooks/useSaved";
 import { Post } from "@/src/types/post";
 import { Listing } from "@/src/types/listing";
+import LoadingState from "@/components/ui/LoadingState";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function SavedScreen() {
   const {
@@ -28,18 +30,12 @@ export default function SavedScreen() {
   } = useSaved();
 
   if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading saved…</Text>
-      </View>
-    );
+    return <LoadingState label="Loading saved…" />;
   }
 
   return (
-    <PageContainer>
-      <View style={styles.screen}>
-        {/* Header */}
+    <PageContainer style={{ paddingTop: 12 }}>
+      {/* Header */}
         <View style={styles.pageHeader}>
           <Text style={styles.pageTitle}>Saved</Text>
           <View style={styles.countPill}>
@@ -72,7 +68,11 @@ export default function SavedScreen() {
         {/* Listings tab */}
         {activeTab === "listings" && (
           savedListings.length === 0 ? (
-            <EmptyState label="No saved listings yet" subtext="Tap the bookmark on any listing to save it" />
+            <EmptyState
+              label="No saved listings yet"
+              subtext="Tap the bookmark on any listing to save it"
+              icon={<Bookmark size={28} color="#444" strokeWidth={1.5} />}
+            />
           ) : (
             <FlatList
               data={savedListings}
@@ -93,7 +93,11 @@ export default function SavedScreen() {
         {/* Posts tab */}
         {activeTab === "posts" && (
           savedPosts.length === 0 ? (
-            <EmptyState label="Nothing saved yet" subtext="Posts you save will appear here" />
+            <EmptyState
+              label="Nothing saved yet"
+              subtext="Posts you save will appear here"
+              icon={<Bookmark size={28} color="#444" strokeWidth={1.5} />}
+            />
           ) : (
             <FlatList
               data={savedPosts}
@@ -110,7 +114,6 @@ export default function SavedScreen() {
             />
           )
         )}
-      </View>
     </PageContainer>
   );
 }
@@ -187,24 +190,7 @@ function SavedPostCard({
   );
 }
 
-function EmptyState({ label, subtext }: { label: string; subtext: string }) {
-  return (
-    <View style={styles.emptyState}>
-      <View style={styles.emptyIconWrap}>
-        <Bookmark size={28} color="#444" strokeWidth={1.5} />
-      </View>
-      <Text style={styles.emptyTitle}>{label}</Text>
-      <Text style={styles.emptySubtext}>{subtext}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "#000",
-    paddingTop: 12,
-  },
   pageHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -353,47 +339,5 @@ const styles = StyleSheet.create({
   unsaveBtn: {
     paddingTop: 2,
     paddingLeft: 4,
-  },
-  // Shared
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-    gap: 12,
-  },
-  centeredText: {
-    color: "#aaa",
-    fontSize: 14,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 32,
-    paddingBottom: 60,
-  },
-  emptyIconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: "#111",
-    borderWidth: 1,
-    borderColor: "#1e1e1e",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
-  },
-  emptyTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  emptySubtext: {
-    color: "#555",
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
   },
 });

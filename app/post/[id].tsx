@@ -14,6 +14,7 @@ import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Pencil, Trash2 } from "lucide-react-native";
 import { usePostDetail } from "@/hooks/usePostDetail";
+import LoadingState from "@/components/ui/LoadingState";
 
 export default function PostDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,14 +42,7 @@ export default function PostDetailScreen() {
   } = usePostDetail(id);
 
   if (loading || !post || deleting) {
-    return (
-      <SafeAreaView style={styles.loadingScreen}>
-        <ActivityIndicator color="#fff" size="large" />
-        <Text style={styles.loadingText}>
-          {deleting ? "Deleting post…" : "Loading post…"}
-        </Text>
-      </SafeAreaView>
-    );
+    return <LoadingState label={deleting ? "Deleting post…" : "Loading post…"} />;
   }
 
   return (
@@ -227,17 +221,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#000",
-  },
-  loadingScreen: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  loadingText: {
-    color: "#aaa",
-    fontSize: 14,
   },
   header: {
     flexDirection: "row",
