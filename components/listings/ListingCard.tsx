@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View, Image } from "react-native";
+import { Pressable, Text, View, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { Listing } from "@/src/types/listing";
 import { Bookmark } from "lucide-react-native";
@@ -15,52 +15,52 @@ export function ListingCard({ listing }: Props) {
 
   return (
     <Pressable
-      style={styles.card}
+      className="flex-row bg-[#1a1a1a] rounded-xl p-3 mb-3 border border-[#2a2a2a] items-center"
       onPress={() => router.push(`/listing/${listing.id}`)}
     >
       {/* Thumbnail */}
-      <View style={styles.imageWrapper}>
+      <View className="w-20 h-20 rounded-lg bg-[#2a2a2a] items-center justify-center mr-3 overflow-hidden shrink-0">
         {listing.photo_urls?.length ? (
           <Image
             source={{ uri: listing.photo_urls[0] }}
-            style={styles.image}
+            className="w-full h-full"
             resizeMode="cover"
           />
         ) : (
-          <Text style={styles.imageFallback}>🏠</Text>
+          <Text className="text-[28px]">🏠</Text>
         )}
       </View>
 
       {/* Text content */}
-      <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
+      <View className="flex-1 gap-1">
+        <Text className="text-white text-[14px] font-bold leading-[18px]" numberOfLines={1}>{listing.title}</Text>
 
-        <Text style={styles.rent}>
-          <Text style={styles.rentAmount}>${listing.rent}</Text>
-          <Text style={styles.rentSuffix}> /mo</Text>
+        <Text className="mt-0.5">
+          <Text className="text-white text-[18px] font-extrabold">${listing.rent}</Text>
+          <Text className="text-[#777] text-[12px] font-normal"> /mo</Text>
         </Text>
 
-        <View style={styles.metaRow}>
+        <View className="flex-row gap-2 mt-0.5">
           {listing.lease_term ? (
-            <View style={styles.tag}>
-              <Text style={styles.tagText}>{listing.lease_term}</Text>
+            <View className="bg-[#2a2a2a] rounded-lg px-2 py-1 border border-[#333]">
+              <Text className="text-[#aaa] text-[11px] font-medium">{listing.lease_term}</Text>
             </View>
           ) : null}
           {listing.bedrooms != null ? (
-            <View style={styles.tag}>
-              <Text style={styles.tagText}>{listing.bedrooms}bd</Text>
+            <View className="bg-[#2a2a2a] rounded-lg px-2 py-1 border border-[#333]">
+              <Text className="text-[#aaa] text-[11px] font-medium">{listing.bedrooms}bd</Text>
             </View>
           ) : null}
         </View>
 
-        <Text style={styles.address} numberOfLines={2} ellipsizeMode="tail">
+        <Text className="text-[#888] text-[12px] leading-[16px] mt-0.5" numberOfLines={2} ellipsizeMode="tail">
           {listing.address}
         </Text>
       </View>
 
       {/* Save button */}
       <Pressable
-        style={styles.saveBtn}
+        className="pl-2 pt-0.5 self-start"
         onPress={(e) => {
           e.stopPropagation();
           toggleSaveListing(listing.id);
@@ -77,86 +77,3 @@ export function ListingCard({ listing }: Props) {
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: "row",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-    alignItems: "center",
-  },
-  imageWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: "#2a2a2a",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-    overflow: "hidden",
-    flexShrink: 0,
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  imageFallback: {
-    fontSize: 28,
-  },
-  content: {
-    flex: 1,
-    gap: 4,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-    lineHeight: 18,
-  },
-  rent: {
-    marginTop: 1,
-  },
-  rentAmount: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  rentSuffix: {
-    color: "#777",
-    fontSize: 12,
-    fontWeight: "400",
-  },
-  metaRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 2,
-  },
-  tag: {
-    backgroundColor: "#2a2a2a",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  tagText: {
-    color: "#aaa",
-    fontSize: 11,
-    fontWeight: "500",
-  },
-  address: {
-    color: "#888",
-    fontSize: 12,
-    lineHeight: 16,
-    marginTop: 2,
-  },
-  saveBtn: {
-    paddingLeft: 8,
-    paddingTop: 2,
-    alignSelf: "flex-start",
-  },
-});

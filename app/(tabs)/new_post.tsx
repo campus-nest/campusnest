@@ -1,10 +1,8 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React from "react";
 import {
-  ActivityIndicator,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -24,6 +22,7 @@ import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import Section, { Divider } from "@/components/ui/Section";
 import TabSelector from "@/components/ui/TabSelector";
+import LoadingState from "@/components/ui/LoadingState";
 
 // Constants
 const UTILITY_OPTIONS = ["electricity", "water", "wifi", "heat"];
@@ -92,45 +91,47 @@ export default function NewPostScreen() {
   // Landlord Form
   const renderLandlordForm = () => (
     <>
-      <H1 style={styles.title}>Create Listing</H1>
-      <H4 style={styles.subtitle}>Share a place students can rent</H4>
+      <H1 className="text-left mb-1" style={{ textAlign: "left", marginBottom: 4 }}>Create Listing</H1>
+      <H4 className="text-left text-[#aaa] mb-5" style={{ textAlign: "left", color: "#aaa", marginBottom: 20 }}>Share a place students can rent</H4>
 
-      <Card variant="light" style={styles.formCard}>
-        <TabSelector
-          tabs={[
-            { label: "Rent", value: "rent" },
-            { label: "Price", value: "price" },
-          ]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          variant="light"
-          style={styles.tabSelector}
-        />
+      <Card variant="light" className="mt-0.5 mb-4 w-full self-stretch max-w-[1000px]">
+        <View className="mb-3">
+          <TabSelector
+            tabs={[
+              { label: "Rent", value: "rent" },
+              { label: "Price", value: "price" },
+            ]}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            variant="light"
+          />
+        </View>
 
         <Divider variant="light" />
 
         {/* Basic Info */}
         <Input
           label="Listing Title"
-          labelStyle={styles.labelDark}
+          labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
           placeholder="Cozy 2-bedroom near campus"
           value={listingTitle}
           onChangeText={setListingTitle}
-          style={styles.inputLight}
-          containerStyle={styles.field}
+          className="bg-white border-[#ddd] text-black"
+          containerClassName="w-full mb-4"
         />
 
         {/* Address with Map Picker */}
-        <AddressInput
-          label="Address"
-          placeholder="123 University Ave, Edmonton, AB"
-          value={listingAddress}
-          onChangeText={setListingAddress}
-          selectedLocation={selectedLocation}
-          onLocationSelected={handleLocationSelected}
-          variant="light"
-          containerStyle={styles.field}
-        />
+        <View className="w-full mb-4">
+          <AddressInput
+            label="Address"
+            placeholder="123 University Ave, Edmonton, AB"
+            value={listingAddress}
+            onChangeText={setListingAddress}
+            selectedLocation={selectedLocation}
+            onLocationSelected={handleLocationSelected}
+            variant="light"
+          />
+        </View>
 
         {/* Utilities */}
         <Section title="Utilities" variant="light">
@@ -143,21 +144,21 @@ export default function NewPostScreen() {
         </Section>
 
         {/* Nearby University */}
-        <View style={styles.field}>
+        <View className="w-full mb-4">
           <Input
             label="Nearby University"
-            labelStyle={styles.labelDark}
+            labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
             placeholder="Select college"
             value={nearbyUniversity}
             onChangeText={setNearbyUniversity}
-            style={styles.inputLight}
+            className="bg-white border-[#ddd] text-black"
           />
           {nearbyUniversity.length === 0 && (
             <Pressable
-              style={styles.suggestionBox}
+              className="mt-1.5 rounded-xl bg-white p-2 shadow-sm"
               onPress={() => setNearbyUniversity("University of Alberta")}
             >
-              <Text style={styles.suggestionText}>University of Alberta</Text>
+              <Text className="text-[14px] text-[#333]">University of Alberta</Text>
             </Pressable>
           )}
         </View>
@@ -165,40 +166,43 @@ export default function NewPostScreen() {
         {/* Description */}
         <Input
           label="Description"
-          labelStyle={styles.labelDark}
+          labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
           placeholder="Tell people about your place"
           value={description}
           onChangeText={setDescription}
           multiline
-          style={[styles.inputLight, styles.multilineInput]}
-          containerStyle={styles.field}
+          className="bg-white border-[#ddd] text-black min-h-[120px]"
+          style={{ textAlignVertical: "top" }}
+          containerClassName="w-full mb-4"
         />
 
         {/* Tenant Preferences */}
         <Input
           label="Tenant Preferences"
-          labelStyle={styles.labelDark}
+          labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
           placeholder="What do you look for?"
           value={tenantPreferences}
           onChangeText={setTenantPreferences}
           multiline
-          style={[styles.inputLight, styles.multilineInput]}
-          containerStyle={styles.field}
+          className="bg-white border-[#ddd] text-black min-h-[120px]"
+          style={{ textAlignVertical: "top" }}
+          containerClassName="w-full mb-4"
         />
 
         {/* Lease Term Dropdown */}
-        <CycleDropdown
-          label="Lease Term"
-          value={leaseTermOption}
-          placeholder="Select lease term"
-          options={LEASE_TERM_OPTIONS}
-          onChange={(val) => {
-            setLeaseTermOption(val);
-            setListingLeaseTerm(val);
-          }}
-          variant="light"
-          containerStyle={styles.field}
-        />
+        <View className="w-full mb-4">
+          <CycleDropdown
+            label="Lease Term"
+            value={leaseTermOption}
+            placeholder="Select lease term"
+            options={LEASE_TERM_OPTIONS}
+            onChange={(val) => {
+              setLeaseTermOption(val);
+              setListingLeaseTerm(val);
+            }}
+            variant="light"
+          />
+        </View>
 
         {/* Furnished Toggle */}
         <Section title="Furnishing" variant="light">
@@ -211,18 +215,18 @@ export default function NewPostScreen() {
         </Section>
 
         {/* Move In Date */}
-        <View style={styles.field}>
-          <Text style={styles.labelLight}>Move In Date</Text>
+        <View className="w-full mb-4">
+          <Text className="text-[#333] text-[14px] font-medium mb-1">Move In Date</Text>
           <Pressable
-            style={styles.dateDropdown}
+            className="flex-row items-center justify-between bg-white rounded-xl border border-[#ddd] px-3 py-3 mt-1 w-full"
             onPress={() => setShowDatePicker(true)}
           >
-            <Text style={styles.dateDropdownText}>
+            <Text className="text-[14px] text-[#333]">
               {moveInDate
                 ? moveInDate.toLocaleDateString()
                 : "Select move in date"}
             </Text>
-            <Text style={styles.dateIcon}>📅</Text>
+            <Text className="text-[14px]">📅</Text>
           </Pressable>
 
           {showDatePicker && (
@@ -239,73 +243,73 @@ export default function NewPostScreen() {
         </View>
 
         {/* Bedrooms and Bathrooms Row */}
-        <View style={styles.row}>
+        <View className="flex-row gap-3 mb-4 w-full">
           <Input
             label="Bedrooms"
-            labelStyle={styles.labelDark}
+            labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
             placeholder="e.g. 2"
             value={bedrooms}
             onChangeText={setBedrooms}
             keyboardType="numeric"
-            style={styles.inputLight}
-            containerStyle={styles.halfField}
+            className="bg-white border-[#ddd] text-black"
+            containerClassName="flex-1"
           />
           <Input
             label="Bathrooms"
-            labelStyle={styles.labelDark}
+            labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
             placeholder="e.g. 1"
             value={bathrooms}
             onChangeText={setBathrooms}
             keyboardType="numeric"
-            style={styles.inputLight}
-            containerStyle={styles.halfField}
+            className="bg-white border-[#ddd] text-black"
+            containerClassName="flex-1"
           />
         </View>
 
         {/* Security Deposit */}
         <Input
           label="Security Deposit ($)"
-          labelStyle={styles.labelDark}
+          labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
           placeholder="e.g. 1200"
           value={securityDeposit}
           onChangeText={setSecurityDeposit}
           keyboardType="numeric"
-          style={styles.inputLight}
-          containerStyle={styles.field}
+          className="bg-white border-[#ddd] text-black"
+          containerClassName="w-full mb-4"
         />
 
         {/* Rent and Lease Term Row */}
-        <View style={styles.row}>
+        <View className="flex-row gap-3 mb-4 w-full">
           <Input
             label="Rent / month"
-            labelStyle={styles.labelDark}
+            labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
             placeholder="780"
             value={listingRent}
             onChangeText={setListingRent}
             keyboardType="numeric"
-            style={styles.inputLight}
-            containerStyle={styles.halfField}
+            className="bg-white border-[#ddd] text-black"
+            containerClassName="flex-1"
           />
           <Input
             label="Lease term text"
-            labelStyle={styles.labelDark}
+            labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
             placeholder="8 months"
             value={listingLeaseTerm}
             onChangeText={setListingLeaseTerm}
-            style={styles.inputLight}
-            containerStyle={styles.halfField}
+            className="bg-white border-[#ddd] text-black"
+            containerClassName="flex-1"
           />
         </View>
 
         {/* Location Area */}
         <Input
           label="Neighborhood / Area"
-          labelStyle={styles.labelDark}
+          labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
           placeholder="e.g. Downtown, Whyte Ave"
           value={locationArea}
           onChangeText={setLocationArea}
-          style={styles.inputLight}
-          containerStyle={styles.field}
+          className="bg-white border-[#ddd] text-black"
+          containerClassName="w-full mb-4"
         />
 
         {/* Photo Preview */}
@@ -319,8 +323,8 @@ export default function NewPostScreen() {
         )}
 
         {/* Upload Button */}
-        <Pressable style={styles.uploadButton} onPress={pickImages}>
-          <Text style={styles.uploadButtonText}>
+        <Pressable className="mt-3 rounded-full py-3 items-center justify-center bg-black w-full" onPress={pickImages}>
+          <Text className="text-[14px] font-semibold text-white">
             {photoUris.length ? "Add more photos" : "Upload photos"}
           </Text>
         </Pressable>
@@ -336,27 +340,28 @@ export default function NewPostScreen() {
   // Student Form
   const renderStudentForm = () => (
     <>
-      <H1 style={styles.title}>Create Post</H1>
-      <H4 style={styles.subtitle}>Tell others what you&apos;re looking for</H4>
+      <H1 className="text-left mb-1" style={{ textAlign: "left", marginBottom: 4 }}>Create Post</H1>
+      <H4 className="text-left text-[#aaa] mb-5" style={{ textAlign: "left", color: "#aaa", marginBottom: 20 }}>Tell others what you&apos;re looking for</H4>
 
       <Input
         label="Title"
-        labelStyle={styles.labelDark}
+        labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
         placeholder="Looking for a roommate for Fall 2025"
         value={postTitle}
         onChangeText={setPostTitle}
-        containerStyle={styles.field}
+        containerClassName="w-full mb-4"
       />
 
       <Input
         label="Description"
-        labelStyle={styles.labelDark}
+        labelClassName="text-[#1a1a1a] text-[14px] font-semibold mb-1"
         placeholder="Describe yourself, your preferences, and what you're looking for."
         value={postBody}
         onChangeText={setPostBody}
         multiline
-        style={styles.multilineInput}
-        containerStyle={styles.field}
+        className="min-h-[120px]"
+        style={{ textAlignVertical: "top" }}
+        containerClassName="w-full mb-4"
       />
 
       <Button fullWidth onPress={handleCreatePost} disabled={submitting}>
@@ -367,150 +372,22 @@ export default function NewPostScreen() {
 
   // Loading state
   if (roleLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
-        <Text style={styles.centeredText}>Loading...</Text>
-      </View>
-    );
+    return <LoadingState label="Loading…" />;
   }
 
   // No role state
   if (!role) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.centeredText}>
-          Could not determine your role. Please re-login.
-        </Text>
-      </View>
+      <LoadingState
+        label="Could not determine your role. Please re-login."
+        showSpinner={false}
+      />
     );
   }
 
   return (
-    <Screen scrollable contentContainerStyle={styles.scrollContent}>
+    <Screen scrollable contentContainerClassName="pt-4 pb-[100px] items-center">
       {role === "landlord" ? renderLandlordForm() : renderStudentForm()}
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingTop: 16,
-    paddingBottom: 100,
-    paddingHorizontal: 20,
-    alignItems: "center",
-  },
-  title: {
-    textAlign: "left",
-    marginBottom: 4,
-  },
-  subtitle: {
-    textAlign: "left",
-    color: "#aaa",
-    marginBottom: 20,
-  },
-  formCard: {
-    marginTop: 2,
-    marginBottom: 16,
-    width: "100%",
-    alignSelf: "stretch",
-    maxWidth: 1000,
-  },
-  tabSelector: {
-    marginBottom: 12,
-  },
-  field: {
-    width: "100%",
-    marginBottom: 16,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 16,
-    width: "100%",
-  },
-  halfField: {
-    flex: 1,
-  },
-  inputLight: {
-    backgroundColor: "#fff",
-    borderColor: "#ddd",
-    color: "#000",
-  },
-  multilineInput: {
-    minHeight: 120,
-    textAlignVertical: "top",
-  },
-  labelLight: {
-    color: "#333",
-    fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 4,
-  },
-  labelDark: {
-    color: "#1a1a1a",
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  suggestionBox: {
-    marginTop: 6,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    padding: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  suggestionText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  dateDropdown: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    marginTop: 4,
-    width: "100%",
-  },
-  dateDropdownText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  dateIcon: {
-    fontSize: 14,
-  },
-  uploadButton: {
-    marginTop: 12,
-    borderRadius: 999,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#000",
-    width: "100%",
-  },
-  uploadButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  centered: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  centeredText: {
-    color: "#fff",
-    marginTop: 12,
-    textAlign: "center",
-  },
-});
