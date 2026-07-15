@@ -6,8 +6,7 @@ import React, {
     useRef,
     useState,
   } from "react";
-  import { supabase } from "@/src/lib/supabaseClient";
-  import { savedListingService } from "@/src/services";
+  import { savedListingService, profileService } from "@/src/services";
   
   interface SavedListingsContextValue {
     savedListingIds: Set<string>;
@@ -33,27 +32,31 @@ import React, {
     useEffect(() => {
       let mounted = true;
   
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!mounted) return;
-        const uid = session?.user?.id ?? null;
-        userIdRef.current = uid;
-        setUserId(uid);
-      });
-  
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (!mounted) return;
-        const uid = session?.user?.id ?? null;
-        userIdRef.current = uid;
-        setUserId(uid);
-        if (!uid) {
-          setSavedListingIds(new Set());
-          setLoading(false);
+      async function checkUser() {
+        try {
+          const profile = await profileService.getProfile();
+          if (!mounted) return;
+          const uid = profile?.id ?? null;
+          userIdRef.current = uid;
+          setUserId(uid);
+          if (!uid) {
+            setSavedListingIds(new Set());
+            setLoading(false);
+          }
+        } catch (err) {
+          if (mounted) {
+            userIdRef.current = null;
+            setUserId(null);
+            setSavedListingIds(new Set());
+            setLoading(false);
+          }
         }
-      });
+      }
+  
+      checkUser();
   
       return () => {
         mounted = false;
-        subscription.unsubscribe();
       };
     }, []);
   
@@ -61,8 +64,8 @@ import React, {
     const fetchSaved = useCallback(async (uid: string) => {
       setLoading(true);
       try {
-        const listings = await savedListingService.getSavedListings(uid);
-        setSavedListingIds(new Set(listings.map((l) => l.id)));
+        const listings = await savedListingService.getSavedListings();
+        setSavedListingIds(new Set(listings.map((l: any) => l.id)));
       } finally {
         setLoading(false);
       }
@@ -72,47 +75,6 @@ import React, {
       if (!userId) return;
       fetchSaved(userId);
     }, [userId, fetchSaved]);
-  
-    // Realtime subscription
-    useEffect(() => {
-      if (!userId) return;
-  
-      const channel = supabase
-        .channel(`saved_listings:user=${userId}`)
-        .on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "saved_listings", filter: `user_id=eq.${userId}` },
-          (payload) => {
-            const listingId = (payload.new as { listing_id: string }).listing_id;
-            if (listingId) {
-              setSavedListingIds((prev) => {
-                if (prev.has(listingId)) return prev;
-                const next = new Set(prev);
-                next.add(listingId);
-                return next;
-              });
-            }
-          }
-        )
-        .on(
-          "postgres_changes",
-          { event: "DELETE", schema: "public", table: "saved_listings", filter: `user_id=eq.${userId}` },
-          (payload) => {
-            const listingId = (payload.old as { listing_id: string }).listing_id;
-            if (listingId) {
-              setSavedListingIds((prev) => {
-                if (!prev.has(listingId)) return prev;
-                const next = new Set(prev);
-                next.delete(listingId);
-                return next;
-              });
-            }
-          }
-        )
-        .subscribe();
-  
-      return () => { supabase.removeChannel(channel); };
-    }, [userId]);
   
     const toggleSaveListing = useCallback(
       async (listingId: string): Promise<boolean> => {

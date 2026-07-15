@@ -16,9 +16,6 @@ export class ProfileService {
 
   async updateProfile(updates: Partial<Profile>): Promise<{ success: boolean; error?: string }> {
     try {
-      // For now, this requires a PUT /api/auth/me endpoint on the backend
-      // which we'll need to add to the backend if they actually update their profile.
-      // I'll make a generic PUT to /api/auth/me or similar. Assuming the backend accepts it.
       await apiClient.put('/api/auth/me', updates);
       return { success: true };
     } catch (error: any) {
@@ -32,7 +29,7 @@ export class ProfileService {
       if (!token) return { success: false, error: "Not logged in" };
 
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
-      
+
       const uploadResult = await FileSystem.uploadAsync(
         `${API_URL}/api/storage/upload`,
         uri,
@@ -46,7 +43,7 @@ export class ProfileService {
 
       if (uploadResult.status === 201) {
         const data = JSON.parse(uploadResult.body);
-        
+
         // Auto update profile with new avatar URL
         await this.updateProfile({ avatar_url: data.url });
 

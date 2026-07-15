@@ -8,10 +8,10 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
 
-import { useColorScheme } from "../hooks/use-color-scheme";
-import { authService } from "@/src/services";
-import { SavedPostsProvider } from "@/src/context/SavedPostsContext";
 import { SavedListingsProvider } from "@/src/context/SavedListingsContext";
+import { SavedPostsProvider } from "@/src/context/SavedPostsContext";
+import { authService } from "@/src/services";
+import { useColorScheme } from "../hooks/use-color-scheme";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -27,16 +27,6 @@ export default function RootLayout() {
     };
 
     checkAuth();
-
-    const { data: authListener } = authService
-      .getSupabase()
-      .auth.onAuthStateChange((event, session) => {
-        setIsAuthenticated(!!session);
-      });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
   }, []);
 
   useEffect(() => {
