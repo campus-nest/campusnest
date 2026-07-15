@@ -3,12 +3,11 @@ import Screen from "@/components/ui/Screen";
 import { Home, MapPin } from "lucide-react-native";
 import FilterPills from "@/components/ui/FilterPills";
 import PriceRangeModal from "@/components/ui/PriceRangeModal";
+import LoadingState from "@/components/ui/LoadingState";
 import { useExplore } from "@/hooks/useExplore";
 import {
-  ActivityIndicator,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -52,18 +51,18 @@ export default function ExploreScreen() {
   if (!loading && userRole === "landlord") {
     return (
       <Screen>
-        <View style={styles.messageContainer}>
+        <View className="flex-1 justify-center items-center px-8">
           <Home size={48} color="#666" />
-          <Text style={styles.messageTitle}>Explore is for Students</Text>
-          <Text style={styles.messageText}>
+          <Text className="text-white text-[20px] font-bold mt-4 mb-2">Explore is for Students</Text>
+          <Text className="text-[#999] text-[14px] text-center leading-[20px]">
             This map view is only available for student accounts. Use the home
             tab to manage your listings.
           </Text>
           <Pressable
-            style={styles.goHomeButton}
+            className="mt-6 bg-white px-6 py-3 rounded-full"
             onPress={handleGoHome}
           >
-            <Text style={styles.goHomeButtonText}>Go to Home</Text>
+            <Text className="text-black text-[14px] font-semibold">Go to Home</Text>
           </Pressable>
         </View>
       </Screen>
@@ -71,23 +70,16 @@ export default function ExploreScreen() {
   }
 
   if (loading) {
-    return (
-      <Screen>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.loadingText}>Loading listings...</Text>
-        </View>
-      </Screen>
-    );
+    return <LoadingState label="Loading listings..." />;
   }
 
   // Web fallback - show list view instead
   if (Platform.OS === "web") {
     return (
       <Screen>
-        <View style={styles.container}>
-          <View style={styles.webHeader}>
-            <Text style={styles.webTitle}>Nearby Listings</Text>
+        <View className="flex-1 relative">
+          <View className="p-4 bg-[#1a1a1a] border-b border-[#333]">
+            <Text className="text-white text-[20px] font-bold mb-2">Nearby Listings</Text>
             <FilterPills
               options={[
                 { label: "New", value: "new" },
@@ -100,27 +92,27 @@ export default function ExploreScreen() {
             />
           </View>
 
-          <View style={styles.webListContainer}>
+          <View className="flex-1 p-4">
             {listings.map((listing) => (
               <Pressable
                 key={listing.id}
-                style={styles.listingCard}
+                className="flex-row bg-[#1a1a1a] rounded-xl p-4 mb-3 items-center"
                 onPress={() => handleMarkerPress(listing.id)}
               >
-                <View style={styles.cardIcon}>
+                <View className="w-[50px] h-[50px] rounded-full bg-white justify-center items-center mr-4">
                   <Home size={24} color="#0066CC" />
                 </View>
-                <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}>{listing.title}</Text>
-                  <Text style={styles.cardAddress}>{listing.address}</Text>
-                  <Text style={styles.cardRent}>${listing.rent}/month</Text>
+                <View className="flex-1">
+                  <Text className="text-white text-[16px] font-semibold mb-1">{listing.title}</Text>
+                  <Text className="text-[#999] text-[13px] mb-1">{listing.address}</Text>
+                  <Text className="text-[#0066CC] text-[14px] font-semibold">${listing.rent}/month</Text>
                 </View>
               </Pressable>
             ))}
           </View>
 
-          <Pressable style={styles.refreshButton} onPress={fetchListings}>
-            <Text style={styles.refreshText}>↻</Text>
+          <Pressable className="absolute bottom-[80px] right-4 bg-white w-12 h-12 rounded-full justify-center items-center shadow-md" onPress={fetchListings}>
+            <Text className="text-[24px] text-black">↻</Text>
           </Pressable>
         </View>
       </Screen>
@@ -130,10 +122,10 @@ export default function ExploreScreen() {
   // Native mobile map view
   return (
     <Screen noPadding>
-      <View style={styles.container}>
+      <View className="flex-1 relative">
         {MapView && (
           <MapView
-            style={styles.map}
+            className="flex-1 w-full h-full"
             initialRegion={region}
             showsUserLocation
             showsMyLocationButton
@@ -171,20 +163,29 @@ export default function ExploreScreen() {
                     zIndex={isTopMatch ? 999 : 1}
                   >
                     {/* Custom marker */}
-                    <View style={styles.customMarker}>
+                    <View className="items-center">
                       <View
-                        style={[
-                          styles.markerContent,
-                          isTopMatch && styles.highlightedMarkerContent,
-                        ]}
+                        className={`bg-white rounded-[20px] w-10 h-10 justify-center items-center border-[3px] border-[#0066CC] shadow-md ${
+                          isTopMatch ? "bg-[#0066CC] border-[#003366] scale-125 shadow-lg" : ""
+                        }`}
                       >
                         <Home size={16} color={isTopMatch ? "#fff" : "#000"} />
                       </View>
                       <View
-                        style={[
-                          styles.markerArrow,
-                          isTopMatch && styles.highlightedMarkerArrow,
-                        ]}
+                        style={{
+                          width: 0,
+                          height: 0,
+                          backgroundColor: "transparent",
+                          borderStyle: "solid",
+                          borderLeftWidth: 6,
+                          borderRightWidth: 6,
+                          borderTopWidth: 10,
+                          borderLeftColor: "transparent",
+                          borderRightColor: "transparent",
+                          borderTopColor: isTopMatch ? "#0066CC" : "#0066CC",
+                          marginTop: isTopMatch ? -2 : -1,
+                          transform: isTopMatch ? [{ scale: 1.2 }] : [],
+                        }}
                       />
                     </View>
                   </Marker>
@@ -193,22 +194,19 @@ export default function ExploreScreen() {
           </MapView>
         )}
 
-        <View style={styles.filterOverlay}>
+        <View className="absolute top-3 left-0 right-0 z-10">
           <FilterPills
             customPrependPill={
               <Pressable
                 onPress={() => setPriceModalVisible(true)}
-                style={[
-                  styles.pill,
-                  priceActive && styles.pillActive,
-                  { marginRight: 8 },
-                ]}
+                className={`px-3.5 py-2 rounded-full border mr-2 ${
+                  priceActive ? "bg-white border-white" : "bg-black border-[#333]"
+                }`}
               >
                 <Text
-                  style={[
-                    styles.text,
-                    priceActive && styles.textActive,
-                  ]}
+                  className={`text-[13px] font-medium ${
+                    priceActive ? "text-black" : "text-white"
+                  }`}
                 >
                   Price
                 </Text>
@@ -234,252 +232,25 @@ export default function ExploreScreen() {
         />
 
         {/* Attribution for CartoDB */}
-        <Pressable style={styles.attribution} onPress={openOSMAttribution}>
-          <Text style={styles.attributionText}>© OpenStreetMap | © CARTO</Text>
+        <Pressable className="absolute bottom-2 left-2 bg-white/70 px-1.5 py-1 rounded" onPress={openOSMAttribution}>
+          <Text className="text-[10px] text-black">© OpenStreetMap | © CARTO</Text>
         </Pressable>
 
         {/* Listing count badge */}
         {listings.length > 0 && (
-          <View style={styles.countBadge}>
+          <View className="absolute bottom-[140px] right-4 bg-black/80 px-3 py-2 rounded-[20px] flex-row items-center gap-1.5">
             <MapPin size={14} color="#fff" />
-            <Text style={styles.countText}>
+            <Text className="text-white text-[12px] font-semibold">
               {listings.length} listing{listings.length !== 1 ? "s" : ""}
             </Text>
           </View>
         )}
 
         {/* Refresh button */}
-        <Pressable style={styles.refreshButton} onPress={fetchListings}>
-          <Text style={styles.refreshText}>↻</Text>
+        <Pressable className="absolute bottom-[80px] right-4 bg-white w-12 h-12 rounded-full justify-center items-center shadow-md" onPress={fetchListings}>
+          <Text className="text-[24px] text-black">↻</Text>
         </Pressable>
       </View>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: "relative",
-  },
-  filterOverlay: {
-    position: "absolute",
-    top: 12,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#fff",
-    marginTop: 12,
-    fontSize: 14,
-  },
-  messageContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-  },
-  messageTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  messageText: {
-    color: "#999",
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  goHomeButton: {
-    marginTop: 24,
-    backgroundColor: "#fff",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 999,
-  },
-  goHomeButtonText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  map: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  customMarker: {
-    alignItems: "center",
-  },
-  markerContent: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 3,
-    borderColor: "#0066CC",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  markerArrow: {
-    width: 0,
-    height: 0,
-    backgroundColor: "transparent",
-    borderStyle: "solid",
-    borderLeftWidth: 6,
-    borderRightWidth: 6,
-    borderTopWidth: 10,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderTopColor: "#0066CC",
-    marginTop: -1,
-  },
-  highlightedMarkerContent: {
-    backgroundColor: "#0066CC",
-    borderColor: "#003366",
-    transform: [{ scale: 1.2 }],
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-  },
-  highlightedMarkerArrow: {
-    borderTopColor: "#0066CC",
-    transform: [{ scale: 1.2 }],
-    marginTop: -2,
-  },
-  // OSM Attribution (REQUIRED by OSM policy)
-  attribution: {
-    position: "absolute",
-    bottom: 8,
-    left: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  attributionText: {
-    fontSize: 10,
-    color: "#000",
-  },
-  countBadge: {
-    position: "absolute",
-    bottom: 140,
-    right: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  countText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  refreshButton: {
-    position: "absolute",
-    bottom: 80,
-    right: 16,
-    backgroundColor: "#fff",
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  refreshText: {
-    fontSize: 24,
-    color: "#000",
-  },
-  // Web-specific styles
-  webHeader: {
-    padding: 16,
-    backgroundColor: "#1a1a1a",
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  webTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  webListContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  listingCard: {
-    flexDirection: "row",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    alignItems: "center",
-  },
-  cardIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  cardAddress: {
-    color: "#999",
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  cardRent: {
-    color: "#0066CC",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  pillActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
-  },
-  text: {
-    fontSize: 13,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  textActive: {
-    color: "#000",
-  },
-});

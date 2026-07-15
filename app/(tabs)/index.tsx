@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, StyleSheet, View, Pressable, Text } from "react-native";
+import { FlatList, View, Pressable, Text } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { ListingCard } from "@/components/listings/ListingCard";
 import FilterPills from "@/components/ui/FilterPills";
@@ -33,100 +33,58 @@ export default function HomeScreen() {
 
   return (
     <PageContainer>
-      <View style={styles.screen}>
-        {/* Search */}
-        <View style={styles.searchWrapper}>
-          <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-        </View>
+      {/* Search */}
+      <View className="pt-2 pb-[6px]">
+        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+      </View>
 
-        {/* Filters */}
-        <View style={styles.filterWrapper}>
-          <FilterPills
-            customPrependPill={
-              role === "student" ? (
-                <Pressable
-                  onPress={() => setPriceModalVisible(true)}
-                  style={[styles.pricePill, priceActive && styles.pricePillActive]}
+      {/* Filters */}
+      <View className="mb-2">
+        <FilterPills
+          customPrependPill={
+            role === "student" ? (
+              <Pressable
+                onPress={() => setPriceModalVisible(true)}
+                className={`px-4 py-2 rounded-full border mr-2 ${
+                  priceActive ? "bg-white border-white" : "bg-black border-[#333]"
+                }`}
+              >
+                <Text
+                  className={`text-[13px] font-medium ${
+                    priceActive ? "text-black" : "text-white"
+                  }`}
                 >
-                  <Text style={[styles.pricePillText, priceActive && styles.pricePillTextActive]}>
-                    {priceActive ? `$${minPrice}–$${maxPrice}` : "Price"}
-                  </Text>
-                </Pressable>
-              ) : null
-            }
-            options={filterOptions}
-            value={activeFilter}
-            onChange={setActiveFilter}
-          />
-        </View>
-
-        <PriceRangeModal
-          visible={isPriceModalVisible}
-          initialMin={minPrice}
-          initialMax={maxPrice}
-          onClose={() => setPriceModalVisible(false)}
-          onApply={handleApplyPrice}
-        />
-
-        <FlatList
-          data={listings}
-          keyExtractor={(listing) => listing.id}
-          renderItem={({ item }) => <ListingCard listing={item} />}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No listings found.</Text>
-            </View>
+                  {priceActive ? `$${minPrice}–$${maxPrice}` : "Price"}
+                </Text>
+              </Pressable>
+            ) : null
           }
+          options={filterOptions}
+          value={activeFilter}
+          onChange={setActiveFilter}
         />
       </View>
+
+      <PriceRangeModal
+        visible={isPriceModalVisible}
+        initialMin={minPrice}
+        initialMax={maxPrice}
+        onClose={() => setPriceModalVisible(false)}
+        onApply={handleApplyPrice}
+      />
+
+      <FlatList
+        data={listings}
+        keyExtractor={(listing) => listing.id}
+        renderItem={({ item }) => <ListingCard listing={item} />}
+        contentContainerClassName="pb-[60px]"
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View className="pt-[80px] items-center">
+            <Text className="text-[#555] text-[15px]">No listings found.</Text>
+          </View>
+        }
+      />
     </PageContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  searchWrapper: {
-    paddingTop: 8,
-    paddingBottom: 6,
-  },
-  filterWrapper: {
-    marginBottom: 8,
-  },
-  listContent: {
-    paddingBottom: 60,
-  },
-  pricePill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "#333",
-    marginRight: 8,
-  },
-  pricePillActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
-  },
-  pricePillText: {
-    fontSize: 13,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  pricePillTextActive: {
-    color: "#000",
-  },
-  emptyState: {
-    paddingTop: 80,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: "#555",
-    fontSize: 15,
-  },
-});
