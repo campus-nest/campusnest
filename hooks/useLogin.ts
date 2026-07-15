@@ -8,6 +8,7 @@ export function useLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
@@ -82,6 +83,42 @@ export function useLogin() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      const { success, error: loginError } = await authService.signInWithGoogle();
+
+      if (!success) {
+        if (loginError && loginError !== "Sign in was cancelled or failed") {
+          Alert.alert("Google Sign-In Failed", loginError);
+        }
+        return;
+      }
+
+      const session = await authService.getSession();
+      if (!session?.user) {
+        Alert.alert("Error", "No user session found.");
+        return;
+      }
+
+      const userId = session.user.id;
+      const profile = await profileService.getProfileById(userId);
+
+      if (!profile) {
+        // If there's no profile, redirect to complete-profile to choose a role
+        setTimeout(() => router.replace("/complete-profile"), 100);
+      } else {
+        // If they have a profile, go to tabs
+        setTimeout(() => router.replace("/(tabs)"), 100);
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   const handleForgotPassword = () => {
     router.push("/forgot-password");
   };
@@ -96,7 +133,9 @@ export function useLogin() {
     password,
     setPassword,
     loading,
+    googleLoading,
     handleLogin,
+    handleGoogleLogin,
     handleForgotPassword,
     handleBack,
   };

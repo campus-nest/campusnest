@@ -4,6 +4,7 @@ import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import { useLogin } from "@/hooks/useLogin";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const {
@@ -12,7 +13,9 @@ export default function LoginScreen() {
     password,
     setPassword,
     loading,
+    googleLoading,
     handleLogin,
+    handleGoogleLogin,
     handleForgotPassword,
     handleBack,
   } = useLogin();
@@ -52,9 +55,27 @@ export default function LoginScreen() {
 
       {/* Actions */}
       <View style={styles.actions}>
-        <Button disabled={loading} fullWidth onPress={handleLogin}>
+        <Button disabled={loading || googleLoading} fullWidth onPress={handleLogin}>
           {loading ? "Logging in…" : "Login"}
         </Button>
+
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <Pressable
+          disabled={loading || googleLoading}
+          onPress={handleGoogleLogin}
+          style={[styles.googleButton, (loading || googleLoading) && styles.disabledButton]}
+        >
+          <FontAwesome name="google" size={18} color="#fff" />
+          <Text style={styles.googleButtonText}>
+            {googleLoading ? "Connecting…" : "Continue with Google"}
+          </Text>
+        </Pressable>
+
         <Pressable onPress={handleBack}>
           <Text style={styles.backText}>Back to Landing</Text>
         </Pressable>
@@ -89,11 +110,50 @@ const styles = StyleSheet.create({
   actions: {
     gap: 16,
     alignItems: "center",
+    width: "100%",
+  },
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginVertical: 4,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#333",
+  },
+  dividerText: {
+    color: "#888",
+    paddingHorizontal: 12,
+    fontSize: 14,
+  },
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    width: "100%",
+    height: 48,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: "#333",
+    backgroundColor: "#111",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  googleButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+    letterSpacing: 0.1,
   },
   backText: {
     color: "#fff",
     fontSize: 14,
     textAlign: "center",
     opacity: 0.5,
+    marginTop: 8,
   },
 });
