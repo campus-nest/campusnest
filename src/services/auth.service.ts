@@ -1,5 +1,5 @@
-import { User, Session } from "@supabase/supabase-js";
-import { getSupabase } from "@/src/lib/supabaseClient";
+import { apiClient } from "@/src/lib/apiClient";
+import * as SecureStore from 'expo-secure-store';
 
 interface SignUpInput {
   email: string;
@@ -10,51 +10,30 @@ interface SignUpInput {
 }
 
 export class AuthService {
-  private supabase = getSupabase();
-
-  /**
-   * Get Supabase client instance
-   */
-  getSupabase() {
-    return this.supabase;
-  }
-
   /**
    * Sign up a new user
    */
   async signUp(input: SignUpInput): Promise<{
     success: boolean;
-    user?: User;
+    user?: any;
     error?: string;
   }> {
     try {
-      const { data, error } = await this.supabase.auth.signUp({
-        email: input.email,
-        password: input.password,
-        options: {
-          emailRedirectTo: "https://campusnest.uofacs.ca/",
-          data: {
-            full_name: input.fullName,
-            role: input.role,
-            ...input.metadata,
-          },
-        },
+      const response = await apiClient.post('/api/auth/register', {
+        ...input,
+        ...input.metadata,
       });
 
-      if (error) {
-        return { success: false, error: error.message };
-      }
+      const { token, user } = response.data;
+      await SecureStore.setItemAsync('userToken', token);
+      await SecureStore.setItemAsync('userRole', user.role);
 
-      if (!data.user) {
-        return { success: false, error: "No user returned from signup" };
-      }
-
-      return { success: true, user: data.user };
-    } catch (error) {
-      console.error("Sign up error:", error);
+      return { success: true, user };
+    } catch (error: any) {
+      console.error("Sign up error:", error.response?.data || error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error.response?.data?.error || "Unknown error",
       };
     }
   }
@@ -64,29 +43,25 @@ export class AuthService {
    */
   async signIn(email: string, password: string): Promise<{
     success: boolean;
-    user?: User;
+    user?: any;
     error?: string;
   }> {
     try {
-      const { data, error } = await this.supabase.auth.signInWithPassword({
+      const response = await apiClient.post('/api/auth/login', {
         email,
         password,
       });
 
-      if (error) {
-        return { success: false, error: error.message };
-      }
+      const { token, user } = response.data;
+      await SecureStore.setItemAsync('userToken', token);
+      await SecureStore.setItemAsync('userRole', user.role);
 
-      if (!data.user) {
-        return { success: false, error: "No user returned from signin" };
-      }
-
-      return { success: true, user: data.user };
-    } catch (error) {
-      console.error("Sign in error:", error);
+      return { success: true, user };
+    } catch (error: any) {
+      console.error("Sign in error:", error.response?.data || error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error.response?.data?.error || "Invalid credentials",
       };
     }
   }
@@ -94,136 +69,77 @@ export class AuthService {
   /**
    * Get the current authenticated user
    */
-  async getCurrentUser(): Promise<User | null> {
-    const { data, error } = await this.supabase.auth.getUser();
-
-    if (error) {
-      console.error("Error getting current user:", error);
+  async getCurrentUser(): Promise<any | null> {
+    try {
+      const response = await apiClient.get('/api/auth/me');
+      return response.data.user;
+    } catch (error) {
+      // If unauthorized, return null
       return null;
     }
-
-    return data.user;
   }
 
   /**
-   * Get the current session
+   * Get the current session (simulated for legacy compatibility)
    */
-  async getSession(): Promise<Session | null> {
-    const { data, error } = await this.supabase.auth.getSession();
-
-    if (error) {
-      console.error("Error getting session:", error);
-      return null;
-    }
-
-    return data.session;
+  async getSession(): Promise<{ access_token: string } | null> {
+    const token = await SecureStore.getItemAsync('userToken');
+    if (!token) return null;
+    return { access_token: token };
   }
 
   /**
    * Sign out the current user
    */
   async signOut(): Promise<{ success: boolean; error?: string }> {
-    const { error } = await this.supabase.auth.signOut();
-
-    if (error) {
+    try {
+      await SecureStore.deleteItemAsync('userToken');
+      await SecureStore.deleteItemAsync('userRole');
+      return { success: true };
+    } catch (error: any) {
       console.error("Error signing out:", error);
       return { success: false, error: error.message };
     }
-
-    return { success: true };
   }
 
   /**
-   * Get user role from session metadata
+   * Get user role from secure store
    */
   async getUserRole(): Promise<"student" | "landlord" | null> {
-    const session = await this.getSession();
-    return (
-      (session?.user?.user_metadata?.role as "student" | "landlord") ?? null
-    );
+    try {
+      const role = await SecureStore.getItemAsync('userRole');
+      return (role as "student" | "landlord") ?? null;
+    } catch {
+      return null;
+    }
   }
 
   /**
-   * Send password reset code to email
+   * Send password reset code to email (Not Implemented Yet)
    */
   async sendPasswordResetEmail(email: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const { error } = await this.supabase.auth.resetPasswordForEmail(email);
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true };
-    } catch (error) {
-      console.error("sendPasswordResetEmail error:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
+    return { success: false, error: "Password reset not yet implemented on custom backend." };
   }
 
   /**
-   * Verify recovery OTP code
+   * Verify recovery OTP code (Not Implemented Yet)
    */
   async verifyRecoveryOtp(email: string, token: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const { error } = await this.supabase.auth.verifyOtp({
-        email,
-        token,
-        type: "recovery",
-      });
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true };
-    } catch (error) {
-      console.error("verifyRecoveryOtp error:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
+    return { success: false, error: "OTP verification not yet implemented on custom backend." };
   }
 
   /**
-   * Update password for the current user
+   * Update password for the current user (Not Implemented Yet)
    */
   async updatePassword(password: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const { error } = await this.supabase.auth.updateUser({ password });
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true };
-    } catch (error) {
-      console.error("updatePassword error:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
+    return { success: false, error: "Update password not yet implemented on custom backend." };
   }
 
   /**
-   * Resend signup verification email
+   * Resend signup verification email (Not Implemented Yet)
    */
   async resendSignUpEmail(email: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const { error } = await this.supabase.auth.resend({
-        type: "signup",
-        email,
-      });
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true };
-    } catch (error) {
-      console.error("resendSignUpEmail error:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
+    return { success: false, error: "Resend email not yet implemented on custom backend." };
   }
 }
 
