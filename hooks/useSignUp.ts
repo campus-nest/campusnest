@@ -110,8 +110,8 @@ export function useSignUp() {
 
       Alert.alert(
         "Success",
-        "Account created! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.replace("/verify-email") }]
+        "Account created successfully!",
+        [{ text: "OK", onPress: () => router.replace("/(tabs)") }]
       );
     } catch (err) {
       console.error("SignUp error:", err);
