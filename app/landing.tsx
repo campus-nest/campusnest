@@ -4,20 +4,20 @@ import { H1, H3 } from "@/components/ui/Headings";
 import Logo from "@/components/ui/Logo";
 import Screen from "@/components/ui/Screen";
 import { useRouter } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 export default function LandingScreen() {
   const router = useRouter();
 
   return (
-    <Screen style={styles.screen}>
+    <Screen>
       {/* Top: logo + headlines + buttons */}
-      <View style={styles.top}>
-        <Logo style={styles.logoGap} />
+      <View className="flex-1 items-center pt-12 gap-3">
+        <Logo className="mb-1" style={{ marginBottom: 4 }} />
         <H1 bold>Campus Nest</H1>
-        <H3 italic style={styles.tagline}>Let&apos;s get Started!</H3>
+        <H3 italic style={{ marginBottom: 8 }}>Let&apos;s get Started!</H3>
 
-        <View style={styles.buttons}>
+        <View className="w-full items-center gap-3 mt-2">
           <Button fullWidth onPress={() => router.push("/login")}>
             Login
           </Button>
@@ -29,38 +29,9 @@ export default function LandingScreen() {
       </View>
 
       {/* Bottom: illustration pinned to the bottom */}
-      <View style={styles.illustration} pointerEvents="none">
+      <View className="h-[180px] w-full mb-0" pointerEvents="none">
         <LandingPageLogo width="100%" height="100%" />
       </View>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    paddingHorizontal: 24,
-  },
-  top: {
-    flex: 1,
-    alignItems: "center",
-    paddingTop: 48,
-    gap: 12,
-  },
-  logoGap: {
-    marginBottom: 4,
-  },
-  tagline: {
-    marginBottom: 8,
-  },
-  buttons: {
-    width: "100%",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 8,
-  },
-  illustration: {
-    height: 180,
-    width: "100%",
-    marginBottom: 0,
-  },
-});

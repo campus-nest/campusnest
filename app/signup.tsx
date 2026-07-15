@@ -4,7 +4,7 @@ import { H1, H3, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import { useSignUp } from "@/hooks/useSignUp";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 export default function SignUpScreen() {
   const {
@@ -42,7 +42,7 @@ export default function SignUpScreen() {
   } = useSignUp();
 
   return (
-    <Screen scrollable contentContainerStyle={styles.scroll}>
+    <Screen scrollable contentContainerClassName="pt-4 pb-10 gap-4">
       <H1>Create Account</H1>
       <H4 italic>
         Join CampusNest as a {role === "student" ? "Student" : "Landlord"}
@@ -140,15 +140,15 @@ export default function SignUpScreen() {
         onChangeText={setCurrentAddress}
       />
 
-      <View style={styles.row}>
-        <View style={styles.half}>
+      <View className="flex-row gap-3">
+        <View className="flex-1">
           <Input
             label={role === "landlord" ? "City *" : "City"}
             value={city}
             onChangeText={setCity}
           />
         </View>
-        <View style={styles.half}>
+        <View className="flex-1">
           <Input
             label={role === "landlord" ? "Province *" : "Province"}
             value={province}
@@ -163,18 +163,3 @@ export default function SignUpScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll: {
-    paddingTop: 16,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  half: {
-    flex: 1,
-  },
-});
