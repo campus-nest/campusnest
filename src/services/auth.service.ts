@@ -73,7 +73,7 @@ export class AuthService {
     try {
       const response = await apiClient.get('/api/auth/me');
       return response.data.user;
-    } catch (error) {
+    } catch {
       // If unauthorized, return null
       return null;
     }

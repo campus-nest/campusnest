@@ -61,7 +61,7 @@ export function SavedPostsProvider({
           setSavedPostIds(new Set());
           setLoading(false);
         }
-      } catch (err) {
+      } catch {
         if (mounted) {
           userIdRef.current = null;
           setUserId(null);
