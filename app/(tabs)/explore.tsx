@@ -1,11 +1,10 @@
 import React from "react";
 import Screen from "@/components/ui/Screen";
 import { Home, MapPin } from "lucide-react-native";
-import FilterPills from "@/components/ui/FilterPills";
+import FilterPills, { pillStyles } from "@/components/ui/FilterPills";
 import PriceRangeModal from "@/components/ui/PriceRangeModal";
 import { useExplore } from "@/hooks/useExplore";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
-import { pillStyles } from "@/components/ui/FilterPills";
 import {
   ActivityIndicator,
   Platform,

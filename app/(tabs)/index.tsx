@@ -2,14 +2,13 @@ import React from "react";
 import { FlatList, StyleSheet, View, Pressable, Text } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { ListingCard } from "@/components/listings/ListingCard";
-import FilterPills from "@/components/ui/FilterPills";
+import FilterPills, { pillStyles } from "@/components/ui/FilterPills";
 import LoadingState from "@/components/ui/LoadingState";
 import SearchBar from "@/components/ui/SearchBar";
 import PriceRangeModal from "@/components/ui/PriceRangeModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { useHomeListings } from "@/hooks/useHomeListings";
 import { colors, spacing } from "@/src/constants/theme";
-import { pillStyles } from "@/components/ui/FilterPills";
 
 export default function HomeScreen() {
   const {
