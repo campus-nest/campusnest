@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.bold,
   },
   postBtnTextDisabled: {
-    color: "#444",
+    color: colors.text.disabled,
   },
   noComments: {
     color: colors.text.dim,

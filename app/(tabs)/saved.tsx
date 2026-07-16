@@ -69,7 +69,7 @@ export default function SavedScreen() {
             <EmptyState
               title="No saved listings yet"
               subtitle="Tap the bookmark on any listing to save it"
-              icon={<Bookmark size={28} color="#444" strokeWidth={1.5} />}
+              icon={<Bookmark size={28} color={colors.text.disabled} strokeWidth={1.5} />}
             />
           ) : (
             <FlatList
@@ -93,7 +93,7 @@ export default function SavedScreen() {
             <EmptyState
               title="Nothing saved yet"
               subtitle="Posts you save will appear here"
-              icon={<Bookmark size={28} color="#444" strokeWidth={1.5} />}
+              icon={<Bookmark size={28} color={colors.text.disabled} strokeWidth={1.5} />}
             />
           ) : (
             <FlatList
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   cardText: {
-    color: "#777",
+    color: colors.text.faded,
     fontSize: typography.size.base,
     lineHeight: 18,
   },

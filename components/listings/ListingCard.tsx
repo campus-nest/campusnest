@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.extrabold,
   },
   rentSuffix: {
-    color: "#777",
+    color: colors.text.faded,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.regular,
   },

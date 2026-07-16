@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   dropdownLight: {
     backgroundColor: colors.white,
-    borderColor: "#ddd",
+    borderColor: colors.light.border,
   },
   dropdownText: {
     fontSize: typography.size.md,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   optionsListLight: {
     backgroundColor: colors.white,
-    borderColor: "#ddd",
+    borderColor: colors.light.border,
   },
   option: {
     padding: spacing.lg,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border.strong,
   },
   optionLight: {
-    borderBottomColor: "#eee",
+    borderBottomColor: colors.light.borderSubtle,
   },
   optionSelected: {
     backgroundColor: colors.border.strong,

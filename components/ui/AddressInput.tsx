@@ -84,7 +84,7 @@ export default function AddressInput({
       <TextInput
         style={[styles.input, isLight && styles.inputLight]}
         placeholder={placeholder}
-        placeholderTextColor={isLight ? "#777" : colors.text.faint}
+        placeholderTextColor={isLight ? colors.light.placeholder : colors.text.faint}
         value={value}
         onChangeText={(text) => {
           onChangeText(text);
@@ -100,7 +100,7 @@ export default function AddressInput({
         style={[styles.mapButton, selectedLocation && styles.mapButtonSelected]}
         onPress={handleOpenMapPicker}
       >
-        <MapPin size={18} color={selectedLocation ? "#fff" : "#007AFF"} />
+        <MapPin size={18} color={selectedLocation ? colors.white : colors.accent.primary} />
         <Text
           style={[
             styles.mapButtonText,
@@ -115,7 +115,7 @@ export default function AddressInput({
       {selectedLocation && (
         <View style={styles.locationInfo}>
           <View style={styles.locationHeader}>
-            <Navigation size={16} color="#4CAF50" />
+            <Navigation size={16} color={colors.success.default} />
             <Text style={styles.locationTitle}>Location Selected</Text>
           </View>
           <Text style={styles.locationCoords}>
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.medium,
   },
   labelLight: {
-    color: "#333",
+    color: colors.light.text,
   },
   input: {
     backgroundColor: colors.background.elevated,
@@ -167,14 +167,14 @@ const styles = StyleSheet.create({
   },
   inputLight: {
     backgroundColor: colors.white,
-    borderColor: "#ddd",
+    borderColor: colors.light.border,
     color: colors.black,
   },
   mapButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#e3f2fd",
+    backgroundColor: colors.accent.background,
     borderRadius: radius.sm,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
@@ -184,8 +184,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   mapButtonSelected: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: colors.success.default,
+    borderColor: colors.success.default,
   },
   mapButtonText: {
     color: colors.accent.primary,
@@ -197,11 +197,11 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   locationInfo: {
-    backgroundColor: "#e8f5e9",
+    backgroundColor: colors.success.background,
     borderRadius: radius.sm,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: "#4CAF50",
+    borderColor: colors.success.border,
   },
   locationHeader: {
     flexDirection: "row",
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   locationTitle: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
-    color: "#2e7d32",
+    color: colors.success.text,
   },
   locationCoords: {
     fontSize: typography.size.sm,
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   clearButtonText: {
-    color: "#d32f2f",
+    color: colors.danger.text,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },

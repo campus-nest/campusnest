@@ -54,7 +54,7 @@ export default function ExploreScreen() {
     return (
       <Screen>
         <View style={styles.messageContainer}>
-          <Home size={48} color="#666" />
+          <Home size={48} color={colors.text.faint} />
           <Text style={styles.messageTitle}>Explore is for Students</Text>
           <Text style={styles.messageText}>
             This map view is only available for student accounts. Use the home
@@ -75,7 +75,7 @@ export default function ExploreScreen() {
     return (
       <Screen>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#fff" />
+          <ActivityIndicator size="large" color={colors.white} />
           <Text style={styles.loadingText}>Loading listings...</Text>
         </View>
       </Screen>
@@ -109,7 +109,7 @@ export default function ExploreScreen() {
                 onPress={() => handleMarkerPress(listing.id)}
               >
                 <View style={styles.cardIcon}>
-                  <Home size={24} color="#0066CC" />
+                  <Home size={24} color={colors.accent.secondary} />
                 </View>
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle}>{listing.title}</Text>
@@ -179,7 +179,7 @@ export default function ExploreScreen() {
                           isTopMatch && styles.highlightedMarkerContent,
                         ]}
                       >
-                        <Home size={16} color={isTopMatch ? "#fff" : "#000"} />
+                        <Home size={16} color={isTopMatch ? colors.white : colors.black} />
                       </View>
                       <View
                         style={[
@@ -242,7 +242,7 @@ export default function ExploreScreen() {
         {/* Listing count badge */}
         {listings.length > 0 && (
           <View style={styles.countBadge}>
-            <MapPin size={14} color="#fff" />
+            <MapPin size={14} color={colors.white} />
             <Text style={styles.countText}>
               {listings.length} listing{listings.length !== 1 ? "s" : ""}
             </Text>
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   },
   highlightedMarkerContent: {
     backgroundColor: colors.accent.secondary,
-    borderColor: "#003366",
+    borderColor: colors.map.markerHighlightBorder,
     transform: [{ scale: 1.2 }],
     shadowOpacity: 0.5,
     shadowRadius: 8,

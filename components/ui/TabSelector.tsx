@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border.strong,
   },
   tabRowLight: {
-    backgroundColor: "#e0e0e0",
+    backgroundColor: colors.light.chipBackground,
   },
   tab: {
     flex: 1,

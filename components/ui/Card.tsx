@@ -36,8 +36,8 @@ const styles = StyleSheet.create({
   },
   // Used in new_post and edit listing forms — light card on dark background
   light: {
-    backgroundColor: "#f2f2f2",
-    borderColor: "#ddd",
+    backgroundColor: colors.light.surface,
+    borderColor: colors.light.border,
     borderRadius: radius.xxl,
     padding: spacing.xl,
   },

@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   chipLight: {
     backgroundColor: colors.white,
-    borderColor: "#bbb",
+    borderColor: colors.light.chipBorder,
   },
   chipSelected: {
     backgroundColor: colors.white,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border.strong,
   },
   toggleChipLight: {
-    backgroundColor: "#e0e0e0",
+    backgroundColor: colors.light.chipBackground,
   },
   toggleChipActive: {
     backgroundColor: colors.black,

@@ -370,7 +370,7 @@ export default function NewPostScreen() {
   if (roleLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator color="#fff" />
+        <ActivityIndicator color={colors.white} />
         <Text style={styles.centeredText}>Loading...</Text>
       </View>
     );
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   },
   inputLight: {
     backgroundColor: colors.white,
-    borderColor: "#ddd",
+    borderColor: colors.light.border,
     color: colors.black,
   },
   multilineInput: {
@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.light.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     marginTop: spacing.xs,

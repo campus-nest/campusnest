@@ -15,6 +15,7 @@ import { ListingImageGallery } from "@/components/listings/ListingImageGallery";
 import { useListingDetail } from "@/hooks/useListingDetail";
 import LoadingState from "@/components/ui/LoadingState";
 import PageHeader, { HeaderActions, HeaderIconBtn } from "@/components/ui/PageHeader";
+import DetailRow from "@/components/ui/DetailRow";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 let MapView: any;
@@ -101,14 +102,14 @@ export default function ListingDetailScreen() {
 
           <View style={styles.infoCard}>
             {listing.security_deposit != null && (
-              <InfoRow label="Security deposit" value={`$${listing.security_deposit}`} />
+              <DetailRow label="Security deposit" value={`$${listing.security_deposit}`} />
             )}
-            {listing.utilities && <InfoRow label="Utilities" value={listing.utilities} />}
+            {listing.utilities && <DetailRow label="Utilities" value={listing.utilities} />}
             {listing.move_in_date && (
-              <InfoRow label="Move-in date" value={new Date(listing.move_in_date).toLocaleDateString()} />
+              <DetailRow label="Move-in date" value={new Date(listing.move_in_date).toLocaleDateString()} />
             )}
             {listing.nearby_university && (
-              <InfoRow label="Nearby university" value={listing.nearby_university} last />
+              <DetailRow label="Nearby university" value={listing.nearby_university} last />
             )}
           </View>
 
@@ -264,15 +265,6 @@ export default function ListingDetailScreen() {
   );
 }
 
-function InfoRow({ label, value, last }: { label: string; value: string; last?: boolean }) {
-  return (
-    <View style={[styles.infoRow, last && styles.infoRowLast]}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -343,27 +335,6 @@ const styles = StyleSheet.create({
   cardValue: {
     color: colors.text.value,
     fontSize: 15,
-    fontWeight: typography.weight.medium,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.default,
-  },
-  infoRowLast: {
-    borderBottomWidth: 0,
-    paddingBottom: 0,
-  },
-  infoLabel: {
-    color: colors.text.faint,
-    fontSize: typography.size.base,
-  },
-  infoValue: {
-    color: colors.text.value,
-    fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },
   section: {
@@ -522,7 +493,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "#1c1c1c",
+    borderColor: colors.border.subtle,
     opacity: 0.5,
   },
   contactItemLeft: {
@@ -544,7 +515,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#181818",
+    backgroundColor: colors.background.elevated,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -562,7 +533,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   contactItemLabelDisabled: {
-    color: "#444",
+    color: colors.text.disabled,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },

@@ -57,7 +57,7 @@ export default function SelectLocationScreen() {
         <View style={styles.webContainer}>
           <View style={styles.header}>
             <Pressable onPress={handleCancel} style={styles.headerButton}>
-              <X size={24} color="#fff" />
+              <X size={24} color={colors.white} />
             </Pressable>
             <Text style={styles.headerTitle}>Select Location</Text>
             <View style={styles.headerButton} />
@@ -76,7 +76,7 @@ export default function SelectLocationScreen() {
               <TextInput
                 style={styles.searchInput}
                 placeholder="Search for an address..."
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.text.readable}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={handleSearch}
@@ -87,16 +87,16 @@ export default function SelectLocationScreen() {
                 disabled={isSearching}
               >
                 {isSearching ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={colors.white} size="small" />
                 ) : (
-                  <Search size={20} color="#fff" />
+                  <Search size={20} color={colors.white} />
                 )}
               </Pressable>
             </View>
 
             {selectedLocation && (
               <View style={styles.selectedInfo}>
-                <MapPin size={20} color="#4CAF50" />
+                <MapPin size={20} color={colors.success.default} />
                 <View style={styles.selectedTextContainer}>
                   <Text style={styles.selectedAddress}>
                     {selectedLocation.address || "Location selected"}
@@ -136,7 +136,7 @@ export default function SelectLocationScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={handleCancel} style={styles.headerButton}>
-          <X size={24} color="#fff" />
+          <X size={24} color={colors.white} />
         </Pressable>
         <Text style={styles.headerTitle}>Select Location</Text>
         <Pressable
@@ -147,7 +147,7 @@ export default function SelectLocationScreen() {
           ]}
           disabled={!selectedLocation}
         >
-          <Check size={24} color={selectedLocation ? "#4CAF50" : "#666"} />
+          <Check size={24} color={selectedLocation ? colors.success.default : colors.text.faint} />
         </Pressable>
       </View>
 
@@ -156,7 +156,7 @@ export default function SelectLocationScreen() {
         <TextInput
           style={styles.searchInput}
           placeholder="Search for an address..."
-          placeholderTextColor="#999"
+          placeholderTextColor={colors.text.readable}
           value={searchQuery}
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
@@ -168,9 +168,9 @@ export default function SelectLocationScreen() {
           disabled={isSearching}
         >
           {isSearching ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={colors.white} size="small" />
           ) : (
-            <Search size={20} color="#fff" />
+            <Search size={20} color={colors.white} />
           )}
         </Pressable>
       </View>
@@ -206,7 +206,7 @@ export default function SelectLocationScreen() {
               >
                 <View style={styles.markerContainer}>
                   <View style={styles.marker}>
-                    <MapPin size={24} color="#fff" />
+                    <MapPin size={24} color={colors.white} />
                   </View>
                   <View style={styles.markerShadow} />
                 </View>
@@ -220,7 +220,7 @@ export default function SelectLocationScreen() {
           style={styles.currentLocationButton}
           onPress={handleGoToCurrentLocation}
         >
-          <Navigation size={20} color="#007AFF" />
+          <Navigation size={20} color={colors.accent.primary} />
         </Pressable>
 
         {/* Instructions */}
@@ -235,10 +235,10 @@ export default function SelectLocationScreen() {
       {selectedLocation && (
         <View style={styles.bottomSheet}>
           <View style={styles.selectedInfo}>
-            <MapPin size={24} color="#4CAF50" />
+            <MapPin size={24} color={colors.success.default} />
             <View style={styles.selectedTextContainer}>
               {isLoadingAddress ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color={colors.white} size="small" />
               ) : (
                 <>
                   <Text style={styles.selectedAddress} numberOfLines={2}>
@@ -254,7 +254,7 @@ export default function SelectLocationScreen() {
           </View>
 
           <Pressable style={styles.confirmButton} onPress={handleConfirm}>
-            <Check size={20} color="#000" />
+            <Check size={20} color={colors.black} />
             <Text style={styles.confirmButtonText}>Confirm Location</Text>
           </Pressable>
         </View>

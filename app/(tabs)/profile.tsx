@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useProfile } from "@/hooks/useProfile";
 import LoadingState from "@/components/ui/LoadingState";
 import PageHeader from "@/components/ui/PageHeader";
+import DetailRow from "@/components/ui/DetailRow";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function ProfileScreen() {
@@ -172,15 +173,6 @@ export default function ProfileScreen() {
   );
 }
 
-function DetailRow({ label, value, last }: { label: string; value?: string | null; last?: boolean }) {
-  return (
-    <View style={[styles.detailRow, last && styles.detailRowLast]}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue} numberOfLines={1}>{value || "—"}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -300,30 +292,6 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 11,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.faint,
-  },
-  detailRowLast: {
-    borderBottomWidth: 0,
-    paddingBottom: 0,
-  },
-  detailLabel: {
-    color: colors.text.dim,
-    fontSize: typography.size.base,
-    fontWeight: typography.weight.medium,
-  },
-  detailValue: {
-    color: colors.text.value,
-    fontSize: typography.size.base,
-    fontWeight: typography.weight.medium,
-    maxWidth: "58%",
-    textAlign: "right",
-  },
   savedEmpty: {
     flexDirection: "row",
     alignItems: "center",
@@ -331,7 +299,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   savedEmptyText: {
-    color: "#444",
+    color: colors.text.disabled,
     fontSize: typography.size.base,
   },
   savedList: {
@@ -349,7 +317,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.semibold,
   },
   savedListingMeta: {
-    color: "#777",
+    color: colors.text.faded,
     fontSize: typography.size.xs,
   },
   savedPostRow: {

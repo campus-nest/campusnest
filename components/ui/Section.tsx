@@ -62,6 +62,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border.strong,
   },
   dividerLight: {
-    backgroundColor: "#d0d0d0",
+    backgroundColor: colors.light.divider,
   },
 });

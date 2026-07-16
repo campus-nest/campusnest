@@ -12,6 +12,8 @@ export const colors = {
     muted: "#aaa",
     dim: "#555",
     faint: "#666",
+    faded: "#777",
+    disabled: "#444",
     value: "#e0e0e0",
     body: "#ccc",
     subtle: "#bbb",
@@ -27,11 +29,34 @@ export const colors = {
   accent: {
     primary: "#007AFF",
     secondary: "#0066CC",
+    background: "#e3f2fd",
+  },
+  success: {
+    default: "#4CAF50",
+    background: "#e8f5e9",
+    border: "#4CAF50",
+    text: "#2e7d32",
   },
   danger: {
     default: "#ff4444",
     background: "#1a0a0a",
     border: "#3a1515",
+    text: "#d32f2f",
+  },
+  map: {
+    markerHighlightBorder: "#003366",
+  },
+  // Light-variant palette, used by form components rendered on white surfaces
+  // (e.g. Card/Dropdown/Section/TabSelector/AddressInput with variant="light").
+  light: {
+    text: "#333",
+    placeholder: "#777",
+    surface: "#f2f2f2",
+    border: "#ddd",
+    borderSubtle: "#eee",
+    divider: "#d0d0d0",
+    chipBorder: "#bbb",
+    chipBackground: "#e0e0e0",
   },
   white: "#fff",
   black: "#000",
