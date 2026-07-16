@@ -17,8 +17,8 @@ export function useUsers() {
 
   useEffect(() => {
     const fetchCurrentUserAndRole = async () => {
-      const session = await authService.getSession();
-      setCurrentUserId(session?.user?.id || null);
+      const user = await authService.getCurrentUser();
+      setCurrentUserId(user?.id || null);
       const userRole = await authService.getUserRole();
       setRole(userRole);
     };

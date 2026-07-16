@@ -23,7 +23,7 @@ export function useListingDetail(id: string | undefined) {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const session = await authService.getSession();
+        const user = await authService.getCurrentUser();
         const listingData = await listingService.getListingById(id);
 
         if (!listingData) {
@@ -33,7 +33,7 @@ export function useListingDetail(id: string | undefined) {
 
         setListing(listingData);
 
-        if (session?.user?.id === listingData.landlord_id) {
+        if (user?.id === listingData.landlord_id) {
           setIsOwner(true);
         }
 
