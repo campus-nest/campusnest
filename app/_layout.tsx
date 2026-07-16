@@ -5,7 +5,7 @@ import {
 } from "@react-navigation/native";
 import { Stack, usePathname, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 
 import { SavedListingsProvider } from "@/src/context/SavedListingsContext";
