@@ -16,6 +16,7 @@ import { useListingDetail } from "@/hooks/useListingDetail";
 import LoadingState from "@/components/ui/LoadingState";
 import PageHeader, { HeaderActions, HeaderIconBtn } from "@/components/ui/PageHeader";
 import DetailRow from "@/components/ui/DetailRow";
+import IconCircle from "@/components/ui/IconCircle";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 let MapView: any;
@@ -205,9 +206,9 @@ export default function ListingDetailScreen() {
               {landlordProfile?.phone_number ? (
                 <Pressable style={styles.contactItem} onPress={() => handleCall(landlordProfile.phone_number!)}>
                   <View style={styles.contactItemLeft}>
-                    <View style={styles.iconWrapper}>
+                    <IconCircle variant="subtle" size={40}>
                       <Phone color={colors.text.primary} size={18} />
-                    </View>
+                    </IconCircle>
                     <View>
                       <Text style={styles.contactItemLabel}>Phone Number</Text>
                       <Text style={styles.contactItemValue}>{landlordProfile.phone_number}</Text>
@@ -218,9 +219,9 @@ export default function ListingDetailScreen() {
               ) : (
                 <View style={styles.contactItemDisabled}>
                   <View style={styles.contactItemLeft}>
-                    <View style={styles.iconWrapperDisabled}>
+                    <IconCircle variant="disabled" size={40}>
                       <Phone color={colors.text.dim} size={18} />
-                    </View>
+                    </IconCircle>
                     <View>
                       <Text style={styles.contactItemLabelDisabled}>Phone Number</Text>
                       <Text style={styles.contactItemValueDisabled}>Not provided</Text>
@@ -232,9 +233,9 @@ export default function ListingDetailScreen() {
               {landlordProfile?.email ? (
                 <Pressable style={styles.contactItem} onPress={() => handleCopyEmail(landlordProfile.email!)}>
                   <View style={styles.contactItemLeft}>
-                    <View style={styles.iconWrapper}>
+                    <IconCircle variant="subtle" size={40}>
                       <Mail color={colors.text.primary} size={18} />
-                    </View>
+                    </IconCircle>
                     <View>
                       <Text style={styles.contactItemLabel}>Email Address</Text>
                       <Text style={styles.contactItemValue}>{landlordProfile.email}</Text>
@@ -247,9 +248,9 @@ export default function ListingDetailScreen() {
               ) : (
                 <View style={styles.contactItemDisabled}>
                   <View style={styles.contactItemLeft}>
-                    <View style={styles.iconWrapperDisabled}>
+                    <IconCircle variant="disabled" size={40}>
                       <Mail color={colors.text.dim} size={18} />
-                    </View>
+                    </IconCircle>
                     <View>
                       <Text style={styles.contactItemLabelDisabled}>Email Address</Text>
                       <Text style={styles.contactItemValueDisabled}>Not provided</Text>
@@ -500,26 +501,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-  },
-  iconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.border.dim,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border.strong,
-  },
-  iconWrapperDisabled: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.background.elevated,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border.dim,
   },
   contactItemLabel: {
     color: colors.text.faint,

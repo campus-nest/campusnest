@@ -16,6 +16,7 @@ import { Pencil, Trash2 } from "lucide-react-native";
 import { usePostDetail } from "@/hooks/usePostDetail";
 import LoadingState from "@/components/ui/LoadingState";
 import PageHeader, { HeaderActions, HeaderIconBtn } from "@/components/ui/PageHeader";
+import Avatar from "@/components/ui/Avatar";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function PostDetailScreen() {
@@ -158,11 +159,11 @@ export default function PostDetailScreen() {
               <View style={styles.commentsList}>
                 {comments.map((comment) => (
                   <View key={comment.id} style={styles.commentItem}>
-                    <View style={styles.commentAvatar}>
-                      <Text style={styles.commentAvatarText}>
-                        {comment.profile?.full_name?.[0]?.toUpperCase() || "?"}
-                      </Text>
-                    </View>
+                    <Avatar
+                      size={32}
+                      initials={comment.profile?.full_name?.[0]?.toUpperCase() || "?"}
+                      style={styles.commentAvatar}
+                    />
                     <View style={styles.commentContent}>
                       <View style={styles.commentHeader}>
                         <Text style={styles.commentAuthor}>
@@ -301,18 +302,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border.default,
   },
   commentAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.background.surface,
-    alignItems: "center",
-    justifyContent: "center",
     flexShrink: 0,
-  },
-  commentAvatarText: {
-    color: colors.text.primary,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.bold,
   },
   commentContent: {
     flex: 1,

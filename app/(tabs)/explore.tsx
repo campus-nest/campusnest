@@ -3,6 +3,7 @@ import Screen from "@/components/ui/Screen";
 import { Home, MapPin } from "lucide-react-native";
 import FilterPills, { pillStyles } from "@/components/ui/FilterPills";
 import PriceRangeModal from "@/components/ui/PriceRangeModal";
+import IconCircle from "@/components/ui/IconCircle";
 import { useExplore } from "@/hooks/useExplore";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 import {
@@ -108,9 +109,9 @@ export default function ExploreScreen() {
                 style={styles.listingCard}
                 onPress={() => handleMarkerPress(listing.id)}
               >
-                <View style={styles.cardIcon}>
+                <IconCircle variant="onWhite" size={50} style={styles.cardIcon}>
                   <Home size={24} color={colors.accent.secondary} />
-                </View>
+                </IconCircle>
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle}>{listing.title}</Text>
                   <Text style={styles.cardAddress}>{listing.address}</Text>
@@ -434,12 +435,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.white,
-    justifyContent: "center",
-    alignItems: "center",
     marginRight: spacing.lg,
   },
   cardContent: {

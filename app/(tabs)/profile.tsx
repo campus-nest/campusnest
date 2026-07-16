@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +13,7 @@ import { useProfile } from "@/hooks/useProfile";
 import LoadingState from "@/components/ui/LoadingState";
 import PageHeader from "@/components/ui/PageHeader";
 import DetailRow from "@/components/ui/DetailRow";
+import Avatar from "@/components/ui/Avatar";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function ProfileScreen() {
@@ -42,15 +42,7 @@ export default function ProfileScreen() {
       >
         {/* Avatar + name hero */}
         <View style={styles.heroSection}>
-          <View style={styles.avatarRing}>
-            {profile?.avatar_url ? (
-              <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarFallback}>
-                <Text style={styles.avatarInitials}>{initials}</Text>
-              </View>
-            )}
-          </View>
+          <Avatar uri={profile?.avatar_url} initials={initials} size={84} initialsSize={26} bordered />
           <Text style={styles.heroName}>{profile?.full_name || "—"}</Text>
           <View style={styles.rolePill}>
             <Text style={styles.rolePillText}>
@@ -191,29 +183,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginBottom: spacing.sm,
-  },
-  avatarRing: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    borderWidth: 2,
-    borderColor: colors.border.default,
-    overflow: "hidden",
-  },
-  avatar: {
-    width: "100%",
-    height: "100%",
-  },
-  avatarFallback: {
-    flex: 1,
-    backgroundColor: colors.background.elevated,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarInitials: {
-    color: colors.text.primary,
-    fontSize: 26,
-    fontWeight: typography.weight.bold,
   },
   heroName: {
     color: colors.text.primary,

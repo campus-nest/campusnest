@@ -14,6 +14,7 @@ import { Post } from "@/src/types/post";
 import { Listing } from "@/src/types/listing";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
+import IconCircle from "@/components/ui/IconCircle";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function SavedScreen() {
@@ -165,9 +166,9 @@ function SavedPostCard({
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.cardLeft}>
-        <View style={styles.cardIconWrap}>
+        <IconCircle variant="elevated" size={30} radius={radius.sm}>
           <Bookmark size={14} color={colors.text.faint} strokeWidth={2} />
-        </View>
+        </IconCircle>
       </View>
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle}>{post.title}</Text>
@@ -307,16 +308,6 @@ const styles = StyleSheet.create({
   },
   cardLeft: {
     paddingTop: 2,
-  },
-  cardIconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: radius.sm,
-    backgroundColor: colors.background.elevated,
-    borderWidth: 1,
-    borderColor: colors.border.dim,
-    alignItems: "center",
-    justifyContent: "center",
   },
   cardBody: {
     flex: 1,
