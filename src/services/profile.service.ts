@@ -4,6 +4,9 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as SecureStore from 'expo-secure-store';
 
 export class ProfileService {
+  /**
+   * Get the currently authenticated user's profile.
+   */
   async getProfile(): Promise<Profile | null> {
     try {
       const response = await apiClient.get('/api/auth/me');
@@ -14,8 +17,56 @@ export class ProfileService {
     }
   }
 
-  async updateProfile(updates: Partial<Profile>): Promise<{ success: boolean; error?: string }> {
+  /**
+   * Alias for getProfile() — used by useProfile hook.
+   */
+  async getCurrentUserProfile(): Promise<Profile | null> {
+    return this.getProfile();
+  }
+
+  /**
+   * Get any user's profile by their ID (for viewing landlord/creator profiles).
+   */
+  async getProfileById(userId: string): Promise<Profile | null> {
     try {
+      const response = await apiClient.get(`/api/auth/users/${userId}`);
+      return response.data.user;
+    } catch (error) {
+      console.error("Error fetching profile by ID:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Create a profile for a user. On our custom backend, profiles are
+   * auto-created during registration, so this is a no-op that just
+   * returns the existing profile. Kept for legacy hook compatibility.
+   */
+  async createProfile(
+    userId: string,
+    data: Partial<Profile>
+  ): Promise<{ success: boolean; error?: string }> {
+    // Profiles are auto-created on registration, so just return success.
+    return { success: true };
+  }
+
+  /**
+   * Update a user's profile.
+   * Accepts optional userId for legacy hook compatibility,
+   * but the backend identifies the user from the JWT token.
+   */
+  async updateProfile(
+    userIdOrUpdates: string | Partial<Profile>,
+    maybeUpdates?: Partial<Profile>
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Support both calling conventions:
+      // updateProfile(updates)           — new style
+      // updateProfile(userId, updates)   — legacy hook style
+      const updates = typeof userIdOrUpdates === 'string'
+        ? maybeUpdates!
+        : userIdOrUpdates;
+
       await apiClient.put('/api/auth/me', updates);
       return { success: true };
     } catch (error: any) {
@@ -23,10 +74,23 @@ export class ProfileService {
     }
   }
 
-  async uploadAvatar(uri: string): Promise<{ success: boolean; url?: string; error?: string }> {
+  /**
+   * Upload an avatar image.
+   * Accepts optional userId for legacy hook compatibility.
+   * Returns the uploaded URL string, or null on failure.
+   */
+  async uploadAvatar(
+    uriOrUserId: string,
+    maybeUri?: string
+  ): Promise<string | null> {
     try {
       const token = await SecureStore.getItemAsync('userToken');
-      if (!token) return { success: false, error: "Not logged in" };
+      if (!token) return null;
+
+      // Support both calling conventions:
+      // uploadAvatar(uri)           — new style
+      // uploadAvatar(userId, uri)   — legacy hook style
+      const uri = maybeUri ?? uriOrUserId;
 
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -47,12 +111,12 @@ export class ProfileService {
         // Auto update profile with new avatar URL
         await this.updateProfile({ avatar_url: data.url });
 
-        return { success: true, url: data.url };
+        return data.url;
       }
-      return { success: false, error: 'Upload failed' };
+      return null;
     } catch (error: any) {
       console.error("Error uploading avatar:", error);
-      return { success: false, error: error.message };
+      return null;
     }
   }
 }
