@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { authService, profileService } from "@/src/services";
+import { authService } from "@/src/services";
 
 export function useLogin() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export function useLogin() {
 
     setLoading(true);
     try {
-      const { success, error: loginError } = await authService.signIn(
+      const { success, user, error: loginError } = await authService.signIn(
         email.trim(),
         password
       );
@@ -32,44 +32,13 @@ export function useLogin() {
         return;
       }
 
-      const session = await authService.getSession();
-      if (!session?.user) {
-        Alert.alert("Error", "No user session found.");
+      // signIn already returns the user with their role and stores the token.
+      if (!user) {
+        Alert.alert("Error", "No user data returned from server.");
         return;
       }
 
-      const userId = session.user.id;
-      let profile = await profileService.getProfileById(userId);
-
-      if (!profile) {
-        const fullName = session.user.user_metadata?.full_name;
-        const role = session.user.user_metadata?.role;
-        if (!fullName || !role) {
-          Alert.alert("Error", "Missing required profile information. Please complete signup again.");
-          return;
-        }
-
-        const { success: createSuccess, error: insertError } =
-          await profileService.createProfile(userId, {
-            full_name: fullName,
-            role,
-            email: session.user.email || "",
-          });
-
-        if (!createSuccess || insertError) {
-          Alert.alert("Error", "Failed to create user profile.");
-          return;
-        }
-
-        profile = await profileService.getProfileById(userId);
-      }
-
-      if (!profile) {
-        Alert.alert("Error", "Failed to fetch user profile.");
-        return;
-      }
-
-      if (profile.role === "student" || profile.role === "landlord") {
+      if (user.role === "student" || user.role === "landlord") {
         setTimeout(() => router.replace("/(tabs)"), 100);
       } else {
         Alert.alert("Error", "Unknown user role.");
