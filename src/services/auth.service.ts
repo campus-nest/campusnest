@@ -80,7 +80,9 @@ export class AuthService {
   }
 
   /**
-   * Get the current session (simulated for legacy compatibility)
+   * Get the current session — fast, local-only check.
+   * Only checks if a JWT token exists in SecureStore.
+   * Use getCurrentUser() when you need the full user object.
    */
   async getSession(): Promise<{ access_token: string } | null> {
     const token = await SecureStore.getItemAsync('userToken');
