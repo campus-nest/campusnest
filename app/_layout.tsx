@@ -5,13 +5,20 @@ import {
 } from "@react-navigation/native";
 import { Stack, usePathname, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "react-native-reanimated";
 
 import { SavedListingsProvider } from "@/src/context/SavedListingsContext";
 import { SavedPostsProvider } from "@/src/context/SavedPostsContext";
 import { authService } from "@/src/services";
 import { useColorScheme } from "../hooks/use-color-scheme";
+
+// Simple global emitter so any screen can trigger an auth re-check
+type AuthListener = () => void;
+const authListeners = new Set<AuthListener>();
+export function notifyAuthChanged() {
+  authListeners.forEach((fn) => fn());
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -27,6 +34,10 @@ export default function RootLayout() {
     };
 
     checkAuth();
+
+    // Subscribe to auth changes (e.g. logout from any screen)
+    authListeners.add(checkAuth);
+    return () => { authListeners.delete(checkAuth); };
   }, []);
 
   useEffect(() => {

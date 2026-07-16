@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
 import { authService, profileService, savedListingService, savedPostService } from "@/src/services";
+import { notifyAuthChanged } from "@/app/_layout";
 import { Profile } from "@/src/types/profile";
 import { Post } from "@/src/types/post";
 import { Listing } from "@/src/types/listing";
@@ -45,7 +46,7 @@ export function useProfile() {
       setIsLoggingOut(true);
       const result = await authService.signOut();
       if (result.success) {
-        router.replace("/landing");
+        notifyAuthChanged();
       }
     } catch (error) {
       console.error("Logout error:", error);

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { authService } from "@/src/services";
+import { notifyAuthChanged } from "@/app/_layout";
 
 export function useLogin() {
   const router = useRouter();
@@ -39,6 +40,7 @@ export function useLogin() {
       }
 
       if (user.role === "student" || user.role === "landlord") {
+        notifyAuthChanged();
         setTimeout(() => router.replace("/(tabs)"), 100);
       } else {
         Alert.alert("Error", "Unknown user role.");
