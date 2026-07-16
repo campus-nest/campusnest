@@ -17,18 +17,15 @@ export function useProfile() {
     if (isLoggingOut) return;
     try {
       setLoading(true);
-      const profileData = await profileService.getCurrentUserProfile();
+      const profileData = await profileService.getProfile();
       if (profileData) {
         setProfile(profileData);
-        const session = await authService.getSession();
-        if (session?.user?.id) {
-          const [posts, listings] = await Promise.all([
-            savedPostService.getSavedPosts(session.user.id),
-            savedListingService.getSavedListings(session.user.id),
-          ]);
-          setSavedPosts(posts);
-          setSavedListings(listings);
-        }
+        const [posts, listings] = await Promise.all([
+          savedPostService.getSavedPosts(),
+          savedListingService.getSavedListings(),
+        ]);
+        setSavedPosts(posts);
+        setSavedListings(listings);
       }
     } catch (error) {
       console.error("Unexpected error fetching profile:", error);
