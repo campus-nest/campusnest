@@ -1,19 +1,13 @@
-import React from "react";
 import Button from "@/components/ui/Button";
 import { H1 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
+import Stack from "@/components/ui/Stack";
 import { Upload } from "lucide-react-native";
 import { useEditProfile } from "@/hooks/useEditProfile";
 import LoadingState from "@/components/ui/LoadingState";
 import { colors, radius, spacing } from "@/src/constants/theme";
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function EditProfileScreen() {
   const {
@@ -48,7 +42,7 @@ export default function EditProfileScreen() {
     <Screen scrollable contentContainerStyle={styles.content}>
       <H1>Edit Profile</H1>
 
-      <View style={styles.avatarSection}>
+      <Stack align="center" style={styles.avatarSection}>
         <TouchableOpacity onPress={pickImage}>
           {imageUri || avatarUrl ? (
             <Image source={{ uri: imageUri || avatarUrl || undefined }} style={styles.avatar} />
@@ -61,7 +55,7 @@ export default function EditProfileScreen() {
             <Upload color={colors.white} size={16} />
           </View>
         </TouchableOpacity>
-      </View>
+      </Stack>
 
       <Input
         label="Full Name *"
@@ -119,14 +113,24 @@ export default function EditProfileScreen() {
         onChangeText={setCurrentAddress}
       />
 
-      <View style={styles.rowContainer}>
-        <View style={styles.halfWidth}>
-          <Input label="City" placeholder="City" placeholderTextColor={colors.text.faint} value={city} onChangeText={setCity} />
-        </View>
-        <View style={styles.halfWidth}>
-          <Input label="Province" placeholder="Province" placeholderTextColor={colors.text.faint} value={province} onChangeText={setProvince} />
-        </View>
-      </View>
+      <Stack direction="row" gap="md">
+        <Input
+          label="City"
+          placeholder="City"
+          placeholderTextColor={colors.text.faint}
+          value={city}
+          onChangeText={setCity}
+          containerStyle={{ flex: 1 }}
+        />
+        <Input
+          label="Province"
+          placeholder="Province"
+          placeholderTextColor={colors.text.faint}
+          value={province}
+          onChangeText={setProvince}
+          containerStyle={{ flex: 1 }}
+        />
+      </Stack>
 
       <Button fullWidth onPress={handleSave} disabled={saving}>
         {saving ? "Please wait" : "Save Changes"}
@@ -142,7 +146,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   avatarSection: {
-    alignItems: "center",
     marginBottom: spacing.lg,
   },
   avatar: {
@@ -164,12 +167,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent.primary,
     padding: spacing.sm,
     borderRadius: radius.xl,
-  },
-  rowContainer: {
-    flexDirection: "row",
-    gap: spacing.md,
-  },
-  halfWidth: {
-    flex: 1,
   },
 });
