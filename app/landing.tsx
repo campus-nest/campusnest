@@ -5,8 +5,8 @@ import Logo from "@/components/ui/Logo";
 import Screen from "@/components/ui/Screen";
 import ScreenHeading from "@/components/ui/ScreenHeading";
 import Stack from "@/components/ui/Stack";
+import BottomIllustration from "@/components/ui/BottomIllustration";
 import { useRouter } from "expo-router";
-import { StyleSheet, View } from "react-native";
 import { spacing } from "@/src/constants/theme";
 
 export default function LandingScreen() {
@@ -15,11 +15,11 @@ export default function LandingScreen() {
   return (
     <Screen>
       {/* Top: logo + headlines + buttons */}
-      <Stack gap="md" align="center" flex={1} style={styles.top}>
+      <Stack gap="md" align="center" flex={1} style={{ paddingTop: spacing.huge }}>
         <Logo />
         <ScreenHeading title="Campus Nest" subtitle="Let's get Started!" italic />
 
-        <Stack gap="md" align="center" style={styles.buttons}>
+        <Stack gap="md" align="center" style={{ width: "100%", marginTop: spacing.sm }}>
           <Button fullWidth onPress={() => router.push("/login")}>
             Login
           </Button>
@@ -30,24 +30,9 @@ export default function LandingScreen() {
         </Stack>
       </Stack>
 
-      {/* Bottom: illustration pinned to the bottom */}
-      <View style={styles.illustration} pointerEvents="none">
+      <BottomIllustration height={180}>
         <LandingPageLogo width="100%" height="100%" />
-      </View>
+      </BottomIllustration>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  top: {
-    paddingTop: 48,
-  },
-  buttons: {
-    width: "100%",
-    marginTop: spacing.sm,
-  },
-  illustration: {
-    height: 180,
-    width: "100%",
-  },
-});

@@ -1,20 +1,28 @@
 import { ReactNode } from "react";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
-import { colors, spacing } from "@/src/constants/theme";
+import { Pressable, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 interface EmptyStateProps {
   title: string;
   subtitle?: string;
   icon?: ReactNode;
+  offsetTop?: number;
+  actionLabel?: string;
+  onAction?: () => void;
   style?: ViewStyle;
 }
 
-export default function EmptyState({ title, subtitle, icon, style }: EmptyStateProps) {
+export default function EmptyState({ title, subtitle, icon, offsetTop, actionLabel, onAction, style }: EmptyStateProps) {
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, offsetTop !== undefined && { paddingTop: offsetTop }, style]}>
       {icon && <View style={styles.iconWrap}>{icon}</View>}
       <Text style={styles.title}>{title}</Text>
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+      {actionLabel && onAction && (
+        <Pressable style={styles.action} onPress={onAction}>
+          <Text style={styles.actionText}>{actionLabel}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -26,12 +34,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.md,
     paddingHorizontal: spacing.xxxl,
-    paddingBottom: 60,
+    paddingBottom: spacing.massive,
   },
   iconWrap: {
     width: 64,
     height: 64,
-    borderRadius: 20,
+    borderRadius: radius.xl,
     backgroundColor: colors.background.card,
     borderWidth: 1,
     borderColor: colors.border.subtle,
@@ -41,14 +49,26 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text.primary,
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.semibold,
     textAlign: "center",
   },
   subtitle: {
     color: colors.text.dim,
-    fontSize: 14,
+    fontSize: typography.size.md,
     textAlign: "center",
     lineHeight: 20,
+  },
+  action: {
+    marginTop: spacing.xl,
+    backgroundColor: colors.white,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.md,
+    borderRadius: radius.full,
+  },
+  actionText: {
+    color: colors.black,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
   },
 });

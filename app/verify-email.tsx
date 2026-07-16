@@ -3,9 +3,8 @@ import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import ScreenHeading from "@/components/ui/ScreenHeading";
 import Stack from "@/components/ui/Stack";
+import EmojiIcon from "@/components/ui/EmojiIcon";
 import { useVerifyEmail } from "@/hooks/useVerifyEmail";
-import { spacing } from "@/src/constants/theme";
-import { StyleSheet, Text } from "react-native";
 
 export default function VerifyEmailScreen() {
   const {
@@ -22,7 +21,7 @@ export default function VerifyEmailScreen() {
         <ScreenHeading
           title="Check Your Email"
           subtitle="We've sent a verification link to your email. Click the link to verify your account."
-          icon={<Text style={styles.icon}>📧</Text>}
+          icon={<EmojiIcon>📧</EmojiIcon>}
         />
 
         <Stack gap="lg">
@@ -49,10 +48,3 @@ export default function VerifyEmailScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  icon: {
-    fontSize: 64,
-    marginBottom: spacing.xs,
-  },
-});

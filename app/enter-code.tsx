@@ -1,10 +1,9 @@
 import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
+import CodeInput from "@/components/ui/CodeInput";
 import Screen from "@/components/ui/Screen";
 import ScreenHeading from "@/components/ui/ScreenHeading";
 import Stack from "@/components/ui/Stack";
 import { useEnterCode } from "@/hooks/useEnterCode";
-import { StyleSheet } from "react-native";
 
 export default function EnterCodeScreen() {
   const { email, code, setCode, loading, handleVerifyCode } = useEnterCode();
@@ -18,16 +17,7 @@ export default function EnterCodeScreen() {
         />
 
         <Stack gap="lg">
-          <Input
-            label="Verification Code"
-            placeholder="123456"
-            onChangeText={setCode}
-            value={code}
-            keyboardType="number-pad"
-            maxLength={6}
-            textAlign="center"
-            style={styles.codeInput}
-          />
+          <CodeInput value={code} onChangeText={setCode} />
         </Stack>
 
         <Button fullWidth onPress={handleVerifyCode} disabled={loading}>
@@ -37,12 +27,3 @@ export default function EnterCodeScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  codeInput: {
-    fontSize: 28,
-    fontWeight: "700",
-    letterSpacing: 12,
-    textAlign: "center",
-  },
-});

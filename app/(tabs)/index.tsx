@@ -1,14 +1,15 @@
 import React from "react";
-import { FlatList, StyleSheet, View, Pressable, Text } from "react-native";
+import { FlatList, View } from "react-native";
 import { PageContainer } from "@/components/page-container";
 import { ListingCard } from "@/components/listings/ListingCard";
-import FilterPills, { pillStyles } from "@/components/ui/FilterPills";
+import FilterPills from "@/components/ui/FilterPills";
 import LoadingState from "@/components/ui/LoadingState";
 import SearchBar from "@/components/ui/SearchBar";
 import PriceRangeModal from "@/components/ui/PriceRangeModal";
 import EmptyState from "@/components/ui/EmptyState";
+import PriceFilterPill from "@/components/ui/PriceFilterPill";
 import { useHomeListings } from "@/hooks/useHomeListings";
-import { colors, spacing } from "@/src/constants/theme";
+import { spacing } from "@/src/constants/theme";
 
 export default function HomeScreen() {
   const {
@@ -35,25 +36,20 @@ export default function HomeScreen() {
 
   return (
     <PageContainer>
-      <View style={styles.screen}>
-        {/* Search */}
-        <View style={styles.searchWrapper}>
+      <View style={{ flex: 1 }}>
+        <View style={{ paddingTop: spacing.sm, paddingBottom: spacing.sm - 2 }}>
           <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
         </View>
 
-        {/* Filters */}
-        <View style={styles.filterWrapper}>
+        <View style={{ marginBottom: spacing.sm }}>
           <FilterPills
             customPrependPill={
               role === "student" ? (
-                <Pressable
+                <PriceFilterPill
+                  label={priceActive ? `$${minPrice}–$${maxPrice}` : "Price"}
+                  active={priceActive}
                   onPress={() => setPriceModalVisible(true)}
-                  style={[pillStyles.pill, priceActive && pillStyles.pillActive, styles.pricePillMargin]}
-                >
-                  <Text style={[pillStyles.text, priceActive && pillStyles.textActive]}>
-                    {priceActive ? `$${minPrice}–$${maxPrice}` : "Price"}
-                  </Text>
-                </Pressable>
+                />
               ) : null
             }
             options={filterOptions}
@@ -74,34 +70,11 @@ export default function HomeScreen() {
           data={listings}
           keyExtractor={(listing) => listing.id}
           renderItem={({ item }) => <ListingCard listing={item} />}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={{ paddingBottom: spacing.massive }}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={<EmptyState title="No listings found." style={styles.emptyState} />}
+          ListEmptyComponent={<EmptyState title="No listings found." offsetTop={spacing.giant} />}
         />
       </View>
     </PageContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background.screen,
-  },
-  searchWrapper: {
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm - 2,
-  },
-  filterWrapper: {
-    marginBottom: spacing.sm,
-  },
-  listContent: {
-    paddingBottom: 60,
-  },
-  pricePillMargin: {
-    marginRight: spacing.sm,
-  },
-  emptyState: {
-    paddingTop: 80,
-  },
-});

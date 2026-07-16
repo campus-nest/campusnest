@@ -70,6 +70,10 @@ export const spacing = {
   xl: 20,
   xxl: 24,
   xxxl: 32,
+  xxxxl: 40,
+  huge: 48,
+  massive: 60,
+  giant: 80,
 } as const;
 
 export const radius = {

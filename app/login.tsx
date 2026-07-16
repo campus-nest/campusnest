@@ -3,9 +3,8 @@ import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import ScreenHeading from "@/components/ui/ScreenHeading";
 import Stack from "@/components/ui/Stack";
+import TextLink from "@/components/ui/TextLink";
 import { useLogin } from "@/hooks/useLogin";
-import { colors, typography } from "@/src/constants/theme";
-import { Pressable, StyleSheet, Text } from "react-native";
 
 export default function LoginScreen() {
   const {
@@ -40,38 +39,16 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             secureTextEntry
           />
-          <Pressable onPress={handleForgotPassword} style={styles.forgotRow}>
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </Pressable>
+          <TextLink label="Forgot Password?" onPress={handleForgotPassword} align="end" />
         </Stack>
 
         <Stack gap="lg" align="center">
           <Button disabled={loading} fullWidth onPress={handleLogin}>
             {loading ? "Logging in…" : "Login"}
           </Button>
-          <Pressable onPress={handleBack}>
-            <Text style={styles.backText}>Back to Landing</Text>
-          </Pressable>
+          <TextLink label="Back to Landing" onPress={handleBack} muted />
         </Stack>
       </Stack>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  forgotRow: {
-    alignSelf: "flex-end",
-  },
-  forgotText: {
-    color: colors.text.primary,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.medium,
-    opacity: 0.7,
-  },
-  backText: {
-    color: colors.text.primary,
-    fontSize: typography.size.md,
-    textAlign: "center",
-    opacity: 0.5,
-  },
-});

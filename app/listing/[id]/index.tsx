@@ -4,7 +4,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -17,6 +16,7 @@ import LoadingState from "@/components/ui/LoadingState";
 import PageHeader, { HeaderActions, HeaderIconBtn } from "@/components/ui/PageHeader";
 import DetailRow from "@/components/ui/DetailRow";
 import IconCircle from "@/components/ui/IconCircle";
+import Card from "@/components/ui/Card";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 let MapView: any;
@@ -66,42 +66,36 @@ export default function ListingDetailScreen() {
   ) : undefined;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.screen }}>
       <PageHeader title={listing.title} onBack={handleBack} right={headerRight} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxxl }} showsVerticalScrollIndicator={false}>
         <ListingImageGallery photos={listing.photo_urls ?? []} />
 
-        <View style={styles.content}>
-          <Text style={styles.title}>{listing.title}</Text>
-          <Text style={styles.rent}>
+        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.xl, gap: spacing.lg }}>
+          <Text style={{ color: colors.text.primary, fontSize: typography.size.xxl + 2, fontWeight: typography.weight.bold, lineHeight: 28 }}>
+            {listing.title}
+          </Text>
+          <Text style={{ color: colors.text.primary, fontSize: typography.size.xxxl + 2, fontWeight: typography.weight.extrabold }}>
             ${listing.rent}
-            <Text style={styles.rentSuffix}> / month</Text>
+            <Text style={{ fontSize: typography.size.md + 1, fontWeight: typography.weight.regular, color: colors.text.secondary }}>
+              {" "}/ month
+            </Text>
           </Text>
 
           {(listing.bedrooms != null || listing.bathrooms != null) && (
-            <View style={styles.detailsRow}>
-              {listing.bedrooms != null && (
-                <View style={styles.detailChip}>
-                  <Text style={styles.detailChipText}>{listing.bedrooms} bed</Text>
-                </View>
-              )}
-              {listing.bathrooms != null && (
-                <View style={styles.detailChip}>
-                  <Text style={styles.detailChipText}>{listing.bathrooms} bath</Text>
-                </View>
-              )}
-              {listing.lease_term && (
-                <View style={styles.detailChip}>
-                  <Text style={styles.detailChipText}>{listing.lease_term}</Text>
-                </View>
-              )}
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+              {listing.bedrooms != null && <Tag label={`${listing.bedrooms} bed`} />}
+              {listing.bathrooms != null && <Tag label={`${listing.bathrooms} bath`} />}
+              {listing.lease_term && <Tag label={listing.lease_term} />}
             </View>
           )}
 
-          <Text style={styles.address}>{listing.address}</Text>
+          <Text style={{ color: colors.text.secondary, fontSize: typography.size.md, lineHeight: 20 }}>
+            {listing.address}
+          </Text>
 
-          <View style={styles.infoCard}>
+          <Card variant="elevated">
             {listing.security_deposit != null && (
               <DetailRow label="Security deposit" value={`$${listing.security_deposit}`} />
             )}
@@ -112,24 +106,41 @@ export default function ListingDetailScreen() {
             {listing.nearby_university && (
               <DetailRow label="Nearby university" value={listing.nearby_university} last />
             )}
-          </View>
+          </Card>
 
           {listing.description && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Description</Text>
-              <Text style={styles.bodyText}>{listing.description}</Text>
+            <View style={{ gap: spacing.sm }}>
+              <Text style={{ color: colors.text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.bold }}>
+                Description
+              </Text>
+              <Text style={{ color: colors.text.readable, fontSize: typography.size.md, lineHeight: 22 }}>
+                {listing.description}
+              </Text>
             </View>
           )}
 
-          <View style={styles.infoCard}>
-            <Text style={styles.cardLabel}>Listed by</Text>
-            <Text style={styles.cardValue}>{landlordName || "Landlord"}</Text>
-          </View>
+          <Card variant="elevated">
+            <Text
+              style={{
+                color: colors.text.faint,
+                fontSize: typography.size.sm,
+                fontWeight: typography.weight.medium,
+                marginBottom: spacing.xs,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              Listed by
+            </Text>
+            <Text style={{ color: colors.text.value, fontSize: typography.size.md + 1, fontWeight: typography.weight.medium }}>
+              {landlordName || "Landlord"}
+            </Text>
+          </Card>
 
           {hasCoordinates && MapView ? (
-            <View style={styles.mapContainer}>
+            <View style={{ height: 160, borderRadius: radius.md, overflow: "hidden", borderWidth: 1, borderColor: colors.border.default }}>
               <MapView
-                style={styles.map}
+                style={{ flex: 1 }}
                 initialRegion={{
                   latitude: listing.latitude!,
                   longitude: listing.longitude!,
@@ -156,25 +167,76 @@ export default function ListingDetailScreen() {
               </MapView>
             </View>
           ) : (
-            <View style={styles.mapPlaceholder}>
-              <Text style={styles.mapText}>📍 No location available</Text>
+            <View
+              style={{
+                height: 160,
+                borderRadius: radius.md,
+                backgroundColor: colors.background.elevated,
+                borderWidth: 1,
+                borderColor: colors.border.default,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: colors.text.dim, fontSize: typography.size.md }}>📍 No location available</Text>
             </View>
           )}
 
           {isOwner ? (
-            <View style={styles.ownerCTARow}>
-              <Pressable style={styles.editBtn} onPress={handleEdit}>
+            <View style={{ flexDirection: "row", gap: spacing.md, marginTop: spacing.xs }}>
+              <Pressable
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: spacing.sm,
+                  backgroundColor: colors.white,
+                  paddingVertical: spacing.lg,
+                  borderRadius: radius.md,
+                }}
+                onPress={handleEdit}
+              >
                 <Pencil color={colors.black} size={16} />
-                <Text style={styles.editBtnText}>Edit Listing</Text>
+                <Text style={{ color: colors.black, fontSize: typography.size.md + 1, fontWeight: typography.weight.bold }}>
+                  Edit Listing
+                </Text>
               </Pressable>
-              <Pressable style={styles.deleteBtn} onPress={handleDelete}>
+              <Pressable
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: spacing.sm - 2,
+                  backgroundColor: colors.danger.background,
+                  paddingVertical: spacing.lg,
+                  paddingHorizontal: spacing.xl,
+                  borderRadius: radius.md,
+                  borderWidth: 1,
+                  borderColor: colors.danger.border,
+                }}
+                onPress={handleDelete}
+              >
                 <Trash2 color={colors.danger.default} size={16} />
-                <Text style={styles.deleteBtnText}>Delete</Text>
+                <Text style={{ color: colors.danger.default, fontSize: typography.size.md + 1, fontWeight: typography.weight.bold }}>
+                  Delete
+                </Text>
               </Pressable>
             </View>
           ) : (
-            <Pressable style={styles.ctaButton} onPress={handleContact}>
-              <Text style={styles.ctaButtonText}>Contact landlord</Text>
+            <Pressable
+              style={{
+                backgroundColor: colors.white,
+                paddingVertical: spacing.lg,
+                borderRadius: radius.md,
+                alignItems: "center",
+                marginTop: spacing.xs,
+              }}
+              onPress={handleContact}
+            >
+              <Text style={{ color: colors.black, fontSize: typography.size.lg, fontWeight: typography.weight.bold }}>
+                Contact landlord
+              </Text>
             </Pressable>
           )}
         </View>
@@ -187,77 +249,58 @@ export default function ListingDetailScreen() {
         animationType="slide"
         onRequestClose={() => setContactModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setContactModalVisible(false)} />
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Contact Landlord</Text>
-              <Pressable style={styles.modalCloseBtn} onPress={() => setContactModalVisible(false)}>
-                <X color={colors.text.primary} size={20} />
+        <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0, 0, 0, 0.7)" }}>
+          <Pressable
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+            onPress={() => setContactModalVisible(false)}
+          />
+          <View
+            style={{
+              backgroundColor: colors.background.modal,
+              borderTopLeftRadius: radius.xxl,
+              borderTopRightRadius: radius.xxl,
+              padding: spacing.xxl,
+              borderWidth: 1,
+              borderColor: colors.border.dim,
+              borderBottomWidth: 0,
+              paddingBottom: Platform.OS === "ios" ? spacing.xxxxl : spacing.xxl,
+            }}
+          >
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.xl }}>
+              <Text style={{ color: colors.text.primary, fontSize: typography.size.xxl, fontWeight: typography.weight.bold }}>
+                Contact Landlord
+              </Text>
+              <Pressable onPress={() => setContactModalVisible(false)}>
+                <IconCircle size={36} variant="onWhite" style={{ backgroundColor: colors.border.dim }}>
+                  <X color={colors.text.primary} size={20} />
+                </IconCircle>
               </Pressable>
             </View>
 
-            <View style={styles.landlordHero}>
-              <Text style={styles.landlordName}>{landlordName || "Landlord"}</Text>
-              <Text style={styles.landlordSubtitle}>Interested in this property?</Text>
+            <View style={{ marginBottom: spacing.xxl }}>
+              <Text style={{ color: colors.text.primary, fontSize: typography.size.xxxl, fontWeight: typography.weight.bold }}>
+                {landlordName || "Landlord"}
+              </Text>
+              <Text style={{ color: colors.text.secondary, fontSize: typography.size.md, marginTop: spacing.xs }}>
+                Interested in this property?
+              </Text>
             </View>
 
-            <View style={styles.contactOptions}>
-              {landlordProfile?.phone_number ? (
-                <Pressable style={styles.contactItem} onPress={() => handleCall(landlordProfile.phone_number!)}>
-                  <View style={styles.contactItemLeft}>
-                    <IconCircle variant="subtle" size={40}>
-                      <Phone color={colors.text.primary} size={18} />
-                    </IconCircle>
-                    <View>
-                      <Text style={styles.contactItemLabel}>Phone Number</Text>
-                      <Text style={styles.contactItemValue}>{landlordProfile.phone_number}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.actionLinkText}>Call</Text>
-                </Pressable>
-              ) : (
-                <View style={styles.contactItemDisabled}>
-                  <View style={styles.contactItemLeft}>
-                    <IconCircle variant="disabled" size={40}>
-                      <Phone color={colors.text.dim} size={18} />
-                    </IconCircle>
-                    <View>
-                      <Text style={styles.contactItemLabelDisabled}>Phone Number</Text>
-                      <Text style={styles.contactItemValueDisabled}>Not provided</Text>
-                    </View>
-                  </View>
-                </View>
-              )}
-
-              {landlordProfile?.email ? (
-                <Pressable style={styles.contactItem} onPress={() => handleCopyEmail(landlordProfile.email!)}>
-                  <View style={styles.contactItemLeft}>
-                    <IconCircle variant="subtle" size={40}>
-                      <Mail color={colors.text.primary} size={18} />
-                    </IconCircle>
-                    <View>
-                      <Text style={styles.contactItemLabel}>Email Address</Text>
-                      <Text style={styles.contactItemValue}>{landlordProfile.email}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.actionCopyBtn}>
-                    <Copy color={colors.text.primary} size={14} />
-                  </View>
-                </Pressable>
-              ) : (
-                <View style={styles.contactItemDisabled}>
-                  <View style={styles.contactItemLeft}>
-                    <IconCircle variant="disabled" size={40}>
-                      <Mail color={colors.text.dim} size={18} />
-                    </IconCircle>
-                    <View>
-                      <Text style={styles.contactItemLabelDisabled}>Email Address</Text>
-                      <Text style={styles.contactItemValueDisabled}>Not provided</Text>
-                    </View>
-                  </View>
-                </View>
-              )}
+            <View style={{ gap: spacing.lg }}>
+              <ContactMethodRow
+                icon={<Phone size={18} />}
+                label="Phone Number"
+                value={landlordProfile?.phone_number}
+                actionLabel="Call"
+                onPress={landlordProfile?.phone_number ? () => handleCall(landlordProfile.phone_number!) : undefined}
+              />
+              <ContactMethodRow
+                icon={<Mail size={18} />}
+                label="Email Address"
+                value={landlordProfile?.email}
+                actionIcon={<Copy color={colors.text.primary} size={14} />}
+                onPress={landlordProfile?.email ? () => handleCopyEmail(landlordProfile.email!) : undefined}
+              />
             </View>
           </View>
         </View>
@@ -266,275 +309,102 @@ export default function ListingDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background.screen,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  content: {
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.xl,
-    gap: spacing.lg,
-  },
-  title: {
-    color: colors.text.primary,
-    fontSize: 22,
-    fontWeight: typography.weight.bold,
-    lineHeight: 28,
-  },
-  rent: {
-    color: colors.text.primary,
-    fontSize: 26,
-    fontWeight: typography.weight.extrabold,
-  },
-  rentSuffix: {
-    fontSize: 15,
-    fontWeight: typography.weight.regular,
-    color: colors.text.secondary,
-  },
-  detailsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  detailChip: {
-    backgroundColor: colors.background.elevated,
-    borderRadius: radius.full,
-    paddingHorizontal: 14,
-    paddingVertical: spacing.sm - 2,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  detailChipText: {
-    color: colors.text.body,
-    fontSize: typography.size.base,
-    fontWeight: typography.weight.medium,
-  },
-  address: {
-    color: colors.text.secondary,
-    fontSize: typography.size.md,
-    lineHeight: 20,
-  },
-  infoCard: {
-    backgroundColor: colors.background.elevated,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  cardLabel: {
-    color: colors.text.faint,
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-    marginBottom: spacing.xs,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  cardValue: {
-    color: colors.text.value,
-    fontSize: 15,
-    fontWeight: typography.weight.medium,
-  },
-  section: {
-    gap: spacing.sm,
-  },
-  sectionTitle: {
-    color: colors.text.primary,
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.bold,
-  },
-  bodyText: {
-    color: colors.text.readable,
-    fontSize: typography.size.md,
-    lineHeight: 22,
-  },
-  mapContainer: {
-    height: 160,
-    borderRadius: radius.md,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  map: {
-    flex: 1,
-  },
-  mapPlaceholder: {
-    height: 160,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.elevated,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mapText: {
-    color: colors.text.dim,
-    fontSize: typography.size.md,
-  },
-  ownerCTARow: {
-    flexDirection: "row",
-    gap: spacing.md,
-    marginTop: spacing.xs,
-  },
-  editBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.white,
-    paddingVertical: spacing.lg,
-    borderRadius: radius.md,
-  },
-  editBtnText: {
-    color: colors.black,
-    fontSize: 15,
-    fontWeight: typography.weight.bold,
-  },
-  deleteBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm - 2,
-    backgroundColor: colors.danger.background,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.danger.border,
-  },
-  deleteBtnText: {
-    color: colors.danger.default,
-    fontSize: 15,
-    fontWeight: typography.weight.bold,
-  },
-  ctaButton: {
-    backgroundColor: colors.white,
-    paddingVertical: spacing.lg,
-    borderRadius: radius.md,
-    alignItems: "center",
-    marginTop: spacing.xs,
-  },
-  ctaButtonText: {
-    color: colors.black,
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.bold,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-  },
-  modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  modalContent: {
-    backgroundColor: colors.background.modal,
-    borderTopLeftRadius: radius.xxl,
-    borderTopRightRadius: radius.xxl,
-    padding: spacing.xxl,
-    borderWidth: 1,
-    borderColor: colors.border.dim,
-    borderBottomWidth: 0,
-    paddingBottom: Platform.OS === "ios" ? 40 : spacing.xxl,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacing.xl,
-  },
-  modalTitle: {
-    color: colors.text.primary,
-    fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold,
-  },
-  modalCloseBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.border.dim,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  landlordHero: {
-    marginBottom: spacing.xxl,
-  },
-  landlordName: {
-    color: colors.text.primary,
-    fontSize: typography.size.xxxl,
-    fontWeight: typography.weight.bold,
-  },
-  landlordSubtitle: {
-    color: colors.text.secondary,
-    fontSize: typography.size.md,
-    marginTop: spacing.xs,
-  },
-  contactOptions: {
-    gap: spacing.lg,
-  },
-  contactItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.background.elevated,
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  contactItemDisabled: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.background.modal,
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
-    opacity: 0.5,
-  },
-  contactItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-  },
-  contactItemLabel: {
-    color: colors.text.faint,
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-  },
-  contactItemValue: {
-    color: colors.text.primary,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    marginTop: 2,
-  },
-  contactItemLabelDisabled: {
-    color: colors.text.disabled,
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-  },
-  contactItemValueDisabled: {
-    color: colors.text.faint,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    marginTop: 2,
-  },
-  actionLinkText: {
-    color: colors.text.primary,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-  },
-  actionCopyBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.border.default,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm - 2,
-    borderRadius: radius.sm,
-  },
-});
+function Tag({ label }: { label: string }) {
+  return (
+    <View
+      style={{
+        backgroundColor: colors.background.elevated,
+        borderRadius: radius.full,
+        paddingHorizontal: spacing.md + 2,
+        paddingVertical: spacing.sm - 2,
+        borderWidth: 1,
+        borderColor: colors.border.default,
+      }}
+    >
+      <Text style={{ color: colors.text.body, fontSize: typography.size.base, fontWeight: typography.weight.medium }}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+function ContactMethodRow({
+  icon,
+  label,
+  value,
+  actionLabel,
+  actionIcon,
+  onPress,
+}: {
+  icon: React.ReactElement<{ color?: string }>;
+  label: string;
+  value?: string | null;
+  actionLabel?: string;
+  actionIcon?: React.ReactNode;
+  onPress?: () => void;
+}) {
+  const disabled = !onPress;
+  const row = (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        backgroundColor: disabled ? colors.background.modal : colors.background.elevated,
+        padding: spacing.lg,
+        borderRadius: radius.lg,
+        borderWidth: 1,
+        borderColor: disabled ? colors.border.subtle : colors.border.default,
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+        <IconCircle variant={disabled ? "disabled" : "subtle"} size={40}>
+          {React.cloneElement(icon, { color: disabled ? colors.text.dim : colors.text.primary })}
+        </IconCircle>
+        <View>
+          <Text
+            style={{
+              color: disabled ? colors.text.disabled : colors.text.faint,
+              fontSize: typography.size.sm,
+              fontWeight: typography.weight.medium,
+            }}
+          >
+            {label}
+          </Text>
+          <Text
+            style={{
+              color: disabled ? colors.text.faint : colors.text.primary,
+              fontSize: typography.size.md,
+              fontWeight: typography.weight.semibold,
+              marginTop: spacing.xs - 2,
+            }}
+          >
+            {value || "Not provided"}
+          </Text>
+        </View>
+      </View>
+      {!disabled && actionLabel && (
+        <Text style={{ color: colors.text.primary, fontSize: typography.size.md, fontWeight: typography.weight.semibold }}>
+          {actionLabel}
+        </Text>
+      )}
+      {!disabled && actionIcon && (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: colors.border.default,
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm - 2,
+            borderRadius: radius.sm,
+          }}
+        >
+          {actionIcon}
+        </View>
+      )}
+    </View>
+  );
+
+  return onPress ? <Pressable onPress={onPress}>{row}</Pressable> : row;
+}

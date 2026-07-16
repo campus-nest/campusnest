@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Bookmark } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,6 +8,8 @@ import LoadingState from "@/components/ui/LoadingState";
 import PageHeader from "@/components/ui/PageHeader";
 import DetailRow from "@/components/ui/DetailRow";
 import Avatar from "@/components/ui/Avatar";
+import Card from "@/components/ui/Card";
+import CardSectionHeader from "@/components/ui/CardSectionHeader";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function ProfileScreen() {
@@ -32,20 +28,43 @@ export default function ProfileScreen() {
   if (isLoggingOut) return <LoadingState label="Logging out…" />;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.screen }}>
       <PageHeader title="Profile" onBack={() => router.back()} />
 
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.xl,
+          paddingTop: spacing.xxl + 4,
+          paddingBottom: spacing.xxxxl,
+          gap: spacing.md + 2,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* Avatar + name hero */}
-        <View style={styles.heroSection}>
+        <View style={{ alignItems: "center", gap: spacing.md - 2, marginBottom: spacing.sm }}>
           <Avatar uri={profile?.avatar_url} initials={initials} size={84} initialsSize={26} bordered />
-          <Text style={styles.heroName}>{profile?.full_name || "—"}</Text>
-          <View style={styles.rolePill}>
-            <Text style={styles.rolePillText}>
+          <Text
+            style={{
+              color: colors.text.primary,
+              fontSize: typography.size.xxl + 1,
+              fontWeight: typography.weight.bold,
+              letterSpacing: 0.1,
+            }}
+          >
+            {profile?.full_name || "—"}
+          </Text>
+          <View
+            style={{
+              backgroundColor: colors.background.elevated,
+              borderWidth: 1,
+              borderColor: colors.border.default,
+              borderRadius: radius.full,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.xs,
+            }}
+          >
+            <Text style={{ color: colors.text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium }}>
               {profile?.role
                 ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1)
                 : "—"}
@@ -54,22 +73,43 @@ export default function ProfileScreen() {
         </View>
 
         {/* Action buttons */}
-        <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => router.push("/edit-profile")}>
-            <Text style={styles.actionBtnText}>Edit Profile</Text>
+        <View style={{ flexDirection: "row", gap: spacing.md - 2 }}>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              backgroundColor: colors.white,
+              borderRadius: radius.md,
+              paddingVertical: spacing.md + 1,
+              alignItems: "center",
+            }}
+            onPress={() => router.push("/edit-profile")}
+          >
+            <Text style={{ color: colors.black, fontSize: typography.size.md, fontWeight: typography.weight.semibold }}>
+              Edit Profile
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionBtn, styles.actionBtnOutline]}
+            style={{
+              flex: 1,
+              backgroundColor: "transparent",
+              borderWidth: 1,
+              borderColor: colors.border.default,
+              borderRadius: radius.md,
+              paddingVertical: spacing.md + 1,
+              alignItems: "center",
+            }}
             onPress={handleSignOut}
             disabled={isLoggingOut}
           >
-            <Text style={[styles.actionBtnText, styles.actionBtnTextOutline]}>Log Out</Text>
+            <Text style={{ color: colors.text.primary, fontSize: typography.size.md, fontWeight: typography.weight.semibold }}>
+              Log Out
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Account details card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Account Details</Text>
+        <Card variant="dark">
+          <CardSectionHeader title="Account Details" />
           <DetailRow label="Email" value={profile?.email} />
           {profile?.role === "student" && (
             <>
@@ -80,235 +120,109 @@ export default function ProfileScreen() {
           <DetailRow label="City" value={profile?.city} />
           <DetailRow label="Province" value={profile?.province} />
           <DetailRow label="Address" value={profile?.current_address} last />
-        </View>
+        </Card>
 
         {/* Saved Posts card */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Saved Posts</Text>
-            {savedPosts.length > 0 && (
-              <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push("/(tabs)/saved")}>
-                <Text style={styles.viewAllText}>View all</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+        <Card variant="dark">
+          <CardSectionHeader
+            title="Saved Posts"
+            actionLabel={savedPosts.length > 0 ? "View all" : undefined}
+            onAction={() => router.push("/(tabs)/saved")}
+          />
 
           {savedPosts.length === 0 ? (
-            <View style={styles.savedEmpty}>
-              <Bookmark size={18} color={colors.border.strong} strokeWidth={1.5} />
-              <Text style={styles.savedEmptyText}>No saved posts yet</Text>
-            </View>
+            <SavedEmptyRow text="No saved posts yet" />
           ) : (
-            <View style={styles.savedList}>
+            <View style={{ gap: spacing.md - 2 }}>
               {savedPosts.slice(0, 3).map((post) => (
                 <TouchableOpacity
                   key={post.id}
-                  style={styles.savedPostRow}
+                  style={{ flexDirection: "row", alignItems: "center", gap: spacing.md - 2 }}
                   onPress={() => router.push(`/post/${post.id}`)}
                 >
-                  <View style={styles.savedPostDot} />
-                  <Text style={styles.savedPostTitle} numberOfLines={1}>{post.title}</Text>
+                  <Dot />
+                  <Text style={{ color: colors.text.body, fontSize: typography.size.base, flex: 1 }} numberOfLines={1}>
+                    {post.title}
+                  </Text>
                 </TouchableOpacity>
               ))}
               {savedPosts.length > 3 && (
                 <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}>
-                  <Text style={styles.moreText}>+{savedPosts.length - 3} more</Text>
+                  <Text style={{ color: colors.text.dim, fontSize: typography.size.sm, paddingTop: spacing.xs / 2 }}>
+                    +{savedPosts.length - 3} more
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
           )}
-        </View>
+        </Card>
 
         {/* Saved Listings card */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Saved Listings</Text>
-            {savedListings.length > 0 && (
-              <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push("/(tabs)/saved")}>
-                <Text style={styles.viewAllText}>View all</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+        <Card variant="dark">
+          <CardSectionHeader
+            title="Saved Listings"
+            actionLabel={savedListings.length > 0 ? "View all" : undefined}
+            onAction={() => router.push("/(tabs)/saved")}
+          />
 
           {savedListings.length === 0 ? (
-            <View style={styles.savedEmpty}>
-              <Bookmark size={18} color={colors.border.strong} strokeWidth={1.5} />
-              <Text style={styles.savedEmptyText}>No saved listings yet</Text>
-            </View>
+            <SavedEmptyRow text="No saved listings yet" />
           ) : (
-            <View style={styles.savedList}>
+            <View style={{ gap: spacing.md - 2 }}>
               {savedListings.slice(0, 3).map((listing) => (
                 <TouchableOpacity
                   key={listing.id}
-                  style={styles.savedListingRow}
+                  style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: spacing.md }}
                   onPress={() => router.push(`/listing/${listing.id}`)}
                 >
                   <View>
-                    <Text style={styles.savedListingTitle} numberOfLines={1}>{listing.title}</Text>
-                    <Text style={styles.savedListingMeta} numberOfLines={1}>
+                    <Text
+                      style={{ color: colors.text.primary, fontSize: typography.size.md, fontWeight: typography.weight.semibold }}
+                      numberOfLines={1}
+                    >
+                      {listing.title}
+                    </Text>
+                    <Text style={{ color: colors.text.faded, fontSize: typography.size.xs }} numberOfLines={1}>
                       ${listing.rent.toLocaleString()} /mo — {listing.address}
                     </Text>
                   </View>
-                  <View style={styles.savedPostDot} />
+                  <Dot />
                 </TouchableOpacity>
               ))}
               {savedListings.length > 3 && (
                 <TouchableOpacity onPress={() => router.push("/(tabs)/saved")}>
-                  <Text style={styles.moreText}>+{savedListings.length - 3} more</Text>
+                  <Text style={{ color: colors.text.dim, fontSize: typography.size.sm, paddingTop: spacing.xs / 2 }}>
+                    +{savedListings.length - 3} more
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
           )}
-        </View>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background.screen,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.xl,
-    paddingTop: 28,
-    paddingBottom: 40,
-    gap: 14,
-  },
-  heroSection: {
-    alignItems: "center",
-    gap: 10,
-    marginBottom: spacing.sm,
-  },
-  heroName: {
-    color: colors.text.primary,
-    fontSize: 21,
-    fontWeight: typography.weight.bold,
-    letterSpacing: 0.1,
-  },
-  rolePill: {
-    backgroundColor: colors.background.elevated,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  rolePillText: {
-    color: colors.text.secondary,
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-  },
-  actionRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  actionBtn: {
-    flex: 1,
-    backgroundColor: colors.white,
-    borderRadius: radius.md,
-    paddingVertical: 13,
-    alignItems: "center",
-  },
-  actionBtnOutline: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  actionBtnText: {
-    color: colors.black,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-  },
-  actionBtnTextOutline: {
-    color: colors.text.primary,
-  },
-  card: {
-    backgroundColor: colors.background.card,
-    borderRadius: radius.lg,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 14,
-  },
-  cardTitle: {
-    color: colors.text.secondary,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.bold,
-    marginBottom: 14,
-    letterSpacing: 0.1,
-    textTransform: "uppercase",
-  },
-  viewAllBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.sm,
-    backgroundColor: colors.background.elevated,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  viewAllText: {
-    color: colors.text.muted,
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-  },
-  savedEmpty: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  savedEmptyText: {
-    color: colors.text.disabled,
-    fontSize: typography.size.base,
-  },
-  savedList: {
-    gap: 10,
-  },
-  savedListingRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: spacing.md,
-  },
-  savedListingTitle: {
-    color: colors.text.primary,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-  },
-  savedListingMeta: {
-    color: colors.text.faded,
-    fontSize: typography.size.xs,
-  },
-  savedPostRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  savedPostDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: colors.border.strong,
-    flexShrink: 0,
-  },
-  savedPostTitle: {
-    color: colors.text.body,
-    fontSize: typography.size.base,
-    flex: 1,
-  },
-  moreText: {
-    color: colors.text.dim,
-    fontSize: typography.size.sm,
-    paddingTop: 2,
-  },
-});
+function SavedEmptyRow({ text }: { text: string }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingVertical: spacing.xs }}>
+      <Bookmark size={18} color={colors.border.strong} strokeWidth={1.5} />
+      <Text style={{ color: colors.text.disabled, fontSize: typography.size.base }}>{text}</Text>
+    </View>
+  );
+}
+
+function Dot() {
+  return (
+    <View
+      style={{
+        width: spacing.xs + 1,
+        height: spacing.xs + 1,
+        borderRadius: radius.sm,
+        backgroundColor: colors.border.strong,
+        flexShrink: 0,
+      }}
+    />
+  );
+}

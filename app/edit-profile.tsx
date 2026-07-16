@@ -3,11 +3,10 @@ import { H1 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
 import Stack from "@/components/ui/Stack";
-import { Upload } from "lucide-react-native";
+import AvatarPicker from "@/components/ui/AvatarPicker";
 import { useEditProfile } from "@/hooks/useEditProfile";
 import LoadingState from "@/components/ui/LoadingState";
-import { colors, radius, spacing } from "@/src/constants/theme";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { colors, spacing } from "@/src/constants/theme";
 
 export default function EditProfileScreen() {
   const {
@@ -39,22 +38,11 @@ export default function EditProfileScreen() {
   if (loading) return <LoadingState />;
 
   return (
-    <Screen scrollable contentContainerStyle={styles.content}>
+    <Screen scrollable contentContainerStyle={{ gap: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.xxxxl }}>
       <H1>Edit Profile</H1>
 
-      <Stack align="center" style={styles.avatarSection}>
-        <TouchableOpacity onPress={pickImage}>
-          {imageUri || avatarUrl ? (
-            <Image source={{ uri: imageUri || avatarUrl || undefined }} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatar}>
-              <Text style={styles.avatarPlaceholder}>Add Photo</Text>
-            </View>
-          )}
-          <View style={styles.editIconContainer}>
-            <Upload color={colors.white} size={16} />
-          </View>
-        </TouchableOpacity>
+      <Stack align="center" style={{ marginBottom: spacing.lg }}>
+        <AvatarPicker uri={imageUri || avatarUrl} onPress={pickImage} />
       </Stack>
 
       <Input
@@ -138,34 +126,3 @@ export default function EditProfileScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: 40,
-  },
-  avatarSection: {
-    marginBottom: spacing.lg,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.background.surface,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarPlaceholder: {
-    color: colors.text.faint,
-    fontSize: 14,
-  },
-  editIconContainer: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: colors.accent.primary,
-    padding: spacing.sm,
-    borderRadius: radius.xl,
-  },
-});

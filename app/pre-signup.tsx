@@ -4,8 +4,9 @@ import Screen from "@/components/ui/Screen";
 import ScreenHeading from "@/components/ui/ScreenHeading";
 import Select from "@/components/ui/Select";
 import Stack from "@/components/ui/Stack";
+import BottomIllustration from "@/components/ui/BottomIllustration";
 import { usePreSignUp } from "@/hooks/usePreSignUp";
-import { StyleSheet, View } from "react-native";
+import { spacing } from "@/src/constants/theme";
 import PreSignUpBottomHouse from "../assets/images/pre_sign_up_bottom_house.svg";
 
 export default function PreSignUpScreen() {
@@ -13,7 +14,7 @@ export default function PreSignUpScreen() {
 
   return (
     <Screen>
-      <Stack gap="lg" align="center" flex={1} style={styles.top}>
+      <Stack gap="lg" align="center" flex={1} style={{ paddingTop: spacing.huge }}>
         <Logo />
         <ScreenHeading
           title="Select a Role"
@@ -37,20 +38,9 @@ export default function PreSignUpScreen() {
         </Button>
       </Stack>
 
-      {/* Bottom illustration */}
-      <View style={styles.illustration} pointerEvents="none">
+      <BottomIllustration height={200}>
         <PreSignUpBottomHouse fill="none" width="100%" height="100%" />
-      </View>
+      </BottomIllustration>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  top: {
-    paddingTop: 48,
-  },
-  illustration: {
-    height: 200,
-    width: "100%",
-  },
-});
