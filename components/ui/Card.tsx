@@ -40,5 +40,10 @@ const styles = StyleSheet.create({
     borderColor: colors.light.border,
     borderRadius: radius.xxl,
     padding: spacing.xl,
+    marginTop: 2,
+    marginBottom: spacing.lg,
+    width: "100%",
+    alignSelf: "stretch",
+    maxWidth: 1000,
   },
 });

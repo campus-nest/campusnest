@@ -14,6 +14,7 @@ interface InputProps extends TextInputProps {
   label?: string;
   containerStyle?: ViewStyle;
   labelStyle?: TextStyle;
+  variant?: "dark" | "light";
 }
 
 export default function Input({
@@ -21,14 +22,20 @@ export default function Input({
   containerStyle,
   style,
   labelStyle,
+  variant = "dark",
   ...props
 }: InputProps) {
+  const isLight = variant === "light";
   return (
     <View style={[styles.inputContainer, containerStyle]}>
-      {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
+      {label && (
+        <Text style={[styles.label, isLight && styles.labelLight, labelStyle]}>
+          {label}
+        </Text>
+      )}
       <TextInput
-        style={[styles.input, style]}
-        placeholderTextColor={colors.text.faint}
+        style={[styles.input, isLight && styles.inputLight, style]}
+        placeholderTextColor={isLight ? colors.light.placeholder : colors.text.faint}
         {...props}
       />
     </View>
@@ -44,6 +51,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
+  labelLight: {
+    color: colors.background.elevated,
+    fontWeight: "600",
+  },
   input: {
     backgroundColor: colors.background.elevated,
     borderRadius: radius.md,
@@ -54,5 +65,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border.strong,
     letterSpacing: 0,
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+  },
+  inputLight: {
+    backgroundColor: colors.white,
+    borderColor: colors.light.border,
+    color: colors.black,
   },
 });

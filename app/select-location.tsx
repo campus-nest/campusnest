@@ -1,17 +1,19 @@
-import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
-  ActivityIndicator,
   Platform,
-  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MapPin, Search, X, Check, Navigation } from "lucide-react-native";
+import { Check, Navigation } from "lucide-react-native";
 import { useSelectLocation } from "@/hooks/useSelectLocation";
 import { colors, radius, spacing, typography } from "@/src/constants/theme";
+import MapHeader, { mapHeaderButtonStyle } from "@/components/ui/MapHeader";
+import AddressSearchField from "@/components/ui/AddressSearchField";
+import SelectedLocationSummary from "@/components/ui/SelectedLocationSummary";
+import MapPinMarker from "@/components/ui/MapPinMarker";
+import Stack from "@/components/ui/Stack";
 
 // Dynamic imports for platform-specific map components
 let MapView: any;
@@ -54,78 +56,46 @@ export default function SelectLocationScreen() {
   if (Platform.OS === "web") {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.webContainer}>
-          <View style={styles.header}>
-            <Pressable onPress={handleCancel} style={styles.headerButton}>
-              <X size={24} color={colors.white} />
+        <MapHeader title="Select Location" onCancel={handleCancel} />
+
+        <Stack gap="xl" style={styles.webContent}>
+          <Text style={styles.webText}>
+            Map selection is only available on mobile devices.
+          </Text>
+          <Text style={styles.webSubtext}>
+            Please use the address search instead, or use the mobile app for
+            map selection.
+          </Text>
+
+          <AddressSearchField
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmit={handleSearch}
+            isSearching={isSearching}
+          />
+
+          {selectedLocation && (
+            <SelectedLocationSummary
+              address={selectedLocation.address}
+              latitude={selectedLocation.latitude}
+              longitude={selectedLocation.longitude}
+              fallbackText="Location selected"
+            />
+          )}
+
+          <Stack direction="row" gap="md" style={styles.webButtonRow}>
+            <Pressable style={styles.cancelButton} onPress={handleCancel}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
             </Pressable>
-            <Text style={styles.headerTitle}>Select Location</Text>
-            <View style={styles.headerButton} />
-          </View>
-
-          <View style={styles.webContent}>
-            <Text style={styles.webText}>
-              Map selection is only available on mobile devices.
-            </Text>
-            <Text style={styles.webSubtext}>
-              Please use the address search instead, or use the mobile app for
-              map selection.
-            </Text>
-
-            <View style={styles.searchContainer}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search for an address..."
-                placeholderTextColor={colors.text.readable}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                onSubmitEditing={handleSearch}
-              />
-              <Pressable
-                style={styles.searchButton}
-                onPress={handleSearch}
-                disabled={isSearching}
-              >
-                {isSearching ? (
-                  <ActivityIndicator color={colors.white} size="small" />
-                ) : (
-                  <Search size={20} color={colors.white} />
-                )}
-              </Pressable>
-            </View>
-
-            {selectedLocation && (
-              <View style={styles.selectedInfo}>
-                <MapPin size={20} color={colors.success.default} />
-                <View style={styles.selectedTextContainer}>
-                  <Text style={styles.selectedAddress}>
-                    {selectedLocation.address || "Location selected"}
-                  </Text>
-                  <Text style={styles.selectedCoords}>
-                    {selectedLocation.latitude.toFixed(6)},{" "}
-                    {selectedLocation.longitude.toFixed(6)}
-                  </Text>
-                </View>
-              </View>
-            )}
-
-            <View style={styles.webButtonRow}>
-              <Pressable style={styles.cancelButton} onPress={handleCancel}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.confirmButton,
-                  !selectedLocation && styles.confirmButtonDisabled,
-                ]}
-                onPress={handleConfirm}
-                disabled={!selectedLocation}
-              >
-                <Text style={styles.confirmButtonText}>Confirm Location</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
+            <Pressable
+              style={[styles.confirmButton, !selectedLocation && styles.confirmButtonDisabled]}
+              onPress={handleConfirm}
+              disabled={!selectedLocation}
+            >
+              <Text style={styles.confirmButtonText}>Confirm Location</Text>
+            </Pressable>
+          </Stack>
+        </Stack>
       </SafeAreaView>
     );
   }
@@ -133,47 +103,26 @@ export default function SelectLocationScreen() {
   // Native mobile map view
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={handleCancel} style={styles.headerButton}>
-          <X size={24} color={colors.white} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Select Location</Text>
-        <Pressable
-          onPress={handleConfirm}
-          style={[
-            styles.headerButton,
-            !selectedLocation && styles.headerButtonDisabled,
-          ]}
-          disabled={!selectedLocation}
-        >
-          <Check size={24} color={selectedLocation ? colors.success.default : colors.text.faint} />
-        </Pressable>
-      </View>
+      <MapHeader
+        title="Select Location"
+        onCancel={handleCancel}
+        right={
+          <Pressable
+            onPress={handleConfirm}
+            style={[mapHeaderButtonStyle, !selectedLocation && styles.headerButtonDisabled]}
+            disabled={!selectedLocation}
+          >
+            <Check size={24} color={selectedLocation ? colors.success.default : colors.text.faint} />
+          </Pressable>
+        }
+      />
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search for an address..."
-          placeholderTextColor={colors.text.readable}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={handleSearch}
-          returnKeyType="search"
-        />
-        <Pressable
-          style={styles.searchButton}
-          onPress={handleSearch}
-          disabled={isSearching}
-        >
-          {isSearching ? (
-            <ActivityIndicator color={colors.white} size="small" />
-          ) : (
-            <Search size={20} color={colors.white} />
-          )}
-        </Pressable>
-      </View>
+      <AddressSearchField
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onSubmit={handleSearch}
+        isSearching={isSearching}
+      />
 
       {/* Map */}
       <View style={styles.mapContainer}>
@@ -204,26 +153,16 @@ export default function SelectLocationScreen() {
                   longitude: selectedLocation.longitude,
                 }}
               >
-                <View style={styles.markerContainer}>
-                  <View style={styles.marker}>
-                    <MapPin size={24} color={colors.white} />
-                  </View>
-                  <View style={styles.markerShadow} />
-                </View>
+                <MapPinMarker />
               </Marker>
             )}
           </MapView>
         )}
 
-        {/* Current Location Button */}
-        <Pressable
-          style={styles.currentLocationButton}
-          onPress={handleGoToCurrentLocation}
-        >
+        <Pressable style={styles.currentLocationButton} onPress={handleGoToCurrentLocation}>
           <Navigation size={20} color={colors.accent.primary} />
         </Pressable>
 
-        {/* Instructions */}
         <View style={styles.instructionsContainer}>
           <Text style={styles.instructionsText}>
             Tap on the map to select your listing location
@@ -231,33 +170,22 @@ export default function SelectLocationScreen() {
         </View>
       </View>
 
-      {/* Selected Location Info */}
       {selectedLocation && (
-        <View style={styles.bottomSheet}>
-          <View style={styles.selectedInfo}>
-            <MapPin size={24} color={colors.success.default} />
-            <View style={styles.selectedTextContainer}>
-              {isLoadingAddress ? (
-                <ActivityIndicator color={colors.white} size="small" />
-              ) : (
-                <>
-                  <Text style={styles.selectedAddress} numberOfLines={2}>
-                    {selectedLocation.address || "Address not available"}
-                  </Text>
-                  <Text style={styles.selectedCoords}>
-                    {selectedLocation.latitude.toFixed(6)},{" "}
-                    {selectedLocation.longitude.toFixed(6)}
-                  </Text>
-                </>
-              )}
-            </View>
-          </View>
+        <Stack gap="lg" style={styles.bottomSheet}>
+          <SelectedLocationSummary
+            address={selectedLocation.address}
+            latitude={selectedLocation.latitude}
+            longitude={selectedLocation.longitude}
+            fallbackText="Address not available"
+            loading={isLoadingAddress}
+            size={24}
+          />
 
           <Pressable style={styles.confirmButton} onPress={handleConfirm}>
             <Check size={20} color={colors.black} />
             <Text style={styles.confirmButtonText}>Confirm Location</Text>
           </Pressable>
-        </View>
+        </Stack>
       )}
     </SafeAreaView>
   );
@@ -273,54 +201,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.screen,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.background.screen,
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 20,
-  },
   headerButtonDisabled: {
     opacity: 0.5,
-  },
-  headerTitle: {
-    fontSize: typography.size.xl,
-    fontWeight: typography.weight.semibold,
-    color: colors.white,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    height: 48,
-    backgroundColor: colors.background.elevated,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    color: colors.white,
-    fontSize: typography.size.md,
-    borderWidth: 1,
-    borderColor: colors.border.strong,
-  },
-  searchButton: {
-    width: 48,
-    height: 48,
-    backgroundColor: colors.accent.primary,
-    borderRadius: radius.md,
-    alignItems: "center",
-    justifyContent: "center",
   },
   mapContainer: {
     flex: 1,
@@ -328,28 +210,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-  },
-  markerContainer: {
-    alignItems: "center",
-  },
-  marker: {
-    backgroundColor: colors.accent.primary,
-    borderRadius: 20,
-    padding: spacing.sm,
-    borderWidth: 3,
-    borderColor: colors.white,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  markerShadow: {
-    width: 20,
-    height: 10,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    borderRadius: 10,
-    marginTop: -5,
   },
   currentLocationButton: {
     position: "absolute",
@@ -387,25 +247,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
     padding: spacing.xl,
-    gap: spacing.lg,
-  },
-  selectedInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-  },
-  selectedTextContainer: {
-    flex: 1,
-  },
-  selectedAddress: {
-    color: colors.white,
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.medium,
-    marginBottom: spacing.xs,
-  },
-  selectedCoords: {
-    color: colors.text.readable,
-    fontSize: typography.size.sm,
   },
   confirmButton: {
     flexDirection: "row",
@@ -424,14 +265,9 @@ const styles = StyleSheet.create({
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
   },
-  // Web styles
-  webContainer: {
-    flex: 1,
-  },
   webContent: {
     flex: 1,
     padding: spacing.xl,
-    gap: spacing.xl,
   },
   webText: {
     color: colors.white,
@@ -446,8 +282,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   webButtonRow: {
-    flexDirection: "row",
-    gap: spacing.md,
     marginTop: spacing.xl,
   },
   cancelButton: {
