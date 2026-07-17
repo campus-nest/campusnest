@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
 import { authService, profileService, savedListingService, savedPostService } from "@/src/services";
+import { notifyAuthChanged } from "@/app/_layout";
 import { Profile } from "@/src/types/profile";
 import { Post } from "@/src/types/post";
 import { Listing } from "@/src/types/listing";
@@ -17,18 +18,15 @@ export function useProfile() {
     if (isLoggingOut) return;
     try {
       setLoading(true);
-      const profileData = await profileService.getCurrentUserProfile();
+      const profileData = await profileService.getProfile();
       if (profileData) {
         setProfile(profileData);
-        const session = await authService.getSession();
-        if (session?.user?.id) {
-          const [posts, listings] = await Promise.all([
-            savedPostService.getSavedPosts(session.user.id),
-            savedListingService.getSavedListings(session.user.id),
-          ]);
-          setSavedPosts(posts);
-          setSavedListings(listings);
-        }
+        const [posts, listings] = await Promise.all([
+          savedPostService.getSavedPosts(),
+          savedListingService.getSavedListings(),
+        ]);
+        setSavedPosts(posts);
+        setSavedListings(listings);
       }
     } catch (error) {
       console.error("Unexpected error fetching profile:", error);
@@ -48,7 +46,7 @@ export function useProfile() {
       setIsLoggingOut(true);
       const result = await authService.signOut();
       if (result.success) {
-        router.replace("/landing");
+        notifyAuthChanged();
       }
     } catch (error) {
       console.error("Logout error:", error);

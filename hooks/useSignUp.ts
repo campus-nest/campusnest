@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { authService } from "@/src/services";
+import { notifyAuthChanged } from "@/app/_layout";
 
 export function useSignUp() {
   const router = useRouter();
@@ -110,8 +111,11 @@ export function useSignUp() {
 
       Alert.alert(
         "Success",
-        "Account created! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.replace("/verify-email") }]
+        "Account created successfully!",
+        [{ text: "OK", onPress: () => {
+          notifyAuthChanged();
+          router.replace("/(tabs)");
+        } }]
       );
     } catch (err) {
       console.error("SignUp error:", err);

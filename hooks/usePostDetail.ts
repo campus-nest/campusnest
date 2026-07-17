@@ -48,8 +48,8 @@ export function usePostDetail(id: string | undefined) {
         setEditTitle(postData.title ?? "");
         setEditBody(postData.body ?? "");
 
-        const session = await authService.getSession();
-        if (session?.user?.id === postData.user_id) {
+        const user = await authService.getCurrentUser();
+        if (user?.id === postData.user_id) {
           setIsOwner(true);
         }
 
@@ -68,8 +68,8 @@ export function usePostDetail(id: string | undefined) {
 
   const handleSubmitComment = async () => {
     if (!commentText.trim() || !id) return;
-    const session = await authService.getSession();
-    if (!session?.user?.id) {
+    const user = await authService.getCurrentUser();
+    if (!user?.id) {
       Alert.alert("Error", "You must be logged in to comment.");
       return;
     }
@@ -77,7 +77,7 @@ export function usePostDetail(id: string | undefined) {
     setSubmitting(true);
     const result = await commentService.createComment({
       post_id: id,
-      user_id: session.user.id,
+      user_id: user.id,
       content: commentText.trim(),
     });
 

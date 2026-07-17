@@ -1,75 +1,37 @@
-import { getSupabase } from "@/src/lib/supabaseClient";
+import { apiClient } from "@/src/lib/apiClient";
 import {
   Listing,
   CreateListingInput,
   ListingFilters,
 } from "@/src/types/listing";
 import * as FileSystem from "expo-file-system/legacy";
+import * as SecureStore from 'expo-secure-store';
 
 export class ListingService {
-  private supabase = getSupabase();
-
   /**
    * Get all listings with optional filters
    */
   async getListings(filters?: ListingFilters): Promise<Listing[]> {
-    let query = this.supabase
-      .from("listings")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (filters?.status) {
-      query = query.eq("status", filters.status);
-    }
-
-    if (filters?.visibility) {
-      query = query.eq("visibility", filters.visibility);
-    }
-
-    if (filters?.landlord_id) {
-      query = query.eq("landlord_id", filters.landlord_id);
-    }
-
-    if (filters?.searchQuery) {
-      query = query.or(
-        `title.ilike.%${filters.searchQuery}%,address.ilike.%${filters.searchQuery}%`,
-      );
-    }
-
-    if (filters?.minRent !== undefined) {
-      query = query.gte("rent", filters.minRent);
-    }
-
-    if (filters?.maxRent !== undefined) {
-      query = query.lte("rent", filters.maxRent);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
+    try {
+      const response = await apiClient.get('/api/listings', { params: filters });
+      return response.data as Listing[];
+    } catch (error) {
       console.error("Error fetching listings:", error);
       return [];
     }
-
-    return (data as Listing[]) ?? [];
   }
 
   /**
    * Get listing by ID
    */
   async getListingById(listingId: string): Promise<Listing | null> {
-    const { data, error } = await this.supabase
-      .from("listings")
-      .select("*")
-      .eq("id", listingId)
-      .single();
-
-    if (error) {
+    try {
+      const response = await apiClient.get(`/api/listings/${listingId}`);
+      return response.data as Listing;
+    } catch (error) {
       console.error("Error fetching listing:", error);
       return null;
     }
-
-    return data as Listing;
   }
 
   /**
@@ -78,18 +40,13 @@ export class ListingService {
   async createListing(
     input: CreateListingInput,
   ): Promise<{ success: boolean; listingId?: string; error?: string }> {
-    const { data, error } = await this.supabase
-      .from("listings")
-      .insert(input)
-      .select("id")
-      .single();
-
-    if (error) {
+    try {
+      const response = await apiClient.post('/api/listings', input);
+      return { success: true, listingId: response.data.id };
+    } catch (error: any) {
       console.error("Error creating listing:", error);
-      return { success: false, error: error.message };
+      return { success: false, error: error.response?.data?.error || error.message };
     }
-
-    return { success: true, listingId: data.id };
   }
 
   /**
@@ -99,123 +56,74 @@ export class ListingService {
     listingId: string,
     input: Partial<CreateListingInput>,
   ): Promise<{ success: boolean; error?: string }> {
-    const { error } = await this.supabase
-      .from("listings")
-      .update({ ...input, updated_at: new Date().toISOString() })
-      .eq("id", listingId);
-
-    if (error) {
+    try {
+      await apiClient.put(`/api/listings/${listingId}`, input);
+      return { success: true };
+    } catch (error: any) {
       console.error("Error updating listing:", error);
-      return { success: false, error: error.message };
+      return { success: false, error: error.response?.data?.error || error.message };
     }
-
-    return { success: true };
   }
 
   /**
-   * Delete a listing and all associated photos from Supabase Storage.
-   * Cascade delete handles saved_listings rows automatically (via DB constraint).
+   * Delete a listing and all associated photos
    */
   async deleteListing(
     listingId: string,
   ): Promise<{ success: boolean; error?: string }> {
-    // 1. Fetch existing photo paths so we can clean up storage
-    const { data: listing, error: fetchError } = await this.supabase
-      .from("listings")
-      .select("photo_urls, landlord_id")
-      .eq("id", listingId)
-      .single();
+    try {
+      // Get the listing first to find photos to delete
+      const listing = await this.getListingById(listingId);
+      
+      // Delete the listing (the DB cascade handles saved_listings)
+      await apiClient.delete(`/api/listings/${listingId}`);
 
-    if (fetchError) {
-      console.error("Error fetching listing for delete:", fetchError);
-      return { success: false, error: fetchError.message };
-    }
-
-    // 2. Delete photos from storage (best-effort — don't block if this fails)
-    if (listing?.photo_urls?.length) {
-      const storagePaths = listing.photo_urls
-        .map((url: string) => {
-          try {
-            // Extract the path after "/listing_photos/"
-            const marker = "/listing_photos/";
-            const idx = url.indexOf(marker);
-            return idx !== -1 ? url.slice(idx + marker.length) : null;
-          } catch {
-            return null;
-          }
-        })
-        .filter(Boolean) as string[];
-
-      if (storagePaths.length) {
-        const { error: storageError } = await this.supabase.storage
-          .from("listing_photos")
-          .remove(storagePaths);
-
-        if (storageError) {
-          // Log but don't block — the row delete is more important
-          console.warn("Error deleting listing photos from storage:", storageError);
-        }
+      // Delete photos from backend storage
+      if (listing?.photo_urls?.length) {
+        await this.deleteListingPhotos(listing.photo_urls);
       }
+
+      return { success: true };
+    } catch (error: any) {
+      console.error("Error deleting listing:", error);
+      return { success: false, error: error.response?.data?.error || error.message };
     }
-
-    // 3. Delete the listing row.
-    //    saved_listings rows cascade-delete automatically via the FK constraint.
-    const { error: deleteError } = await this.supabase
-      .from("listings")
-      .delete()
-      .eq("id", listingId);
-
-    if (deleteError) {
-      console.error("Error deleting listing:", deleteError);
-      return { success: false, error: deleteError.message };
-    }
-
-    return { success: true };
   }
 
   /**
    * Upload photos for a listing and return public URLs
    */
   async uploadListingPhotos(
-    landlordId: string,
+    landlordId: string, // Kept for signature compatibility, though backend uses token
     photoUris: string[],
   ): Promise<string[]> {
-    const {
-      data: { session },
-    } = await this.supabase.auth.getSession();
-
-    if (!session) {
+    const token = await SecureStore.getItemAsync('userToken');
+    if (!token) {
       console.error("No active session for photo upload");
       return [];
     }
 
     const uploadedUrls: string[] = [];
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
     for (const uri of photoUris) {
       try {
-        const fileExt = uri.split(".").pop() || "jpg";
-        const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
-        const filePath = `listings/${landlordId}/${fileName}`;
-
         const uploadResult = await FileSystem.uploadAsync(
-          `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/listing_photos/${filePath}`,
+          `${API_URL}/api/storage/upload`,
           uri,
           {
             httpMethod: "POST",
             headers: {
-              Authorization: `Bearer ${session.access_token}`,
-              "Content-Type": `image/${fileExt}`,
+              Authorization: `Bearer ${token}`,
             },
-            uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+            uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+            fieldName: 'photo',
           },
         );
 
-        if (uploadResult.status === 200) {
-          const { data } = this.supabase.storage
-            .from("listing_photos")
-            .getPublicUrl(filePath);
-
-          uploadedUrls.push(data.publicUrl);
+        if (uploadResult.status === 201) {
+          const data = JSON.parse(uploadResult.body);
+          if (data.url) uploadedUrls.push(data.url);
         }
       } catch (error) {
         console.error("Error uploading photo:", error);
@@ -229,26 +137,14 @@ export class ListingService {
    * Delete specific photos from storage by their public URLs
    */
   async deleteListingPhotos(photoUrls: string[]): Promise<void> {
-    const storagePaths = photoUrls
-      .map((url) => {
-        try {
-          const marker = "/listing_photos/";
-          const idx = url.indexOf(marker);
-          return idx !== -1 ? url.slice(idx + marker.length) : null;
-        } catch {
-          return null;
-        }
-      })
-      .filter(Boolean) as string[];
-
-    if (!storagePaths.length) return;
-
-    const { error } = await this.supabase.storage
-      .from("listing_photos")
-      .remove(storagePaths);
-
-    if (error) {
-      console.warn("Error deleting photos from storage:", error);
+    for (const url of photoUrls) {
+      try {
+        await apiClient.delete('/api/storage/delete', {
+          data: { fileUrl: url }
+        });
+      } catch (error) {
+        console.warn("Error deleting photo from storage:", error);
+      }
     }
   }
 }
