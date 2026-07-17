@@ -24,9 +24,7 @@ export class AuthService {
         ...input.metadata,
       });
 
-      const { token, user } = response.data.data;
-      await SecureStore.setItemAsync('userToken', token);
-      await SecureStore.setItemAsync('userRole', user.role);
+      const { user } = response.data.data;
 
       return { success: true, user };
     } catch (error: any) {

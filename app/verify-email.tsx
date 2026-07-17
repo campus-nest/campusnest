@@ -11,6 +11,9 @@ export default function VerifyEmailScreen() {
     loading,
     email,
     setEmail,
+    code,
+    setCode,
+    handleVerifyCode,
     handleResendEmail,
     handleBackToLogin,
   } = useVerifyEmail();
@@ -20,14 +23,24 @@ export default function VerifyEmailScreen() {
       {/* Icon + heading */}
       <View style={styles.heroBlock}>
         <Text style={styles.icon}>📧</Text>
-        <H1 bold>Check Your Email</H1>
+        <H1 bold>Verify Your Email</H1>
         <H4 style={styles.description}>
-          We&apos;ve sent a verification link to your email. Click the link to verify your account.
+          We&apos;ve sent a 6-digit verification code to your email. Enter it below to verify your account.
         </H4>
       </View>
 
-      {/* Resend form */}
       <View style={styles.form}>
+        <Input
+          label="Verification Code"
+          placeholder="123456"
+          value={code}
+          onChangeText={setCode}
+          keyboardType="number-pad"
+          maxLength={6}
+          textAlign="center"
+          style={styles.codeInput}
+        />
+        
         <Input
           label="Email address"
           placeholder="your.email@example.com"
@@ -40,10 +53,13 @@ export default function VerifyEmailScreen() {
       </View>
 
       <View style={styles.actions}>
-        <Button variant="outline" fullWidth onPress={handleResendEmail} disabled={loading}>
-          {loading ? "Sending…" : "Resend Email"}
+        <Button fullWidth onPress={handleVerifyCode} disabled={loading}>
+          {loading ? "Verifying…" : "Verify Code"}
         </Button>
-        <Button fullWidth onPress={handleBackToLogin}>
+        <Button variant="outline" fullWidth onPress={handleResendEmail} disabled={loading}>
+          Resend Email
+        </Button>
+        <Button variant="ghost" fullWidth onPress={handleBackToLogin}>
           Back to Login
         </Button>
       </View>
@@ -67,9 +83,16 @@ const styles = StyleSheet.create({
     color: "#888",
     lineHeight: 20,
     paddingHorizontal: 8,
+    textAlign: "center",
   },
   form: {
     gap: 16,
+  },
+  codeInput: {
+    fontSize: 28,
+    fontWeight: "700",
+    letterSpacing: 12,
+    textAlign: "center",
   },
   actions: {
     gap: 12,
