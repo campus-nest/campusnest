@@ -19,12 +19,12 @@ export class AuthService {
     error?: string;
   }> {
     try {
-      const response = await apiClient.post('/api/auth/register', {
+      const response = await apiClient.post('/api/auth/users', {
         ...input,
         ...input.metadata,
       });
 
-      const { token, user } = response.data;
+      const { token, user } = response.data.data;
       await SecureStore.setItemAsync('userToken', token);
       await SecureStore.setItemAsync('userRole', user.role);
 
@@ -33,7 +33,7 @@ export class AuthService {
       console.error("Sign up error:", error.response?.data || error);
       return {
         success: false,
-        error: error.response?.data?.error || "Unknown error",
+        error: error.response?.data?.error?.message || "Unknown error",
       };
     }
   }
@@ -45,23 +45,26 @@ export class AuthService {
     success: boolean;
     user?: any;
     error?: string;
+    code?: string;
   }> {
     try {
-      const response = await apiClient.post('/api/auth/login', {
+      const response = await apiClient.post('/api/auth/sessions', {
         email,
         password,
       });
 
-      const { token, user } = response.data;
+      const { token, user } = response.data.data;
       await SecureStore.setItemAsync('userToken', token);
       await SecureStore.setItemAsync('userRole', user.role);
 
       return { success: true, user };
     } catch (error: any) {
       console.error("Sign in error:", error.response?.data || error);
+      const errorData = error.response?.data?.error;
       return {
         success: false,
-        error: error.response?.data?.error || "Invalid credentials",
+        error: errorData?.message || "Invalid credentials",
+        code: errorData?.code,
       };
     }
   }
@@ -72,7 +75,7 @@ export class AuthService {
   async getCurrentUser(): Promise<any | null> {
     try {
       const response = await apiClient.get('/api/auth/me');
-      return response.data.user;
+      return response.data.data.user;
     } catch {
       // If unauthorized, return null
       return null;
@@ -117,33 +120,101 @@ export class AuthService {
   }
 
   /**
-   * Send password reset code to email (Not Implemented Yet)
+   * Send password reset OTP to email
    */
   async sendPasswordResetEmail(email: string): Promise<{ success: boolean; error?: string }> {
-    return { success: false, error: "Password reset not yet implemented on custom backend." };
+    try {
+      await apiClient.post('/api/auth/otps', { email, type: 'password_reset' });
+      return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error?.message || "Failed to send reset email",
+      };
+    }
   }
 
   /**
-   * Verify recovery OTP code (Not Implemented Yet)
+   * Verify recovery OTP code and receive a temporary reset token
    */
-  async verifyRecoveryOtp(email: string, token: string): Promise<{ success: boolean; error?: string }> {
-    return { success: false, error: "OTP verification not yet implemented on custom backend." };
+  async verifyRecoveryOtp(
+    email: string,
+    token: string,
+  ): Promise<{ success: boolean; resetToken?: string; error?: string }> {
+    try {
+      const response = await apiClient.post('/api/auth/otps/verifications', {
+        email,
+        code: token,
+        type: 'password_reset',
+      });
+      return {
+        success: true,
+        resetToken: response.data.data.reset_token,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error?.message || "Invalid OTP",
+      };
+    }
   }
 
   /**
-   * Update password for the current user (Not Implemented Yet)
+   * Update password for the current user using a verified reset token
    */
-  async updatePassword(password: string): Promise<{ success: boolean; error?: string }> {
-    return { success: false, error: "Update password not yet implemented on custom backend." };
+  async updatePassword(
+    password: string,
+    resetToken: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await apiClient.put('/api/auth/passwords', { password, resetToken });
+      return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error?.message || "Failed to update password",
+      };
+    }
   }
 
   /**
-   * Resend signup verification email (Not Implemented Yet)
+   * Resend signup verification email
    */
   async resendSignUpEmail(email: string): Promise<{ success: boolean; error?: string }> {
-    return { success: false, error: "Resend email not yet implemented on custom backend." };
+    try {
+      await apiClient.post('/api/auth/otps', { email, type: 'email_verification' });
+      return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error?.message || "Failed to resend verification email",
+      };
+    }
+  }
+
+  /**
+   * Verify email verification OTP
+   */
+  async verifyEmailOtp(
+    email: string,
+    code: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await apiClient.post('/api/auth/otps/verifications', {
+        email,
+        code,
+        type: 'email_verification',
+      });
+      return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error?.message || "Invalid verification code",
+      };
+    }
   }
 }
 
 // Export singleton instance
 export const authService = new AuthService();
+
