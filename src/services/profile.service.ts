@@ -10,7 +10,7 @@ export class ProfileService {
   async getProfile(): Promise<Profile | null> {
     try {
       const response = await apiClient.get('/api/auth/me');
-      return response.data.user;
+      return response.data.data.user;
     } catch (error) {
       console.error("Error fetching profile:", error);
       return null;
@@ -30,7 +30,7 @@ export class ProfileService {
   async getProfileById(userId: string): Promise<Profile | null> {
     try {
       const response = await apiClient.get(`/api/auth/users/${userId}`);
-      return response.data.user;
+      return response.data.data.user;
     } catch (error) {
       console.error("Error fetching profile by ID:", error);
       return null;
@@ -67,7 +67,7 @@ export class ProfileService {
         ? maybeUpdates!
         : userIdOrUpdates;
 
-      await apiClient.put('/api/auth/me', updates);
+      await apiClient.patch('/api/auth/me', updates);
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };
@@ -109,9 +109,9 @@ export class ProfileService {
         const data = JSON.parse(uploadResult.body);
 
         // Auto update profile with new avatar URL
-        await this.updateProfile({ avatar_url: data.url });
+        await this.updateProfile({ avatar_url: data.data.url });
 
-        return data.url;
+        return data.data.url;
       }
       return null;
     } catch (error: any) {

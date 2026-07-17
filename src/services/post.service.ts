@@ -5,7 +5,7 @@ export class PostService {
   async getPosts(): Promise<Post[]> {
     try {
       const response = await apiClient.get('/api/posts');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error("Error fetching posts:", error);
       return [];
@@ -15,7 +15,7 @@ export class PostService {
   async getPostById(postId: string): Promise<Post | null> {
     try {
       const response = await apiClient.get(`/api/posts/${postId}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error("Error fetching post:", error);
       return null;
@@ -25,7 +25,7 @@ export class PostService {
   async createPost(input: CreatePostInput): Promise<{ success: boolean; postId?: string; error?: string }> {
     try {
       const response = await apiClient.post('/api/posts', input);
-      return { success: true, postId: response.data.id };
+      return { success: true, postId: response.data.data.id };
     } catch (error: any) {
       console.error("Error creating post:", error);
       return { success: false, error: error.message };

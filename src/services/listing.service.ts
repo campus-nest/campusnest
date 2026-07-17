@@ -14,7 +14,7 @@ export class ListingService {
   async getListings(filters?: ListingFilters): Promise<Listing[]> {
     try {
       const response = await apiClient.get('/api/listings', { params: filters });
-      return response.data as Listing[];
+      return response.data.data as Listing[];
     } catch (error) {
       console.error("Error fetching listings:", error);
       return [];
@@ -27,7 +27,7 @@ export class ListingService {
   async getListingById(listingId: string): Promise<Listing | null> {
     try {
       const response = await apiClient.get(`/api/listings/${listingId}`);
-      return response.data as Listing;
+      return response.data.data as Listing;
     } catch (error) {
       console.error("Error fetching listing:", error);
       return null;
@@ -42,10 +42,10 @@ export class ListingService {
   ): Promise<{ success: boolean; listingId?: string; error?: string }> {
     try {
       const response = await apiClient.post('/api/listings', input);
-      return { success: true, listingId: response.data.id };
+      return { success: true, listingId: response.data.data.id };
     } catch (error: any) {
       console.error("Error creating listing:", error);
-      return { success: false, error: error.response?.data?.error || error.message };
+      return { success: false, error: error.response?.data?.error?.message || error.message };
     }
   }
 
@@ -61,7 +61,7 @@ export class ListingService {
       return { success: true };
     } catch (error: any) {
       console.error("Error updating listing:", error);
-      return { success: false, error: error.response?.data?.error || error.message };
+      return { success: false, error: error.response?.data?.error?.message || error.message };
     }
   }
 
@@ -86,7 +86,7 @@ export class ListingService {
       return { success: true };
     } catch (error: any) {
       console.error("Error deleting listing:", error);
-      return { success: false, error: error.response?.data?.error || error.message };
+      return { success: false, error: error.response?.data?.error?.message || error.message };
     }
   }
 
@@ -123,7 +123,7 @@ export class ListingService {
 
         if (uploadResult.status === 201) {
           const data = JSON.parse(uploadResult.body);
-          if (data.url) uploadedUrls.push(data.url);
+          if (data.data?.url) uploadedUrls.push(data.data.url);
         }
       } catch (error) {
         console.error("Error uploading photo:", error);
