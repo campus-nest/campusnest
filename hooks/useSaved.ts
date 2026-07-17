@@ -21,8 +21,8 @@ export function useSaved() {
   const { savedListingIds, toggleSaveListing, loading: listingsContextLoading } = useSavedListings();
 
   useEffect(() => {
-    authService.getSession().then((session) => {
-      setCurrentUserId(session?.user?.id ?? null);
+    authService.getCurrentUser().then((user) => {
+      setCurrentUserId(user?.id ?? null);
     });
   }, []);
 
@@ -31,13 +31,13 @@ export function useSaved() {
       if (!currentUserId) return;
 
       setFetchingPosts(true);
-      savedPostService.getSavedPosts(currentUserId).then((posts) => {
+      savedPostService.getSavedPosts().then((posts) => {
         setSavedPosts(posts);
         setFetchingPosts(false);
       });
 
       setFetchingListings(true);
-      savedListingService.getSavedListings(currentUserId).then((listings) => {
+      savedListingService.getSavedListings().then((listings) => {
         setSavedListings(listings);
         setFetchingListings(false);
       });

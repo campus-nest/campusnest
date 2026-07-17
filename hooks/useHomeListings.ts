@@ -80,7 +80,7 @@ export function useHomeListings() {
 
     const fetchListings = async () => {
       setListingsLoading(true);
-      const session = await authService.getSession();
+      const user = await authService.getCurrentUser();
       let fetchedListings: Listing[] = [];
 
       if (role === "student") {
@@ -94,7 +94,7 @@ export function useHomeListings() {
       } else {
         if (activeFilter === "yourListings") {
           fetchedListings = await listingService.getListings({
-            landlord_id: session?.user?.id,
+            landlord_id: user?.id,
             searchQuery: debouncedQuery,
           });
         } else {

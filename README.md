@@ -1,6 +1,6 @@
 # CampusNest 🏠🎓
 
-CampusNest is a mobile application built with **React Native**, **Expo**, **Expo Router**, **Supabase**, and **TypeScript** designed to connect university/college students with landlords for off-campus housing.
+CampusNest is a mobile application built with **React Native**, **Expo**, **Expo Router**, and **TypeScript** designed to connect university/college students with landlords for off-campus housing.
 
 ---
 
@@ -22,7 +22,7 @@ CampusNest is a mobile application built with **React Native**, **Expo**, **Expo
 
 ### 🛡️ Authentication & Profiles
 - Role-based signup flows (Landlord vs. Student).
-- Secure email authentication backed by Supabase Auth.
+- Secure email authentication backed by custom JWT tokens.
 - Complete password recovery flows (reset password, verify OTP code, update password).
 - User profile management with avatar generation and photo updates.
 
@@ -40,7 +40,7 @@ CampusNest is built on a clean **decoupled architecture** enforcing strict **Sep
 graph TD
     View[Presentational View app/] -->|Consumes| Hook[Custom Controller Hook hooks/]
     Hook -->|Calls| Service[Service Layer src/services/]
-    Service -->|Queries| Supabase[(Supabase Client)]
+    Service -->|Queries| Backend[(Custom Node.js Backend API)]
 ```
 
 ### 1. Presentational Views (`app/`)
@@ -50,10 +50,10 @@ Route screen files under `app/` are purely presentational. They do not maintain 
 All state variables, form validation, image picking integrations, device API bindings (e.g., Clipboard, Phone Linking), and routing coordination are isolated inside dedicated custom hooks (e.g., `useHomeListings`, `useListingDetail`, `useNewPost`).
 
 ### 3. Service Layer (`src/services/`)
-Communicates directly with the database or third-party APIs. No screen or hook contains direct SQL-like Supabase queries; all fetches, updates, and deletes are routed through dedicated services (e.g., `AuthService`, `ListingService`, `PostService`).
+Communicates directly with the backend API. No screen or hook contains direct HTTP requests; all fetches, updates, and deletes are routed through dedicated services (e.g., `AuthService`, `ListingService`, `PostService`) via an Axios API client.
 
 ### 4. Global Contexts (`src/context/`)
-Implements real-time PostgreSQL database change channels to keep saved lists synced reactively across all screens.
+Manages global state (such as saved posts and saved listings) and synchronizes them across different screens.
 
 ---
 
@@ -63,6 +63,7 @@ Implements real-time PostgreSQL database change channels to keep saved lists syn
 - **Node.js** (v20 or higher recommended)
 - **npm** (comes packaged with Node.js)
 - **Expo Go** app installed on your physical iOS/Android device (to preview the app)
+- A running instance of the **CampusNest Node.js Backend**
 
 ### Setup Instructions
 
@@ -78,15 +79,15 @@ Implements real-time PostgreSQL database change channels to keep saved lists syn
    ```
 
 3. **Configure Environment Variables**:
-   Create a `.env` file in the root directory:
+   Create a `.env` file in the root directory and point it to your running backend:
    ```env
-   EXPO_PUBLIC_SUPABASE_URL=your-supabase-project-url
-   EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   EXPO_PUBLIC_API_URL=http://[IP_ADDRESS] # your backend IP address
+   # Or your Cloudflare tunnel public domain if hosting remotely!
    ```
 
 4. **Start the Development Server**:
    ```bash
-   npx expo start
+   npx expo start -c
    ```
 
 5. **Run the App**:
