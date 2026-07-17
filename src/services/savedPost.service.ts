@@ -5,7 +5,7 @@ export class SavedPostService {
   async getSavedPosts(): Promise<Post[]> {
     try {
       const response = await apiClient.get('/api/saved/posts');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error("Error fetching saved posts:", error);
       return [];
