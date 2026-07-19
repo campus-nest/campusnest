@@ -117,8 +117,8 @@ export function SavedPostsProvider({
 
       // Persist to the server
       const result = isSaved
-        ? await savedPostService.unsavePost(postId, uid)
-        : await savedPostService.savePost(postId, uid);
+        ? await savedPostService.unsavePost(postId)
+        : await savedPostService.savePost(postId);
 
       if (!result.success) {
         // Roll back the optimistic update on failure

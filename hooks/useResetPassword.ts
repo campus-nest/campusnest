@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Alert } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { authService } from "@/src/services";
 
 export function useResetPassword() {
   const router = useRouter();
+  const { resetToken } = useLocalSearchParams<{ resetToken: string }>();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,10 +26,16 @@ export function useResetPassword() {
       return;
     }
 
+    if (!resetToken) {
+      Alert.alert("Error", "Reset session expired. Please request a new code.");
+      router.replace("/forgot-password");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { success, error } = await authService.updatePassword(password);
+      const { success, error } = await authService.updatePassword(password, resetToken);
 
       if (error || !success) {
         Alert.alert("Error", error || "Failed to update password.");

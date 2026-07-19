@@ -92,8 +92,8 @@ import React, {
         });
   
         const result = isSaved
-          ? await savedListingService.unsaveListing(listingId, uid)
-          : await savedListingService.saveListing(listingId, uid);
+          ? await savedListingService.unsaveListing(listingId)
+          : await savedListingService.saveListing(listingId);
   
         if (!result.success) {
           // Roll back
