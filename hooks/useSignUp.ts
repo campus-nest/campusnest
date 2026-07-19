@@ -113,8 +113,7 @@ export function useSignUp() {
         "Success",
         "Account created successfully!",
         [{ text: "OK", onPress: () => {
-          notifyAuthChanged();
-          router.replace("/(tabs)");
+          router.replace({ pathname: "/verify-email", params: { email: email.trim() } });
         } }]
       );
     } catch (err) {

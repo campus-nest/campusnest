@@ -5,7 +5,7 @@ export class CommentService {
   async getCommentsByPostId(postId: string): Promise<CommentWithProfile[]> {
     try {
       const response = await apiClient.get(`/api/comments/post/${postId}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error("Error fetching comments:", error);
       return [];

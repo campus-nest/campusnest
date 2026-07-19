@@ -5,7 +5,7 @@ export class SavedListingService {
   async getSavedListings(): Promise<Listing[]> {
     try {
       const response = await apiClient.get('/api/saved/listings');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error("Error fetching saved listings:", error);
       return [];
