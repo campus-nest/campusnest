@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 interface DropdownOption {
   label: string;
@@ -151,80 +152,80 @@ export function CycleDropdown({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 4,
+    gap: spacing.xs,
   },
   label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 4,
+    color: colors.white,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
+    marginBottom: spacing.xs,
   },
   labelLight: {
-    color: "#1a1a1a",
+    color: colors.background.elevated,
   },
   dropdown: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#333",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    borderColor: colors.border.strong,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   dropdownLight: {
-    backgroundColor: "#fff",
-    borderColor: "#ddd",
+    backgroundColor: colors.white,
+    borderColor: colors.light.border,
   },
   dropdownText: {
-    fontSize: 14,
-    color: "#fff",
+    fontSize: typography.size.md,
+    color: colors.white,
   },
   dropdownTextLight: {
-    color: "#333",
+    color: colors.border.strong,
   },
   placeholderText: {
-    color: "#666",
+    color: colors.text.faint,
   },
   icon: {
-    fontSize: 14,
-    color: "#aaa",
+    fontSize: typography.size.md,
+    color: colors.text.muted,
   },
   iconLight: {
-    color: "#555",
+    color: colors.text.dim,
   },
   optionsList: {
-    marginTop: 4,
-    backgroundColor: "#1e1e1e",
-    borderRadius: 12,
+    marginTop: spacing.xs,
+    backgroundColor: colors.border.subtle,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
     overflow: "hidden",
   },
   optionsListLight: {
-    backgroundColor: "#fff",
-    borderColor: "#ddd",
+    backgroundColor: colors.white,
+    borderColor: colors.light.border,
   },
   option: {
-    padding: 16,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: colors.border.strong,
   },
   optionLight: {
-    borderBottomColor: "#eee",
+    borderBottomColor: colors.light.borderSubtle,
   },
   optionSelected: {
-    backgroundColor: "#333",
+    backgroundColor: colors.border.strong,
   },
   optionText: {
-    color: "#fff",
-    fontSize: 14,
+    color: colors.white,
+    fontSize: typography.size.md,
   },
   optionTextLight: {
-    color: "#333",
+    color: colors.border.strong,
   },
   optionTextSelected: {
-    fontWeight: "600",
+    fontWeight: typography.weight.semibold,
   },
 });

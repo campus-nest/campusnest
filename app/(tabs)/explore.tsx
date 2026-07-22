@@ -3,15 +3,15 @@ import Screen from "@/components/ui/Screen";
 import { Home, MapPin } from "lucide-react-native";
 import FilterPills from "@/components/ui/FilterPills";
 import PriceRangeModal from "@/components/ui/PriceRangeModal";
+import IconCircle from "@/components/ui/IconCircle";
+import PriceFilterPill from "@/components/ui/PriceFilterPill";
+import ListingMapMarker from "@/components/ui/ListingMapMarker";
+import CircleFAB from "@/components/ui/CircleFAB";
+import EmptyState from "@/components/ui/EmptyState";
+import LoadingState from "@/components/ui/LoadingState";
 import { useExplore } from "@/hooks/useExplore";
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
+import { Platform, Pressable, Text, View } from "react-native";
 
 // Dynamic imports for platform-specific map components
 let MapView: any;
@@ -25,6 +25,13 @@ if (Platform.OS !== "web") {
   Marker = maps.Marker;
   UrlTile = maps.UrlTile;
 }
+
+const FILTER_OPTIONS: { label: string; value: "new" | "closest" | "cheapest" | "moveIn" }[] = [
+  { label: "New", value: "new" },
+  { label: "Closest", value: "closest" },
+  { label: "Cheapest", value: "cheapest" },
+  { label: "Move-In", value: "moveIn" },
+];
 
 export default function ExploreScreen() {
   const {
@@ -52,20 +59,13 @@ export default function ExploreScreen() {
   if (!loading && userRole === "landlord") {
     return (
       <Screen>
-        <View style={styles.messageContainer}>
-          <Home size={48} color="#666" />
-          <Text style={styles.messageTitle}>Explore is for Students</Text>
-          <Text style={styles.messageText}>
-            This map view is only available for student accounts. Use the home
-            tab to manage your listings.
-          </Text>
-          <Pressable
-            style={styles.goHomeButton}
-            onPress={handleGoHome}
-          >
-            <Text style={styles.goHomeButtonText}>Go to Home</Text>
-          </Pressable>
-        </View>
+        <EmptyState
+          icon={<Home size={48} color={colors.text.faint} />}
+          title="Explore is for Students"
+          subtitle="This map view is only available for student accounts. Use the home tab to manage your listings."
+          actionLabel="Go to Home"
+          onAction={handleGoHome}
+        />
       </Screen>
     );
   }
@@ -73,10 +73,7 @@ export default function ExploreScreen() {
   if (loading) {
     return (
       <Screen>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.loadingText}>Loading listings...</Text>
-        </View>
+        <LoadingState label="Loading listings..." />
       </Screen>
     );
   }
@@ -85,43 +82,70 @@ export default function ExploreScreen() {
   if (Platform.OS === "web") {
     return (
       <Screen>
-        <View style={styles.container}>
-          <View style={styles.webHeader}>
-            <Text style={styles.webTitle}>Nearby Listings</Text>
-            <FilterPills
-              options={[
-                { label: "New", value: "new" },
-                { label: "Closest", value: "closest" },
-                { label: "Cheapest", value: "cheapest" },
-                { label: "Move-In", value: "moveIn" },
-              ]}
-              value={activeFilter}
-              onChange={setActiveFilter}
-            />
+        <View style={{ flex: 1, position: "relative" }}>
+          <View
+            style={{
+              padding: spacing.lg,
+              backgroundColor: colors.background.elevated,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border.strong,
+            }}
+          >
+            <Text
+              style={{
+                color: colors.text.primary,
+                fontSize: typography.size.xxl,
+                fontWeight: typography.weight.bold,
+                marginBottom: spacing.sm,
+              }}
+            >
+              Nearby Listings
+            </Text>
+            <FilterPills options={FILTER_OPTIONS} value={activeFilter} onChange={setActiveFilter} />
           </View>
 
-          <View style={styles.webListContainer}>
+          <View style={{ flex: 1, padding: spacing.lg }}>
             {listings.map((listing) => (
               <Pressable
                 key={listing.id}
-                style={styles.listingCard}
+                style={{
+                  flexDirection: "row",
+                  backgroundColor: colors.background.elevated,
+                  borderRadius: radius.md,
+                  padding: spacing.lg,
+                  marginBottom: spacing.md,
+                  alignItems: "center",
+                }}
                 onPress={() => handleMarkerPress(listing.id)}
               >
-                <View style={styles.cardIcon}>
-                  <Home size={24} color="#0066CC" />
-                </View>
-                <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}>{listing.title}</Text>
-                  <Text style={styles.cardAddress}>{listing.address}</Text>
-                  <Text style={styles.cardRent}>${listing.rent}/month</Text>
+                <IconCircle variant="onWhite" size={50} style={{ marginRight: spacing.lg }}>
+                  <Home size={24} color={colors.accent.secondary} />
+                </IconCircle>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      color: colors.text.primary,
+                      fontSize: typography.size.lg,
+                      fontWeight: typography.weight.semibold,
+                      marginBottom: spacing.xs,
+                    }}
+                  >
+                    {listing.title}
+                  </Text>
+                  <Text style={{ color: colors.text.readable, fontSize: typography.size.base, marginBottom: spacing.xs }}>
+                    {listing.address}
+                  </Text>
+                  <Text style={{ color: colors.accent.secondary, fontSize: typography.size.md, fontWeight: typography.weight.semibold }}>
+                    ${listing.rent}/month
+                  </Text>
                 </View>
               </Pressable>
             ))}
           </View>
 
-          <Pressable style={styles.refreshButton} onPress={fetchListings}>
-            <Text style={styles.refreshText}>↻</Text>
-          </Pressable>
+          <CircleFAB onPress={fetchListings} style={{ position: "absolute", bottom: spacing.giant, right: spacing.lg }}>
+            <Text style={{ fontSize: typography.size.xxl, color: colors.black }}>↻</Text>
+          </CircleFAB>
         </View>
       </Screen>
     );
@@ -130,10 +154,10 @@ export default function ExploreScreen() {
   // Native mobile map view
   return (
     <Screen noPadding>
-      <View style={styles.container}>
+      <View style={{ flex: 1, position: "relative" }}>
         {MapView && (
           <MapView
-            style={styles.map}
+            style={{ flex: 1, width: "100%", height: "100%" }}
             initialRegion={region}
             showsUserLocation
             showsMyLocationButton
@@ -156,70 +180,30 @@ export default function ExploreScreen() {
             {/* Listing markers */}
             {mapReady &&
               Marker &&
-              listings.map((listing, index) => {
-                const isTopMatch = index === 0;
-                return (
-                  <Marker
-                    key={listing.id}
-                    coordinate={{
-                      latitude: listing.latitude!,
-                      longitude: listing.longitude!,
-                    }}
-                    title={listing.title}
-                    description={`$${listing.rent}/month`}
-                    onPress={() => handleMarkerPress(listing.id)}
-                    zIndex={isTopMatch ? 999 : 1}
-                  >
-                    {/* Custom marker */}
-                    <View style={styles.customMarker}>
-                      <View
-                        style={[
-                          styles.markerContent,
-                          isTopMatch && styles.highlightedMarkerContent,
-                        ]}
-                      >
-                        <Home size={16} color={isTopMatch ? "#fff" : "#000"} />
-                      </View>
-                      <View
-                        style={[
-                          styles.markerArrow,
-                          isTopMatch && styles.highlightedMarkerArrow,
-                        ]}
-                      />
-                    </View>
-                  </Marker>
-                );
-              })}
+              listings.map((listing, index) => (
+                <Marker
+                  key={listing.id}
+                  coordinate={{
+                    latitude: listing.latitude!,
+                    longitude: listing.longitude!,
+                  }}
+                  title={listing.title}
+                  description={`$${listing.rent}/month`}
+                  onPress={() => handleMarkerPress(listing.id)}
+                  zIndex={index === 0 ? 999 : 1}
+                >
+                  <ListingMapMarker highlighted={index === 0} />
+                </Marker>
+              ))}
           </MapView>
         )}
 
-        <View style={styles.filterOverlay}>
+        <View style={{ position: "absolute", top: spacing.md, left: 0, right: 0, zIndex: 10 }}>
           <FilterPills
             customPrependPill={
-              <Pressable
-                onPress={() => setPriceModalVisible(true)}
-                style={[
-                  styles.pill,
-                  priceActive && styles.pillActive,
-                  { marginRight: 8 },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.text,
-                    priceActive && styles.textActive,
-                  ]}
-                >
-                  Price
-                </Text>
-              </Pressable>
+              <PriceFilterPill label="Price" active={priceActive} onPress={() => setPriceModalVisible(true)} />
             }
-            options={[
-              { label: "New", value: "new" },
-              { label: "Closest", value: "closest" },
-              { label: "Cheapest", value: "cheapest" },
-              { label: "Move-In", value: "moveIn" },
-            ]}
+            options={FILTER_OPTIONS}
             value={activeFilter}
             onChange={setActiveFilter}
           />
@@ -234,252 +218,49 @@ export default function ExploreScreen() {
         />
 
         {/* Attribution for CartoDB */}
-        <Pressable style={styles.attribution} onPress={openOSMAttribution}>
-          <Text style={styles.attributionText}>© OpenStreetMap | © CARTO</Text>
+        <Pressable
+          style={{
+            position: "absolute",
+            bottom: spacing.sm,
+            left: spacing.sm,
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            paddingHorizontal: spacing.sm - 2,
+            paddingVertical: spacing.xs - 1,
+            borderRadius: radius.sm - 4,
+          }}
+          onPress={openOSMAttribution}
+        >
+          <Text style={{ fontSize: typography.size.xs - 1, color: colors.black }}>© OpenStreetMap | © CARTO</Text>
         </Pressable>
 
         {/* Listing count badge */}
         {listings.length > 0 && (
-          <View style={styles.countBadge}>
-            <MapPin size={14} color="#fff" />
-            <Text style={styles.countText}>
+          <View
+            style={{
+              position: "absolute",
+              bottom: spacing.giant + spacing.huge + spacing.md,
+              right: spacing.lg,
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.sm,
+              borderRadius: radius.xl,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing.sm - 2,
+            }}
+          >
+            <MapPin size={14} color={colors.white} />
+            <Text style={{ color: colors.text.primary, fontSize: typography.size.sm, fontWeight: typography.weight.semibold }}>
               {listings.length} listing{listings.length !== 1 ? "s" : ""}
             </Text>
           </View>
         )}
 
         {/* Refresh button */}
-        <Pressable style={styles.refreshButton} onPress={fetchListings}>
-          <Text style={styles.refreshText}>↻</Text>
-        </Pressable>
+        <CircleFAB onPress={fetchListings} style={{ position: "absolute", bottom: spacing.giant, right: spacing.lg }}>
+          <Text style={{ fontSize: typography.size.xxl, color: colors.black }}>↻</Text>
+        </CircleFAB>
       </View>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: "relative",
-  },
-  filterOverlay: {
-    position: "absolute",
-    top: 12,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#fff",
-    marginTop: 12,
-    fontSize: 14,
-  },
-  messageContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-  },
-  messageTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  messageText: {
-    color: "#999",
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  goHomeButton: {
-    marginTop: 24,
-    backgroundColor: "#fff",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 999,
-  },
-  goHomeButtonText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  map: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  customMarker: {
-    alignItems: "center",
-  },
-  markerContent: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 3,
-    borderColor: "#0066CC",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  markerArrow: {
-    width: 0,
-    height: 0,
-    backgroundColor: "transparent",
-    borderStyle: "solid",
-    borderLeftWidth: 6,
-    borderRightWidth: 6,
-    borderTopWidth: 10,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderTopColor: "#0066CC",
-    marginTop: -1,
-  },
-  highlightedMarkerContent: {
-    backgroundColor: "#0066CC",
-    borderColor: "#003366",
-    transform: [{ scale: 1.2 }],
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-  },
-  highlightedMarkerArrow: {
-    borderTopColor: "#0066CC",
-    transform: [{ scale: 1.2 }],
-    marginTop: -2,
-  },
-  // OSM Attribution (REQUIRED by OSM policy)
-  attribution: {
-    position: "absolute",
-    bottom: 8,
-    left: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  attributionText: {
-    fontSize: 10,
-    color: "#000",
-  },
-  countBadge: {
-    position: "absolute",
-    bottom: 140,
-    right: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  countText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  refreshButton: {
-    position: "absolute",
-    bottom: 80,
-    right: 16,
-    backgroundColor: "#fff",
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  refreshText: {
-    fontSize: 24,
-    color: "#000",
-  },
-  // Web-specific styles
-  webHeader: {
-    padding: 16,
-    backgroundColor: "#1a1a1a",
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  webTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  webListContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  listingCard: {
-    flexDirection: "row",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    alignItems: "center",
-  },
-  cardIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  cardAddress: {
-    color: "#999",
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  cardRent: {
-    color: "#0066CC",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  pillActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
-  },
-  text: {
-    fontSize: 13,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  textActive: {
-    color: "#000",
-  },
-});

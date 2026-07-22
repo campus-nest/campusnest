@@ -9,6 +9,7 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 const { width } = Dimensions.get("window");
 
@@ -56,7 +57,7 @@ export function ImagePickerPreview({ photos, onRemove }: Props) {
           style={styles.closeViewer}
           onPress={() => setViewerIndex(null)}
         >
-          <Text style={{ color: "#fff", fontSize: 24 }}>✕</Text>
+          <Text style={{ color: colors.white, fontSize: 24 }}>✕</Text>
         </Pressable>
       </Modal>
     </>
@@ -67,8 +68,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginTop: 12,
+    gap: spacing.sm,
+    marginTop: spacing.md,
   },
   imageWrapper: {
     position: "relative",
@@ -76,13 +77,13 @@ const styles = StyleSheet.create({
   image: {
     width: 100,
     height: 100,
-    borderRadius: 12,
+    borderRadius: radius.md,
   },
   removeButton: {
     position: "absolute",
     top: -4,
     right: -4,
-    backgroundColor: "#000",
+    backgroundColor: colors.black,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -90,19 +91,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   removeText: {
-    color: "#fff",
-    fontSize: 14,
+    color: colors.white,
+    fontSize: typography.size.md,
     lineHeight: 14,
   },
   fullImage: {
     width,
     height: "100%",
     resizeMode: "contain",
-    backgroundColor: "#000",
+    backgroundColor: colors.black,
   },
   closeViewer: {
     position: "absolute",
     top: 50,
-    right: 20,
+    right: spacing.xl,
   },
 });

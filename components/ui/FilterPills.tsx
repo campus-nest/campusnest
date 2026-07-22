@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, ScrollView } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export interface FilterOption<T extends string> {
   label: string;
@@ -27,7 +28,6 @@ export default function FilterPills<T extends string>({
       {customPrependPill}
       {options.map((option) => {
         const active = option.value === value;
-
         return (
           <Pressable
             key={option.value}
@@ -44,31 +44,35 @@ export default function FilterPills<T extends string>({
   );
 }
 
+export const pillStyles = StyleSheet.create({
+  pill: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.background.screen,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+  },
+  pillActive: {
+    backgroundColor: colors.white,
+    borderColor: colors.white,
+  },
+  text: {
+    fontSize: typography.size.base,
+    color: colors.text.primary,
+    fontWeight: typography.weight.medium,
+  },
+  textActive: {
+    color: colors.black,
+  },
+});
+
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
-    gap: 8,
-    marginVertical: 12,
-    paddingHorizontal: 16,
+    gap: spacing.sm,
+    marginVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
-  pill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  pillActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
-  },
-  text: {
-    fontSize: 14,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  textActive: {
-    color: "#000",
-  },
+  ...pillStyles,
 });

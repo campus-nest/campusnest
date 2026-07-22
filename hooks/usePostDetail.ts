@@ -97,10 +97,7 @@ export function usePostDetail(id: string | undefined) {
     }
 
     setSubmitting(true);
-    const result = await postService.updatePost(id, {
-      title: editTitle.trim(),
-      body: editBody.trim(),
-    });
+    const result = await postService.updatePost(id, editTitle.trim(), editBody.trim());
 
     if (result.success) {
       setPost((prev) =>

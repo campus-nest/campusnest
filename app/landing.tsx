@@ -1,23 +1,25 @@
 import LandingPageLogo from "@/assets/images/landing_page_bottom_logo.svg";
 import Button from "@/components/ui/Button";
-import { H1, H3 } from "@/components/ui/Headings";
+import { H3 } from "@/components/ui/Headings";
 import Logo from "@/components/ui/Logo";
 import Screen from "@/components/ui/Screen";
+import ScreenHeading from "@/components/ui/ScreenHeading";
+import Stack from "@/components/ui/Stack";
+import BottomIllustration from "@/components/ui/BottomIllustration";
 import { useRouter } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { spacing } from "@/src/constants/theme";
 
 export default function LandingScreen() {
   const router = useRouter();
 
   return (
-    <Screen style={styles.screen}>
+    <Screen>
       {/* Top: logo + headlines + buttons */}
-      <View style={styles.top}>
-        <Logo style={styles.logoGap} />
-        <H1 bold>Campus Nest</H1>
-        <H3 italic style={styles.tagline}>Let&apos;s get Started!</H3>
+      <Stack gap="md" align="center" flex={1} style={{ paddingTop: spacing.huge }}>
+        <Logo />
+        <ScreenHeading title="Campus Nest" subtitle="Let's get Started!" italic />
 
-        <View style={styles.buttons}>
+        <Stack gap="md" align="center" style={{ width: "100%", marginTop: spacing.sm }}>
           <Button fullWidth onPress={() => router.push("/login")}>
             Login
           </Button>
@@ -25,42 +27,12 @@ export default function LandingScreen() {
           <Button fullWidth onPress={() => router.push("/pre-signup")}>
             Sign Up
           </Button>
-        </View>
-      </View>
+        </Stack>
+      </Stack>
 
-      {/* Bottom: illustration pinned to the bottom */}
-      <View style={styles.illustration} pointerEvents="none">
+      <BottomIllustration height={180}>
         <LandingPageLogo width="100%" height="100%" />
-      </View>
+      </BottomIllustration>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    paddingHorizontal: 24,
-  },
-  top: {
-    flex: 1,
-    alignItems: "center",
-    paddingTop: 48,
-    gap: 12,
-  },
-  logoGap: {
-    marginBottom: 4,
-  },
-  tagline: {
-    marginBottom: 8,
-  },
-  buttons: {
-    width: "100%",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 8,
-  },
-  illustration: {
-    height: 180,
-    width: "100%",
-    marginBottom: 0,
-  },
-});

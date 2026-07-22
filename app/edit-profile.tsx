@@ -1,18 +1,12 @@
-import React from "react";
 import Button from "@/components/ui/Button";
 import { H1 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
-import { Upload } from "lucide-react-native";
+import Stack from "@/components/ui/Stack";
+import AvatarPicker from "@/components/ui/AvatarPicker";
 import { useEditProfile } from "@/hooks/useEditProfile";
-import {
-  ActivityIndicator,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import LoadingState from "@/components/ui/LoadingState";
+import { colors, spacing } from "@/src/constants/theme";
 
 export default function EditProfileScreen() {
   const {
@@ -41,42 +35,20 @@ export default function EditProfileScreen() {
     handleSave,
   } = useEditProfile();
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    );
-  }
+  if (loading) return <LoadingState />;
 
   return (
-    <Screen scrollable contentContainerStyle={styles.content}>
-      {/* Header */}
+    <Screen scrollable contentContainerStyle={{ gap: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.xxxxl }}>
       <H1>Edit Profile</H1>
-      {/* Avatar */}
-      <View style={styles.avatarSection}>
-        <TouchableOpacity onPress={pickImage}>
-          {imageUri || avatarUrl ? (
-            <Image
-              source={{ uri: imageUri || avatarUrl || undefined }}
-              style={styles.avatar}
-            />
-          ) : (
-            <View style={styles.avatar}>
-              <Text style={styles.avatarPlaceholder}>Add Photo</Text>
-            </View>
-          )}
-          <View style={styles.editIconContainer}>
-            <Upload color="white" size={16} />
-          </View>
-        </TouchableOpacity>
-      </View>
 
-      {/* Form Fields */}
+      <Stack align="center" style={{ marginBottom: spacing.lg }}>
+        <AvatarPicker uri={imageUri || avatarUrl} onPress={pickImage} />
+      </Stack>
+
       <Input
         label="Full Name *"
         placeholder="Enter your full name"
-        placeholderTextColor="#666"
+        placeholderTextColor={colors.text.faint}
         value={fullName}
         onChangeText={setFullName}
       />
@@ -84,7 +56,7 @@ export default function EditProfileScreen() {
       <Input
         label="Email *"
         placeholder="Enter your email"
-        placeholderTextColor="#666"
+        placeholderTextColor={colors.text.faint}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -95,7 +67,7 @@ export default function EditProfileScreen() {
         <Input
           label="Phone Number *"
           placeholder="e.g., (403) 123-4567"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.text.faint}
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
@@ -106,7 +78,7 @@ export default function EditProfileScreen() {
         <Input
           label="University"
           placeholder="e.g., University of Calgary"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.text.faint}
           value={university}
           onChangeText={setUniversity}
         />
@@ -115,90 +87,42 @@ export default function EditProfileScreen() {
         <Input
           label="Year of Study"
           placeholder="e.g., 2nd Year"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.text.faint}
           value={year}
           onChangeText={setYear}
         />
       )}
+
       <Input
         label="Current Address"
         placeholder="Enter your address"
-        placeholderTextColor="#666"
+        placeholderTextColor={colors.text.faint}
         value={currentAddress}
         onChangeText={setCurrentAddress}
       />
 
-      <View style={styles.rowContainer}>
-        <View style={[styles.halfWidth]}>
-          <Input
-            label="City"
-            placeholder="City"
-            placeholderTextColor="#666"
-            value={city}
-            onChangeText={setCity}
-          />
-        </View>
+      <Stack direction="row" gap="md">
+        <Input
+          label="City"
+          placeholder="City"
+          placeholderTextColor={colors.text.faint}
+          value={city}
+          onChangeText={setCity}
+          containerStyle={{ flex: 1 }}
+        />
+        <Input
+          label="Province"
+          placeholder="Province"
+          placeholderTextColor={colors.text.faint}
+          value={province}
+          onChangeText={setProvince}
+          containerStyle={{ flex: 1 }}
+        />
+      </Stack>
 
-        <View style={[styles.halfWidth]}>
-          <Input
-            label="Province"
-            placeholder="Province"
-            placeholderTextColor="#666"
-            value={province}
-            onChangeText={setProvince}
-          />
-        </View>
-      </View>
-
-      {/* Save Button */}
       <Button fullWidth onPress={handleSave} disabled={saving}>
         {saving ? "Please wait" : "Save Changes"}
       </Button>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: "black",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: {
-    gap: 16,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  avatarSection: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#27272a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarPlaceholder: {
-    color: "#666",
-    fontSize: 14,
-  },
-  editIconContainer: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#3b82f6",
-    padding: 8,
-    borderRadius: 20,
-  },
-  rowContainer: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  halfWidth: {
-    flex: 1,
-  },
-});

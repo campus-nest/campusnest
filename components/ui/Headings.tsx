@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TextStyle } from "react-native";
+import { colors, typography } from "@/src/constants/theme";
 
 interface HeadingProps {
   children: React.ReactNode;
@@ -74,35 +75,35 @@ export function H4({ children, style, bold, italic, underline }: HeadingProps) {
 
 const styles = StyleSheet.create({
   h1: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "500",
+    color: colors.text.primary,
+    fontSize: typography.size.display,
+    fontWeight: typography.weight.medium,
     textAlign: "center",
     letterSpacing: 0.1,
   },
   h2: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "500",
+    color: colors.text.primary,
+    fontSize: typography.size.xxxl,
+    fontWeight: typography.weight.medium,
     textAlign: "center",
     letterSpacing: 0.1,
   },
   h3: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
     textAlign: "center",
     letterSpacing: 0.1,
   },
   h4: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "400",
+    color: colors.text.primary,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.regular,
     textAlign: "center",
     letterSpacing: 0.1,
   },
   bold: {
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
   },
   italic: {
     fontStyle: "italic",

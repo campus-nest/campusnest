@@ -1,10 +1,9 @@
-import React from "react";
 import Button from "@/components/ui/Button";
-import { H1, H4 } from "@/components/ui/Headings";
 import Input from "@/components/ui/Input";
 import Screen from "@/components/ui/Screen";
+import ScreenHeading from "@/components/ui/ScreenHeading";
+import Stack from "@/components/ui/Stack";
 import { useResetPassword } from "@/hooks/useResetPassword";
-import { StyleSheet } from "react-native";
 
 export default function ResetPasswordScreen() {
   const {
@@ -17,36 +16,30 @@ export default function ResetPasswordScreen() {
   } = useResetPassword();
 
   return (
-    <Screen scrollable contentContainerStyle={styles.content}>
-      <H1 bold>New Password</H1>
-      <H4>Create a new password for your account</H4>
+    <Screen scrollable>
+      <Stack gap="lg">
+        <ScreenHeading title="New Password" subtitle="Create a new password for your account" />
 
-      <Input
-        label="New Password"
-        placeholder="Enter new password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        <Input
+          label="New Password"
+          placeholder="Enter new password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <Input
-        label="Confirm Password"
-        placeholder="Confirm new password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
+        <Input
+          label="Confirm Password"
+          placeholder="Confirm new password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
 
-      <Button fullWidth onPress={handleUpdatePassword} disabled={loading}>
-        {loading ? "Updating…" : "Update Password"}
-      </Button>
+        <Button fullWidth onPress={handleUpdatePassword} disabled={loading}>
+          {loading ? "Updating…" : "Update Password"}
+        </Button>
+      </Stack>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: 16,
-    paddingTop: 16,
-  },
-});

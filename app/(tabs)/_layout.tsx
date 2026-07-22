@@ -1,11 +1,11 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, View } from "react-native";
 import { NavigationBar } from "../../components/navigation-bar";
 
 export default function TabLayout() {
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       {Platform.OS === "web" && <NavigationBar />}
       <Tabs
         screenOptions={{
@@ -24,9 +24,3 @@ export default function TabLayout() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

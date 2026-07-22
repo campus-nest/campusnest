@@ -5,15 +5,20 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Pencil, Trash2 } from "lucide-react-native";
+import { Pencil, Trash2 } from "lucide-react-native";
 import { usePostDetail } from "@/hooks/usePostDetail";
+import LoadingState from "@/components/ui/LoadingState";
+import PageHeader, { HeaderActions, HeaderIconBtn } from "@/components/ui/PageHeader";
+import Avatar from "@/components/ui/Avatar";
+import Card from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function PostDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,145 +46,165 @@ export default function PostDetailScreen() {
   } = usePostDetail(id);
 
   if (loading || !post || deleting) {
-    return (
-      <SafeAreaView style={styles.loadingScreen}>
-        <ActivityIndicator color="#fff" size="large" />
-        <Text style={styles.loadingText}>
-          {deleting ? "Deleting post…" : "Loading post…"}
-        </Text>
-      </SafeAreaView>
-    );
+    return <LoadingState label={deleting ? "Deleting post…" : "Loading post…"} />;
   }
 
+  const headerRight = isOwner && !isEditing ? (
+    <HeaderActions>
+      <HeaderIconBtn onPress={() => setIsEditing(true)} hitSlop={6}>
+        <Pencil color={colors.text.primary} size={16} />
+      </HeaderIconBtn>
+      <HeaderIconBtn onPress={handleDelete} danger hitSlop={6}>
+        <Trash2 color={colors.danger.default} size={16} />
+      </HeaderIconBtn>
+    </HeaderActions>
+  ) : undefined;
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={handleBack}>
-          <ChevronLeft color="#fff" size={22} />
-        </Pressable>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          Post
-        </Text>
-        {isOwner && !isEditing ? (
-          <View style={styles.headerActions}>
-            <Pressable
-              style={styles.headerIconBtn}
-              onPress={() => setIsEditing(true)}
-              hitSlop={6}
-            >
-              <Pencil color="#fff" size={16} />
-            </Pressable>
-            <Pressable
-              style={[styles.headerIconBtn, styles.headerDeleteBtn]}
-              onPress={handleDelete}
-              hitSlop={6}
-            >
-              <Trash2 color="#ff4444" size={16} />
-            </Pressable>
-          </View>
-        ) : (
-          <View style={{ width: 40, height: 40 }} />
-        )}
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.screen }}>
+      <PageHeader title="Post" onBack={handleBack} right={headerRight} />
 
       <KeyboardAvoidingView
-        style={styles.flex}
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
       >
         <ScrollView
-          style={styles.flex}
-          contentContainerStyle={styles.scrollContent}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: spacing.xl, paddingBottom: spacing.xxxxl, gap: spacing.lg }}
           showsVerticalScrollIndicator={false}
         >
           {/* Post card */}
           {isEditing ? (
-            <View style={styles.postCard}>
-              <Text style={styles.editLabel}>Title</Text>
-              <TextInput
-                style={styles.editTitleInput}
-                value={editTitle}
-                onChangeText={setEditTitle}
-                placeholder="Post title"
-                placeholderTextColor="#555"
-              />
-              <Text style={styles.editLabel}>Description</Text>
-              <TextInput
-                style={styles.editBodyInput}
+            <Card variant="elevated" style={{ padding: spacing.xl, gap: spacing.md }}>
+              <Input label="Title" value={editTitle} onChangeText={setEditTitle} placeholder="Post title" />
+              <Input
+                label="Description"
                 value={editBody}
                 onChangeText={setEditBody}
                 placeholder="Post description"
-                placeholderTextColor="#555"
                 multiline
                 numberOfLines={6}
+                style={{ textAlignVertical: "top", minHeight: 100 }}
               />
-              <View style={styles.editActionsRow}>
+              <View style={{ flexDirection: "row", gap: spacing.md, marginTop: spacing.md }}>
                 <Pressable
-                  style={[styles.saveBtn, submitting && styles.btnDisabled]}
+                  style={{
+                    flex: 1,
+                    backgroundColor: colors.white,
+                    borderRadius: radius.sm,
+                    paddingVertical: spacing.md,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: submitting ? 0.5 : 1,
+                  }}
                   onPress={handleSaveEdit}
                   disabled={submitting}
                 >
-                  <Text style={styles.saveBtnText}>Save</Text>
+                  <Text style={{ color: colors.black, fontWeight: typography.weight.bold, fontSize: typography.size.md }}>
+                    Save
+                  </Text>
                 </Pressable>
                 <Pressable
-                  style={styles.cancelBtn}
+                  style={{
+                    flex: 1,
+                    backgroundColor: colors.border.dim,
+                    borderRadius: radius.sm,
+                    paddingVertical: spacing.md,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderWidth: 1,
+                    borderColor: colors.border.strong,
+                  }}
                   onPress={handleCancelEdit}
                   disabled={submitting}
                 >
-                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                  <Text style={{ color: colors.text.primary, fontWeight: typography.weight.semibold, fontSize: typography.size.md }}>
+                    Cancel
+                  </Text>
                 </Pressable>
               </View>
-            </View>
+            </Card>
           ) : (
-            <View style={styles.postCard}>
-              <Text style={styles.postTitle}>{post.title}</Text>
-              <Text style={styles.postBody}>{post.body}</Text>
-              <View style={styles.postMeta}>
-                <Text style={styles.postAuthor}>
+            <Card variant="elevated" style={{ padding: spacing.xl, gap: spacing.md }}>
+              <Text style={{ color: colors.text.primary, fontSize: typography.size.xxl, fontWeight: typography.weight.bold, lineHeight: 26 }}>
+                {post.title}
+              </Text>
+              <Text
+                style={{
+                  color: colors.text.body,
+                  fontSize: typography.size.md,
+                  lineHeight: 22,
+                  paddingBottom: spacing.md,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.border.default,
+                }}
+              >
+                {post.body}
+              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                <Text style={{ color: colors.text.primary, fontSize: typography.size.base, fontWeight: typography.weight.semibold }}>
                   {creator?.full_name || "Unknown"}
                 </Text>
-                <Text style={styles.postDate}>
+                <Text style={{ color: colors.text.dim, fontSize: typography.size.sm }}>
                   {new Date(post.created_at).toLocaleDateString()}
                 </Text>
               </View>
-            </View>
+            </Card>
           )}
 
           {/* Comments section */}
-          <View style={styles.commentsSection}>
-            <Text style={styles.commentsSectionTitle}>
+          <View style={{ gap: spacing.lg }}>
+            <Text style={{ color: colors.text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.bold }}>
               Comments{comments.length > 0 ? ` (${comments.length})` : ""}
             </Text>
 
-            {/* Comment input */}
-            <View style={styles.commentInputRow}>
+            <View style={{ flexDirection: "row", gap: spacing.md, alignItems: "center" }}>
               <TextInput
-                style={styles.commentInput}
+                style={{
+                  flex: 1,
+                  backgroundColor: colors.background.elevated,
+                  borderRadius: radius.md,
+                  paddingHorizontal: spacing.md + 2,
+                  paddingVertical: spacing.md,
+                  color: colors.text.primary,
+                  fontSize: typography.size.md,
+                  minHeight: 46,
+                  maxHeight: 120,
+                  borderWidth: 1,
+                  borderColor: colors.border.default,
+                  textAlignVertical: "center",
+                }}
                 placeholder="Add a comment…"
-                placeholderTextColor="#555"
+                placeholderTextColor={colors.text.dim}
                 value={commentText}
                 onChangeText={setCommentText}
                 multiline
                 editable={!submitting}
               />
               <Pressable
-                style={[
-                  styles.postBtn,
-                  (!commentText.trim() || submitting) && styles.postBtnDisabled,
-                ]}
+                style={{
+                  backgroundColor: !commentText.trim() || submitting ? colors.background.elevated : colors.white,
+                  borderRadius: radius.md,
+                  paddingHorizontal: spacing.lg + 2,
+                  height: 46,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: !commentText.trim() || submitting ? 1 : 0,
+                  borderColor: colors.border.default,
+                }}
                 onPress={handleSubmitComment}
                 disabled={!commentText.trim() || submitting}
               >
                 {submitting ? (
-                  <ActivityIndicator color="#000" size="small" />
+                  <ActivityIndicator color={colors.black} size="small" />
                 ) : (
                   <Text
-                    style={[
-                      styles.postBtnText,
-                      (!commentText.trim() || submitting) &&
-                        styles.postBtnTextDisabled,
-                    ]}
+                    style={{
+                      color: !commentText.trim() ? colors.text.disabled : colors.black,
+                      fontSize: typography.size.md,
+                      fontWeight: typography.weight.bold,
+                    }}
                   >
                     Post
                   </Text>
@@ -187,32 +212,37 @@ export default function PostDetailScreen() {
               </Pressable>
             </View>
 
-            {/* Comments list */}
             {comments.length === 0 ? (
-              <Text style={styles.noComments}>
+              <Text style={{ color: colors.text.dim, fontSize: typography.size.md, textAlign: "center", paddingVertical: spacing.xxl }}>
                 No comments yet — be the first!
               </Text>
             ) : (
-              <View style={styles.commentsList}>
+              <View style={{ gap: spacing.md }}>
                 {comments.map((comment) => (
-                  <View key={comment.id} style={styles.commentItem}>
-                    <View style={styles.commentAvatar}>
-                      <Text style={styles.commentAvatarText}>
-                        {comment.profile?.full_name?.[0]?.toUpperCase() || "?"}
-                      </Text>
-                    </View>
-                    <View style={styles.commentContent}>
-                      <View style={styles.commentHeader}>
-                        <Text style={styles.commentAuthor}>
+                  <Card
+                    key={comment.id}
+                    variant="elevated"
+                    style={{ flexDirection: "row", gap: spacing.md, padding: spacing.md }}
+                  >
+                    <Avatar
+                      size={32}
+                      initials={comment.profile?.full_name?.[0]?.toUpperCase() || "?"}
+                      style={{ flexShrink: 0 }}
+                    />
+                    <View style={{ flex: 1, gap: spacing.xs }}>
+                      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                        <Text style={{ color: colors.text.primary, fontSize: typography.size.base, fontWeight: typography.weight.semibold }}>
                           {comment.profile?.full_name || "Anonymous"}
                         </Text>
-                        <Text style={styles.commentDate}>
+                        <Text style={{ color: colors.text.dim, fontSize: typography.size.xs }}>
                           {new Date(comment.created_at).toLocaleDateString()}
                         </Text>
                       </View>
-                      <Text style={styles.commentText}>{comment.content}</Text>
+                      <Text style={{ color: colors.text.body, fontSize: typography.size.base, lineHeight: 19 }}>
+                        {comment.content}
+                      </Text>
                     </View>
-                  </View>
+                  </Card>
                 ))}
               </View>
             )}
@@ -222,276 +252,3 @@ export default function PostDetailScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  loadingScreen: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  loadingText: {
-    color: "#aaa",
-    fontSize: 14,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    flex: 1,
-    textAlign: "center",
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#1a1a1a",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-  },
-  headerDeleteBtn: {
-    borderColor: "#3a1a1a",
-    backgroundColor: "#1a0a0a",
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#1a1a1a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  postCard: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-    gap: 12,
-  },
-  postTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
-    lineHeight: 26,
-  },
-  postBody: {
-    color: "#bbb",
-    fontSize: 14,
-    lineHeight: 22,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#2a2a2a",
-  },
-  postMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  postAuthor: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  postDate: {
-    color: "#555",
-    fontSize: 12,
-  },
-  commentsSection: {
-    gap: 16,
-  },
-  commentsSectionTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  commentInputRow: {
-    flexDirection: "row",
-    gap: 12,
-    alignItems: "center",
-  },
-  commentInput: {
-    flex: 1,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: "#fff",
-    fontSize: 14,
-    minHeight: 46,
-    maxHeight: 120,
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-    textAlignVertical: "center",
-  },
-  postBtn: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingHorizontal: 18,
-    height: 46,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  postBtnDisabled: {
-    backgroundColor: "#1a1a1a",
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-  },
-  postBtnText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  postBtnTextDisabled: {
-    color: "#444",
-  },
-  noComments: {
-    color: "#555",
-    fontSize: 14,
-    textAlign: "center",
-    paddingVertical: 24,
-  },
-  commentsList: {
-    gap: 12,
-  },
-  commentItem: {
-    flexDirection: "row",
-    gap: 12,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-  },
-  commentAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#2a2a2a",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  commentAvatarText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  commentContent: {
-    flex: 1,
-    gap: 4,
-  },
-  commentHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  commentAuthor: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  commentDate: {
-    color: "#555",
-    fontSize: 11,
-  },
-  commentText: {
-    color: "#ccc",
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  editLabel: {
-    color: "#888",
-    fontSize: 11,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginTop: 4,
-  },
-  editTitleInput: {
-    backgroundColor: "#222",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#333",
-    padding: 10,
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  editBodyInput: {
-    backgroundColor: "#222",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#333",
-    padding: 10,
-    color: "#fff",
-    fontSize: 14,
-    textAlignVertical: "top",
-    minHeight: 100,
-  },
-  editActionsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 12,
-  },
-  saveBtn: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  saveBtnText: {
-    color: "#000",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-  cancelBtn: {
-    flex: 1,
-    backgroundColor: "#222",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  cancelBtnText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  btnDisabled: {
-    opacity: 0.5,
-  },
-});

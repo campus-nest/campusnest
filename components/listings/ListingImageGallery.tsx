@@ -10,11 +10,11 @@ import {
   Text,
   View,
 } from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Gallery height and padding — matches the paddingHorizontal: 20 of the content below
-const H_PAD = 20;
+const H_PAD = spacing.xl; // 20 — matches paddingHorizontal of surrounding content
 const GALLERY_WIDTH = SCREEN_WIDTH - H_PAD * 2;
 const MAIN_HEIGHT = 220;
 const THUMB_HEIGHT = (MAIN_HEIGHT - 8) / 2; // two thumbs + 8px gap between them
@@ -149,29 +149,29 @@ const styles = StyleSheet.create({
   placeholder: {
     marginHorizontal: H_PAD,
     height: MAIN_HEIGHT,
-    borderRadius: 12,
-    backgroundColor: "#1a1a1a",
+    borderRadius: radius.md,
+    backgroundColor: colors.background.elevated,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: colors.border.default,
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    marginBottom: 4,
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
   },
   placeholderEmoji: {
     fontSize: 36,
   },
   placeholderText: {
-    color: "#555",
-    fontSize: 12,
+    color: colors.text.dim,
+    fontSize: typography.size.sm,
   },
   singleWrapper: {
     marginHorizontal: H_PAD,
     height: MAIN_HEIGHT,
-    borderRadius: 12,
+    borderRadius: radius.md,
     overflow: "hidden",
-    backgroundColor: "#1a1a1a",
-    marginBottom: 4,
+    backgroundColor: colors.background.elevated,
+    marginBottom: spacing.xs,
   },
   singleImage: {
     width: "100%",
@@ -180,26 +180,26 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     marginHorizontal: H_PAD,
-    gap: 8,
-    marginBottom: 4,
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
   },
   mainImage: {
-    borderRadius: 12,
+    borderRadius: radius.md,
     overflow: "hidden",
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.background.elevated,
   },
   sideColumn: {
-    gap: 8,
+    gap: spacing.sm,
   },
   thumbImage: {
-    borderRadius: 12,
+    borderRadius: radius.md,
     overflow: "hidden",
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.background.elevated,
     flex: 1,
   },
   emptyThumb: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.background.elevated,
   },
   countOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -209,22 +209,22 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   countText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 22,
-    fontWeight: "700",
+    fontWeight: typography.weight.bold,
     lineHeight: 26,
   },
   countSub: {
     color: "rgba(255,255,255,0.7)",
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
 });
 
 const viewer = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.black,
   },
   closeWrapper: {
     position: "absolute",
@@ -232,7 +232,7 @@ const viewer = StyleSheet.create({
     right: 0,
   },
   closeBtn: {
-    margin: 16,
+    margin: spacing.lg,
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -243,8 +243,8 @@ const viewer = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.15)",
   },
   closeText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: typography.weight.semibold,
   },
 });

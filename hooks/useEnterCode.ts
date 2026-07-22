@@ -29,11 +29,11 @@ export function useEnterCode() {
     }
     setLoading(true);
     try {
-      const { success, error } = await authService.verifyRecoveryOtp(email, code.trim());
-      if (error || !success) {
+      const { success, resetToken, error } = await authService.verifyRecoveryOtp(email, code.trim());
+      if (error || !success || !resetToken) {
         Alert.alert("Error", error || "Failed to verify code.");
       } else {
-        router.replace("/reset-password");
+        router.replace({ pathname: "/reset-password", params: { resetToken } });
       }
     } catch (err) {
       console.error("Verify code error:", err);

@@ -9,6 +9,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { colors, radius, spacing, typography } from "@/src/constants/theme";
 
 export interface LocationData {
   latitude: number;
@@ -83,7 +84,7 @@ export default function AddressInput({
       <TextInput
         style={[styles.input, isLight && styles.inputLight]}
         placeholder={placeholder}
-        placeholderTextColor={isLight ? "#777" : "#666"}
+        placeholderTextColor={isLight ? colors.light.placeholder : colors.text.faint}
         value={value}
         onChangeText={(text) => {
           onChangeText(text);
@@ -99,7 +100,7 @@ export default function AddressInput({
         style={[styles.mapButton, selectedLocation && styles.mapButtonSelected]}
         onPress={handleOpenMapPicker}
       >
-        <MapPin size={18} color={selectedLocation ? "#fff" : "#007AFF"} />
+        <MapPin size={18} color={selectedLocation ? colors.white : colors.accent.primary} />
         <Text
           style={[
             styles.mapButtonText,
@@ -114,7 +115,7 @@ export default function AddressInput({
       {selectedLocation && (
         <View style={styles.locationInfo}>
           <View style={styles.locationHeader}>
-            <Navigation size={16} color="#4CAF50" />
+            <Navigation size={16} color={colors.success.default} />
             <Text style={styles.locationTitle}>Location Selected</Text>
           </View>
           <Text style={styles.locationCoords}>
@@ -144,94 +145,94 @@ declare global {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 8,
+    gap: spacing.sm,
   },
   label: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
+    color: colors.white,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
   },
   labelLight: {
-    color: "#333",
+    color: colors.light.text,
   },
   input: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    color: "#fff",
-    fontSize: 14,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    color: colors.white,
+    fontSize: typography.size.md,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: colors.border.strong,
   },
   inputLight: {
-    backgroundColor: "#fff",
-    borderColor: "#ddd",
-    color: "#000",
+    backgroundColor: colors.white,
+    borderColor: colors.light.border,
+    color: colors.black,
   },
   mapButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#e3f2fd",
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    gap: 8,
+    backgroundColor: colors.accent.background,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: colors.accent.primary,
     width: "100%",
   },
   mapButtonSelected: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: colors.success.default,
+    borderColor: colors.success.default,
   },
   mapButtonText: {
-    color: "#007AFF",
-    fontSize: 14,
-    fontWeight: "600",
+    color: colors.accent.primary,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
     textAlign: "center",
   },
   mapButtonTextSelected: {
-    color: "#fff",
+    color: colors.white,
   },
   locationInfo: {
-    backgroundColor: "#e8f5e9",
-    borderRadius: 10,
-    padding: 12,
+    backgroundColor: colors.success.background,
+    borderRadius: radius.sm,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: "#4CAF50",
+    borderColor: colors.success.border,
   },
   locationHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   locationTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#2e7d32",
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
+    color: colors.success.text,
   },
   locationCoords: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 8,
+    fontSize: typography.size.sm,
+    color: colors.text.faint,
+    marginBottom: spacing.sm,
   },
   clearButton: {
     alignSelf: "flex-start",
   },
   clearButtonText: {
-    color: "#d32f2f",
-    fontSize: 12,
-    fontWeight: "500",
+    color: colors.danger.text,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
   helperText: {
-    fontSize: 12,
-    color: "#999",
+    fontSize: typography.size.sm,
+    color: colors.text.readable,
     fontStyle: "italic",
   },
   helperTextLight: {
-    color: "#666",
+    color: colors.text.faint,
   },
 });

@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { colors, spacing, typography } from "@/src/constants/theme";
 
 interface SectionProps {
   title?: string;
@@ -8,14 +9,8 @@ interface SectionProps {
   style?: ViewStyle;
 }
 
-export default function Section({
-  title,
-  children,
-  variant = "dark",
-  style,
-}: SectionProps) {
+export default function Section({ title, children, variant = "dark", style }: SectionProps) {
   const isLight = variant === "light";
-
   return (
     <View style={[styles.section, style]}>
       {title && (
@@ -35,7 +30,6 @@ interface DividerProps {
 
 export function Divider({ variant = "dark", style }: DividerProps) {
   const isLight = variant === "light";
-
   return (
     <View
       style={[
@@ -49,25 +43,25 @@ export function Divider({ variant = "dark", style }: DividerProps) {
 
 const styles = StyleSheet.create({
   section: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#fff",
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+    marginBottom: spacing.sm,
+    color: colors.text.primary,
   },
   titleLight: {
-    color: "#111",
+    color: colors.background.card,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    marginVertical: 12,
+    marginVertical: spacing.md,
   },
   dividerDark: {
-    backgroundColor: "#333",
+    backgroundColor: colors.border.strong,
   },
   dividerLight: {
-    backgroundColor: "#d0d0d0",
+    backgroundColor: colors.light.divider,
   },
 });
