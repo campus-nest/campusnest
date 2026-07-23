@@ -74,14 +74,17 @@ export class ListingService {
     try {
       // Get the listing first to find photos to delete
       const listing = await this.getListingById(listingId);
-      
-      // Delete the listing (the DB cascade handles saved_listings)
-      await apiClient.delete(`/api/listings/${listingId}`);
 
-      // Delete photos from backend storage
+      // Delete photos from backend storage first: the backend verifies
+      // ownership by checking the photo is still referenced by one of the
+      // caller's own listings, which only works while the listing row
+      // still exists.
       if (listing?.photo_urls?.length) {
         await this.deleteListingPhotos(listing.photo_urls);
       }
+
+      // Delete the listing (the DB cascade handles saved_listings)
+      await apiClient.delete(`/api/listings/${listingId}`);
 
       return { success: true };
     } catch (error: any) {
