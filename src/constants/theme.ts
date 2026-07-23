@@ -105,3 +105,12 @@ export const typography = {
     extrabold: "800" as const,
   },
 } as const;
+
+// The mobile bottom nav is a floating pill (`position: "absolute"`), so it
+// never reserves layout space on its own — every tab screen's scrollable
+// content must add its own bottom padding to clear it.
+export const layout = {
+  navBarHeight: 70,
+  navBarBottomOffset: spacing.xl,
+  navBarClearance: 70 + spacing.xl + spacing.lg,
+} as const;

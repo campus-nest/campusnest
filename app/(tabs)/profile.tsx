@@ -10,7 +10,7 @@ import DetailRow from "@/components/ui/DetailRow";
 import Avatar from "@/components/ui/Avatar";
 import Card from "@/components/ui/Card";
 import CardSectionHeader from "@/components/ui/CardSectionHeader";
-import { colors, radius, spacing, typography } from "@/src/constants/theme";
+import { colors, layout, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function ProfileScreen() {
         contentContainerStyle={{
           paddingHorizontal: spacing.xl,
           paddingTop: spacing.xxl + 4,
-          paddingBottom: spacing.xxxxl,
+          paddingBottom: layout.navBarClearance,
           gap: spacing.md + 2,
         }}
         showsVerticalScrollIndicator={false}

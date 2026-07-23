@@ -10,7 +10,7 @@ import CircleFAB from "@/components/ui/CircleFAB";
 import EmptyState from "@/components/ui/EmptyState";
 import LoadingState from "@/components/ui/LoadingState";
 import { useExplore } from "@/hooks/useExplore";
-import { colors, radius, spacing, typography } from "@/src/constants/theme";
+import { colors, layout, radius, spacing, typography } from "@/src/constants/theme";
 import { Platform, Pressable, Text, View } from "react-native";
 
 // Dynamic imports for platform-specific map components
@@ -221,7 +221,7 @@ export default function ExploreScreen() {
         <Pressable
           style={{
             position: "absolute",
-            bottom: spacing.sm,
+            bottom: layout.navBarClearance,
             left: spacing.sm,
             backgroundColor: "rgba(255, 255, 255, 0.7)",
             paddingHorizontal: spacing.sm - 2,
@@ -238,7 +238,7 @@ export default function ExploreScreen() {
           <View
             style={{
               position: "absolute",
-              bottom: spacing.giant + spacing.huge + spacing.md,
+              bottom: layout.navBarClearance + spacing.huge + spacing.md,
               right: spacing.lg,
               backgroundColor: "rgba(0, 0, 0, 0.8)",
               paddingHorizontal: spacing.md,
@@ -257,7 +257,7 @@ export default function ExploreScreen() {
         )}
 
         {/* Refresh button */}
-        <CircleFAB onPress={fetchListings} style={{ position: "absolute", bottom: spacing.giant, right: spacing.lg }}>
+        <CircleFAB onPress={fetchListings} style={{ position: "absolute", bottom: layout.navBarClearance, right: spacing.lg }}>
           <Text style={{ fontSize: typography.size.xxl, color: colors.black }}>↻</Text>
         </CircleFAB>
       </View>

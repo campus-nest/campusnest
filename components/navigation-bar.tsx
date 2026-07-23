@@ -5,7 +5,7 @@ import Profile from "@/assets/images/nav_bar/profile.svg";
 import Users from "@/assets/images/nav_bar/users_icon.svg";
 import { usePathname, useRouter } from "expo-router";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, spacing, typography } from "@/src/constants/theme";
+import { colors, layout, spacing, typography } from "@/src/constants/theme";
 
 export function NavigationBar() {
   const router = useRouter();
@@ -272,11 +272,11 @@ const styles = StyleSheet.create({
   // Mobile styles
   mobileContainer: {
     position: "absolute",
-    bottom: spacing.xl,
+    bottom: layout.navBarBottomOffset,
     alignSelf: "center",
     width: "90%",
     maxWidth: 480,
-    height: 70,
+    height: layout.navBarHeight,
     backgroundColor: colors.white,
     flexDirection: "row",
     justifyContent: "space-around",
