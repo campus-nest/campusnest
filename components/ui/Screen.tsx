@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { ScrollView, StyleSheet, View, ViewStyle } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, spacing } from "@/src/constants/theme";
 
@@ -24,17 +24,23 @@ export default function Screen({
     return (
       <SafeAreaView style={[styles.container, style]}>
         <StatusBar style="light" />
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={[
-            hPad,
-            styles.scrollBase,
-            contentContainerStyle,
-          ]}
+        <KeyboardAvoidingView
+          style={styles.inner}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : undefined}
         >
-          {children}
-        </ScrollView>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={[
+              hPad,
+              styles.scrollBase,
+              contentContainerStyle,
+            ]}
+          >
+            {children}
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }

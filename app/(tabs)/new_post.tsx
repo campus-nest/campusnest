@@ -10,6 +10,7 @@ import Stack from "@/components/ui/Stack";
 import TabSelector from "@/components/ui/TabSelector";
 import ListingFormFields from "@/components/listings/ListingFormFields";
 import { useNewPost } from "@/hooks/useNewPost";
+import { layout } from "@/src/constants/theme";
 
 export default function NewPostScreen() {
   const {
@@ -163,7 +164,7 @@ export default function NewPostScreen() {
   if (!role) return <LoadingState label="Could not determine your role. Please re-login." showSpinner={false} />;
 
   return (
-    <Screen scrollable>
+    <Screen scrollable contentContainerStyle={{ paddingBottom: layout.navBarClearance }}>
       {role === "landlord" ? landlordForm() : studentForm()}
     </Screen>
   );

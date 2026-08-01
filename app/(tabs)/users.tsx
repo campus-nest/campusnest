@@ -9,7 +9,7 @@ import TabPageHeader from "@/components/ui/TabPageHeader";
 import IconCircle from "@/components/ui/IconCircle";
 import FilterPills from "@/components/ui/FilterPills";
 import PostPreviewCard from "@/components/listings/PostPreviewCard";
-import { colors, radius, spacing } from "@/src/constants/theme";
+import { colors, layout, radius, spacing } from "@/src/constants/theme";
 
 export default function UsersScreen() {
   const {
@@ -90,7 +90,7 @@ export default function UsersScreen() {
                 />
               );
             }}
-            contentContainerStyle={{ paddingBottom: spacing.massive, gap: spacing.sm - 2 }}
+            contentContainerStyle={{ paddingBottom: layout.navBarClearance, gap: spacing.sm - 2 }}
             showsVerticalScrollIndicator={false}
           />
         )}

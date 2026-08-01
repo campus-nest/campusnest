@@ -10,7 +10,7 @@ import IconCircle from "@/components/ui/IconCircle";
 import TabPageHeader from "@/components/ui/TabPageHeader";
 import FilterPills from "@/components/ui/FilterPills";
 import PostPreviewCard from "@/components/listings/PostPreviewCard";
-import { colors, radius, spacing, typography } from "@/src/constants/theme";
+import { colors, layout, radius, spacing, typography } from "@/src/constants/theme";
 
 export default function SavedScreen() {
   const {
@@ -80,7 +80,7 @@ export default function SavedScreen() {
                   onUnsave={() => toggleSaveListing(item.id)}
                 />
               )}
-              contentContainerStyle={{ paddingBottom: spacing.massive, gap: spacing.sm - 2 }}
+              contentContainerStyle={{ paddingBottom: layout.navBarClearance, gap: spacing.sm - 2 }}
               showsVerticalScrollIndicator={false}
             />
           )
@@ -118,7 +118,7 @@ export default function SavedScreen() {
                   }
                 />
               )}
-              contentContainerStyle={{ paddingBottom: spacing.massive, gap: spacing.sm - 2 }}
+              contentContainerStyle={{ paddingBottom: layout.navBarClearance, gap: spacing.sm - 2 }}
               showsVerticalScrollIndicator={false}
             />
           )

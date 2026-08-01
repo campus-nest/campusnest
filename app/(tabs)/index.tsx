@@ -9,7 +9,7 @@ import PriceRangeModal from "@/components/ui/PriceRangeModal";
 import EmptyState from "@/components/ui/EmptyState";
 import PriceFilterPill from "@/components/ui/PriceFilterPill";
 import { useHomeListings } from "@/hooks/useHomeListings";
-import { spacing } from "@/src/constants/theme";
+import { layout, spacing } from "@/src/constants/theme";
 
 export default function HomeScreen() {
   const {
@@ -70,7 +70,7 @@ export default function HomeScreen() {
           data={listings}
           keyExtractor={(listing) => listing.id}
           renderItem={({ item }) => <ListingCard listing={item} />}
-          contentContainerStyle={{ paddingBottom: spacing.massive }}
+          contentContainerStyle={{ paddingBottom: layout.navBarClearance }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={<EmptyState title="No listings found." offsetTop={spacing.giant} />}
         />
